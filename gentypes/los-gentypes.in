@@ -444,6 +444,10 @@ class ASTProcessor :
         hfile.write('defines',
                     '#define %s_INSTANCE_HEADER %s __l_instance_super\n' %
                     (n.ident.full.up, n.base.ident.full.up))
+        # class header macro
+        hfile.write('defines',
+                    '#define %s_CLASS_HEADER %s __l_class_super\n' %
+                    (n.ident.full.up, n.base.ident.full.up))
         # instance/class typedefs
         hfile.write('typedefs',
                     'typedef struct _%s %s;\n' % (n.ident.full.cml, n.ident.full.cml),
