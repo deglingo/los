@@ -411,6 +411,8 @@ class ASTProcessor :
     # visit_nclass:
     def visit_nclass (self, n) :
         trace("class: '%s'" % n.ident.qual)
+        if n.extern :
+            return
         hfile = self.context.hfile = self.open_file(n.ident.full.strip + '-def.h')
         hfile.sections('typedefs')
         # instance/class typedefs
