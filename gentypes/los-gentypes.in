@@ -462,8 +462,12 @@ class ASTProcessor :
         if n.extern :
             return
         hfile = self.context.hfile = self.open_file(n.ident.full.strip + '-def.h')
+        ifile = self.context.ifile = self.open_file(n.ident.full.strip + '.inl')
+        # header sections
         hfile.sections('defines')
         hfile.sections('typedefs')
+        # inl sections
+        ifile.sections('header')
         # instance header macro
         hfile.write('defines',
                     '#define %s_INSTANCE_HEADER %s __l_instance_super\n' %
@@ -476,6 +480,8 @@ class ASTProcessor :
         hfile.write('typedefs',
                     'typedef struct _%s %s;\n' % (n.ident.full.cml, n.ident.full.cml),
                     'typedef struct _%sClass %sClass;\n' % (n.ident.full.cml, n.ident.full.cml))
+        # [fixme]
+        ifile.write('header', '/* [TODO] */\n')
 
     # accept_nclass:
     def accept_nclass (self, n) :
