@@ -174,9 +174,10 @@ class NList (Node) :
 class NDecl (Node) :
 
     # __init__:
-    def __init__ (self, ctxt, name) :
+    def __init__ (self, ctxt, name, extern=False) :
         self.ctxt = ctxt # [fixme] ref-cycle ?
         self.name = name
+        self.extern = extern
         if ctxt is None :
             self.ident = CIdent(None, self.name)
         else :
@@ -187,8 +188,8 @@ class NDecl (Node) :
 class NNamespace (NDecl) :
 
     # __init__:
-    def __init__ (self, ctxt, name) :
-        NDecl.__init__(self, ctxt, name)
+    def __init__ (self, ctxt, name, extern=False) :
+        NDecl.__init__(self, ctxt, name, extern=extern)
         self.body = []
 
     # _add:
@@ -199,8 +200,8 @@ class NNamespace (NDecl) :
 class NClass (NDecl) :
 
     # __init__:
-    def __init__ (self, ctxt, name) :
-        NDecl.__init__(self, ctxt, name)
+    def __init__ (self, ctxt, name, extern=False) :
+        NDecl.__init__(self, ctxt, name, extern=extern)
 
 # Parser:
 class Parser :
@@ -211,6 +212,12 @@ class Parser :
         self.lex = self.lexer.lex
         self.unlex = self.lexer.unlex
         self.look = self.lexer.look
+        # root namespace
+        self.root_nspc = NNamespace(None, '')
+        # L namespace
+        self.l_nspc = NNamespace(self.root_nspc, 'L', extern=True)
+        # LObject class
+        self.l_object_class = NClass(self.l_nspc, 'Object', extern=True)
         
     # parse:
     def parse (self, f) :
@@ -220,7 +227,6 @@ class Parser :
 
     # parse_input:
     def parse_input (self) :
-        self.root_nspc = NNamespace(None, '')
         while True :
             tok = self.look()
             if tok.tp == 'END' :
