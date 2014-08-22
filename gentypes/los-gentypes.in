@@ -231,6 +231,20 @@ class ASTContext :
         else :
             s.__attrs[n] = v
 
+# Writer:
+class Writer :
+    pass
+
+# Id:
+class Id :
+
+    # __init__:
+    def __init__ (self, cml, low, up) :
+        self.cml = cml
+        self.low = low
+        self.up = up
+        self.strip = low.replace('_', '')
+        
 # CIdent:
 class CIdent :
 
@@ -241,14 +255,28 @@ class CIdent :
         if parent is None :
             assert spec == '', spec # [fixme]
             self.qual = '::'
+            self.full = Id('', '', '')
         else :
             if parent.parent is None :
                 self.qual = parent.qual + spec
             else :
                 self.qual = parent.qual + '::' + spec
+            self.full = Id(cml=parent.full.cml + spec,
+                           low=parent.full.low + spec,
+                           up =parent.full.up  + spec)
             
 # ASTProcessor:
 class ASTProcessor :
+
+    # __init__:
+    def __init__ (self) :
+        self.files = {}
+
+    # open_file:
+    def open_file (self, fname) :
+        assert fname not in self.files, fname
+        f = Writer()
+        self.files[fname] = f
 
     # process:
     def process (self, ast) :
@@ -282,8 +310,9 @@ class ASTProcessor :
 
     # visit_class:
     def visit_class (self, ast) :
-        self.context.ident = CIdent(self.context.ident, ast.name)
+        ident = self.context.ident = CIdent(self.context.ident, ast.name)
         trace("class: '%s'" % self.context.ident.qual)
+        self.context.hfile = self.open_file(ident.full.strip + '-def.h')
 
     # accept_class:
     def accept_class (self, ast) :
