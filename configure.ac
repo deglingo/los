@@ -2,6 +2,7 @@ AC_INIT([los], [0.0.0])
 AM_INIT_AUTOMAKE
 
 AC_SUBST([pkgconfigdir], ['${libdir}/pkgconfig'])
+AC_SUBST([includelosdir], ['${includedir}/los'])
 
 : ${CFLAGS:=-g -Wall}
 
@@ -18,6 +19,7 @@ PKG_CHECK_MODULES([GLIB], [glib-2.0])
 AC_CONFIG_FILES([ \
   Makefile \
   gentypes/Makefile \
+  los/Makefile \
 ])
 AC_CONFIG_FILES([los.pc])
 AC_CONFIG_FILES([gentypes/los-gentypes], [chmod +x gentypes/los-gentypes])
