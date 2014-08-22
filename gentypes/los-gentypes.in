@@ -239,6 +239,11 @@ class WSection :
         self.nodes = []
         self.children = {}
 
+    # dump:
+    def dump (self, f) :
+        for n in self.nodes :
+            n.dump(f)
+
     # add_child:
     def add_child (self, name) :
         assert name not in self.children
@@ -257,6 +262,10 @@ class WText :
     # __init__:
     def __init__ (self, text) :
         self.text = text
+
+    # dump:
+    def dump (self, f) :
+        f.write(self.text)
         
 # Writer:
 class Writer :
@@ -264,6 +273,10 @@ class Writer :
     # __init__:
     def __init__ (self) :
         self.root = WSection()
+
+    # dump:
+    def dump (self, f) :
+        self.root.dump(f)
         
     # sections:
     def sections (self, *sections) :
@@ -340,6 +353,11 @@ class ASTProcessor :
         self.context = ASTContext()
         self.context.ident = None
         self.visit(ast)
+        trace("output...")
+        for fname, writer in self.files.items() :
+            trace(" => '%s'" % fname)
+            writer.dump(sys.stderr)
+        trace("all done!")
 
     # visit:
     def visit (self, ast) :
