@@ -354,6 +354,30 @@ class Writer :
     def __init__ (self) :
         self.root = WSection()
 
+    # dump_file:
+    def dump_file (self, fname) :
+        tmpfile = fname + '.tmp'
+        with open(tmpfile, 'wt') as f :
+            self.dump(f)
+        if (not os.path.exists(fname)) or Writer.cmpfile(fname, tmpfile) :
+            trace(' + %s' % fname)
+            os.rename(tmpfile, fname)
+        else :
+            trace(' - %s' % fname)
+            os.unlink(tmpfile)
+
+    @staticmethod
+    def cmpfile (file1, file2) :
+        with open(file1, 'rt') as f1 :
+            with open(file2, 'rt') as f2 :
+                while True :
+                    l1 = f1.readline()
+                    l2 = f2.readline()
+                    if l1 != l2 :
+                        return 1
+                    if l1 == '' :
+                        return 0
+
     # dump:
     def dump (self, f) :
         self.root.dump(f)
@@ -406,7 +430,7 @@ class ASTProcessor :
         trace("output...")
         for fname, writer in self.files.items() :
             trace(" => '%s'" % fname)
-            writer.dump(sys.stderr)
+            writer.dump_file(fname)
         trace("all done!")
 
     # visit:
@@ -476,7 +500,6 @@ def _main () :
     # process the AST
     visitor = ASTProcessor()
     visitor.process(ast)
-    assert 0
 
 # exec
 if __name__ == '__main__' :
