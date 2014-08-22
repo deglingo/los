@@ -332,7 +332,7 @@ def _main () :
     # parse input
     parser = Parser()
     ast = parser.parse(sys.stdin)
-    trace("AST:\n%s" % pprint.pformat(ast))
+    # trace("AST:\n%s" % pprint.pformat(ast))
     # process the AST
     visitor = ASTProcessor()
     visitor.process(ast)
