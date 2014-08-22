@@ -16,10 +16,14 @@ test x"$PYTHON" != x || AC_ERROR([python3 not found])
 
 PKG_CHECK_MODULES([GLIB], [glib-2.0])
 
+# test suite
+AM_PIFTEST_SUITE([test])
+
 AC_CONFIG_FILES([ \
   Makefile \
   gentypes/Makefile \
   los/Makefile \
+  test/Makefile \
 ])
 AC_CONFIG_FILES([los.pc])
 AC_CONFIG_FILES([gentypes/los-gentypes], [chmod +x gentypes/los-gentypes])
