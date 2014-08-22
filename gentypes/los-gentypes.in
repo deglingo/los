@@ -1,7 +1,7 @@
 #!@PYTHON@
 # -*- python -*-
 
-import sys, os, pprint, traceback, re
+import sys, os, pprint, traceback, re, collections
 
 # trace:
 def trace (msg) :
@@ -132,6 +132,24 @@ class Lexer :
             tp = val.upper()
         return Token(tp, val)
 
+# AST node types:
+def ast_class (clsname, tpname, fields) :
+    base = collections.namedtuple(clsname+'_Base', ('loc',) + fields)
+    cls = type(clsname, (base,), {
+        'tp': tpname,
+    })
+    return cls
+
+ASTNamespace = ast_class('ASTNamespace',
+                         'namespace',
+                         ('name',
+                          'body'))
+
+ASTClass = ast_class('ASTClass',
+                     'class',
+                     ('name',
+                      'body'))
+
 # Parser:
 class Parser :
 
@@ -159,7 +177,7 @@ class Parser :
                 body.append(self.parse_namespace())
             else :
                 assert 0, tok
-        return ('namespace', (), '', tuple(body))
+        return ASTNamespace((), '', tuple(body))
 
     # parse_namespace:
     def parse_namespace (self) :
@@ -176,7 +194,7 @@ class Parser :
             else :
                 assert 0, tok
         self.lex('CLOSEBRACE')
-        return ('namespace', (), tok_name.val, tuple(body))
+        return ASTNamespace((), tok_name.val, tuple(body))
 
     # parse_class:
     def parse_class (self) :
@@ -186,7 +204,32 @@ class Parser :
         # self.lex('OPENBRACE')
         # self.lex('CLOSEBRACE')
         self.lex('SEMICOLON')
-        return ('class', (), tok_name.val, tuple(body))
+        return ASTClass((), tok_name.val, tuple(body))
+
+# ASTProcessor:
+class ASTProcessor :
+
+    # process:
+    def process (self, ast) :
+        trace("processing ast...")
+        self.visit(ast)
+
+    # visit:
+    def visit (self, ast) :
+        hdlr = getattr(self, 'visit_' + ast.tp)
+        hdlr(ast)
+
+    # visit_namespace:
+    def visit_namespace (self, ast) :
+        trace("namespace: %s" % repr(ast))
+        for n in ast.body :
+            self.visit(n)
+
+    # visit_class:
+    def visit_class (self, ast) :
+        trace("class: %s" % repr(ast))
+        for n in ast.body :
+            self.visit(n)
         
 # main:
 def main () :
@@ -203,6 +246,9 @@ def _main () :
     parser = Parser()
     ast = parser.parse(sys.stdin)
     trace("AST:\n%s" % pprint.pformat(ast))
+    # process the AST
+    visitor = ASTProcessor()
+    visitor.process(ast)
     assert 0
 
 # exec
