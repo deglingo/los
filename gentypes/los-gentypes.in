@@ -145,10 +145,29 @@ class Id :
 # CIdent:
 class CIdent :
 
+    @staticmethod
+    def split_cml (ident) :
+        words = []
+        w = ''
+        for c in ident :
+            if c.isupper() :
+                if w :
+                    words.append(w)
+                w = c
+            else :
+                w += c
+        if w :
+            words.append(w)
+        return words
+        
     # __init__:
     def __init__ (self, parent, spec) :
         self.parent = parent
         self.spec = spec
+        cml_words = CIdent.split_cml(spec)
+        self.sfx = Id(''.join(cml_words),
+                      '_'.join(w.lower() for w in cml_words),
+                      '_'.join(w.upper() for w in cml_words))
         if parent is None :
             assert spec == '', spec # [fixme]
             self.qual = '::'
@@ -156,11 +175,14 @@ class CIdent :
         else :
             if parent.parent is None :
                 self.qual = parent.qual + spec
+                self.full = Id(self.sfx.cml,
+                               self.sfx.low,
+                               self.sfx.up)
             else :
                 self.qual = parent.qual + '::' + spec
-            self.full = Id(cml=parent.full.cml + spec,
-                           low=parent.full.low + spec,
-                           up =parent.full.up  + spec)
+                self.full = Id(cml=parent.full.cml + self.sfx.cml,
+                               low=parent.full.low + '_' + self.sfx.low,
+                               up =parent.full.up  + '_' + self.sfx.up)
 
 # Node:
 class Node :
@@ -416,7 +438,12 @@ class ASTProcessor :
         if n.extern :
             return
         hfile = self.context.hfile = self.open_file(n.ident.full.strip + '-def.h')
+        hfile.sections('defines')
         hfile.sections('typedefs')
+        # instance header macro
+        hfile.write('defines',
+                    '#define %s_INSTANCE_HEADER %s __l_instance_super\n' %
+                    (n.ident.full.up, n.base.ident.full.up))
         # instance/class typedefs
         hfile.write('typedefs',
                     'typedef struct _%s %s;\n' % (n.ident.full.cml, n.ident.full.cml),
