@@ -1,0 +1,16 @@
+#!@PYTHON@
+# -*- python -*-
+
+import sys
+
+# trace:
+def trace (msg) :
+    sys.stderr.write('los-gentypes: %s\n' % msg)
+
+# main:
+def main () :
+    trace('hello!')
+
+# exec
+if __name__ == '__main__' :
+    main()
