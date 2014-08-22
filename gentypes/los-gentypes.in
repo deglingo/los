@@ -118,7 +118,7 @@ class Lexer :
             # cpp location tracking
             m = Lexer.LOCATION.match(self.buffer)
             if m is not None :
-                trace("[TODO] location: '%s'" % self.buffer.rstrip('\n'))
+                # trace("[TODO] location: '%s'" % self.buffer.rstrip('\n'))
                 self.buffer = ''
         # get the next token
         m = Lexer.LEX(self.buffer, self.pos)
