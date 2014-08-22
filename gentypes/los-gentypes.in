@@ -132,23 +132,75 @@ class Lexer :
             tp = val.upper()
         return Token(tp, val)
 
-# AST node types:
-def ast_class (clsname, tpname, fields) :
-    base = collections.namedtuple(clsname+'_Base', ('loc',) + fields)
-    cls = type(clsname, (base,), {
-        'tp': tpname,
-    })
-    return cls
+# Id:
+class Id :
 
-ASTNamespace = ast_class('ASTNamespace',
-                         'namespace',
-                         ('name',
-                          'body'))
+    # __init__:
+    def __init__ (self, cml, low, up) :
+        self.cml = cml
+        self.low = low
+        self.up = up
+        self.strip = low.replace('_', '')
+        
+# CIdent:
+class CIdent :
 
-ASTClass = ast_class('ASTClass',
-                     'class',
-                     ('name',
-                      'body'))
+    # __init__:
+    def __init__ (self, parent, spec) :
+        self.parent = parent
+        self.spec = spec
+        if parent is None :
+            assert spec == '', spec # [fixme]
+            self.qual = '::'
+            self.full = Id('', '', '')
+        else :
+            if parent.parent is None :
+                self.qual = parent.qual + spec
+            else :
+                self.qual = parent.qual + '::' + spec
+            self.full = Id(cml=parent.full.cml + spec,
+                           low=parent.full.low + spec,
+                           up =parent.full.up  + spec)
+
+# Node:
+class Node :
+    pass
+
+# NList:
+class NList (Node) :
+    pass
+
+# NDecl:
+class NDecl (Node) :
+
+    # __init__:
+    def __init__ (self, ctxt, name) :
+        self.ctxt = ctxt # [fixme] ref-cycle ?
+        self.name = name
+        if ctxt is None :
+            self.ident = CIdent(None, self.name)
+        else :
+            ctxt._add(self)
+            self.ident = CIdent(ctxt.ident, self.name)
+            
+# NNamespace:
+class NNamespace (NDecl) :
+
+    # __init__:
+    def __init__ (self, ctxt, name) :
+        NDecl.__init__(self, ctxt, name)
+        self.body = []
+
+    # _add:
+    def _add (self, decl) :
+        self.body.append(decl)
+
+# NClass:
+class NClass (NDecl) :
+
+    # __init__:
+    def __init__ (self, ctxt, name) :
+        NDecl.__init__(self, ctxt, name)
 
 # Parser:
 class Parser :
@@ -168,43 +220,41 @@ class Parser :
 
     # parse_input:
     def parse_input (self) :
-        body = []
+        self.root_nspc = NNamespace(None, '')
         while True :
             tok = self.look()
             if tok.tp == 'END' :
                 break
             elif tok.tp == 'NAMESPACE' :
-                body.append(self.parse_namespace())
+                self.parse_namespace(self.root_nspc)
             else :
                 assert 0, tok
-        return ASTNamespace((), '', tuple(body))
+        return self.root_nspc
 
     # parse_namespace:
-    def parse_namespace (self) :
-        body = []
+    def parse_namespace (self, ctxt) :
         self.lex('NAMESPACE')
         tok_name = self.lex('ID')
+        node = NNamespace(ctxt, tok_name.val)
         self.lex('OPENBRACE')
         while True :
             tok = self.look()
             if tok.tp == 'CLOSEBRACE' :
                 break
             elif tok.tp == 'CLASS' :
-                body.append(self.parse_class())
+                self.parse_class(node)
             else :
                 assert 0, tok
         self.lex('CLOSEBRACE')
-        return ASTNamespace((), tok_name.val, tuple(body))
 
     # parse_class:
-    def parse_class (self) :
-        body = []
+    def parse_class (self, ctxt) :
         self.lex('CLASS')
         tok_name = self.lex('ID')
+        node = NClass(ctxt, tok_name.val)
         # self.lex('OPENBRACE')
         # self.lex('CLOSEBRACE')
         self.lex('SEMICOLON')
-        return ASTClass((), tok_name.val, tuple(body))
 
 # ASTContext:
 class ASTContext :
@@ -302,36 +352,6 @@ class Writer :
     def write (self, secpath, *lines) :
         sec = self.get_section(secpath)
         sec.write(*lines)
-
-# Id:
-class Id :
-
-    # __init__:
-    def __init__ (self, cml, low, up) :
-        self.cml = cml
-        self.low = low
-        self.up = up
-        self.strip = low.replace('_', '')
-        
-# CIdent:
-class CIdent :
-
-    # __init__:
-    def __init__ (self, parent, spec) :
-        self.parent = parent
-        self.spec = spec
-        if parent is None :
-            assert spec == '', spec # [fixme]
-            self.qual = '::'
-            self.full = Id('', '', '')
-        else :
-            if parent.parent is None :
-                self.qual = parent.qual + spec
-            else :
-                self.qual = parent.qual + '::' + spec
-            self.full = Id(cml=parent.full.cml + spec,
-                           low=parent.full.low + spec,
-                           up =parent.full.up  + spec)
             
 # ASTProcessor:
 class ASTProcessor :
@@ -361,41 +381,41 @@ class ASTProcessor :
 
     # visit:
     def visit (self, ast) :
+        tpname = ast.__class__.__name__.lower()
         # push context
         self.context = ASTContext(self.context)
         # visit
-        hdlr = getattr(self, 'visit_' + ast.tp)
+        hdlr = getattr(self, 'visit_' + tpname)
         hdlr(ast)
         # accept
-        hdlr = getattr(self, 'accept_' + ast.tp)
+        hdlr = getattr(self, 'accept_' + tpname)
         for child in hdlr(ast) :
             self.visit(child)
         # pop context
         self.context = self.context.parent
 
-    # visit_namespace:
-    def visit_namespace (self, ast) :
-        self.context.ident = CIdent(self.context.ident, ast.name)
-        trace("namespace: '%s'" % self.context.ident.qual)
+    # visit_nnamespace:
+    def visit_nnamespace (self, n) :
+        trace("namespace: '%s'" % n.ident.qual)
 
-    # accept_namespace:
-    def accept_namespace (self, ast) :
+    # accept_nnamespace:
+    def accept_nnamespace (self, ast) :
         for n in ast.body : yield n
 
-    # visit_class:
-    def visit_class (self, ast) :
-        ident = self.context.ident = CIdent(self.context.ident, ast.name)
-        trace("class: '%s'" % self.context.ident.qual)
-        hfile = self.context.hfile = self.open_file(ident.full.strip + '-def.h')
+    # visit_nclass:
+    def visit_nclass (self, n) :
+        trace("class: '%s'" % n.ident.qual)
+        hfile = self.context.hfile = self.open_file(n.ident.full.strip + '-def.h')
         hfile.sections('typedefs')
         # instance/class typedefs
         hfile.write('typedefs',
-                    'typedef struct _%s %s;\n' % (ident.full.cml, ident.full.cml),
-                    'typedef struct _%sClass %sClass;\n' % (ident.full.cml, ident.full.cml))
+                    'typedef struct _%s %s;\n' % (n.ident.full.cml, n.ident.full.cml),
+                    'typedef struct _%sClass %sClass;\n' % (n.ident.full.cml, n.ident.full.cml))
 
-    # accept_class:
-    def accept_class (self, ast) :
-        for n in ast.body : yield n
+    # accept_nclass:
+    def accept_nclass (self, n) :
+        # [fixme]
+        if 0 : yield None
         
 # main:
 def main () :
