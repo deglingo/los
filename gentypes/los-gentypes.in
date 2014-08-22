@@ -206,30 +206,88 @@ class Parser :
         self.lex('SEMICOLON')
         return ASTClass((), tok_name.val, tuple(body))
 
+# ASTContext:
+class ASTContext :
+
+    parent = property(lambda s: s.__parent)
+    
+    # __init__:
+    def __init__ (self, parent=None) :
+        self.__parent = parent
+        self.__attrs = {}
+        
+    # __getattr__:
+    def __getattr__ (s, n) :
+        if n[0] == '_' :
+            return object.__getattr__(s, n)
+        else :
+            try: return s.__attrs[n]
+            except KeyError: return getattr(s.__parent, n)
+
+    # __setattr__:
+    def __setattr__ (s, n, v) :
+        if n[0] == '_' :
+            object.__setattr__(s, n, v)
+        else :
+            s.__attrs[n] = v
+
+# CIdent:
+class CIdent :
+
+    # __init__:
+    def __init__ (self, parent, spec) :
+        self.parent = parent
+        self.spec = spec
+        if parent is None :
+            assert spec == '', spec # [fixme]
+            self.qual = '::'
+        else :
+            if parent.parent is None :
+                self.qual = parent.qual + spec
+            else :
+                self.qual = parent.qual + '::' + spec
+            
 # ASTProcessor:
 class ASTProcessor :
 
     # process:
     def process (self, ast) :
         trace("processing ast...")
+        self.context = ASTContext()
+        self.context.ident = None
         self.visit(ast)
 
     # visit:
     def visit (self, ast) :
+        # push context
+        self.context = ASTContext(self.context)
+        # visit
         hdlr = getattr(self, 'visit_' + ast.tp)
         hdlr(ast)
+        # accept
+        hdlr = getattr(self, 'accept_' + ast.tp)
+        for child in hdlr(ast) :
+            self.visit(child)
+        # pop context
+        self.context = self.context.parent
 
     # visit_namespace:
     def visit_namespace (self, ast) :
-        trace("namespace: %s" % repr(ast))
-        for n in ast.body :
-            self.visit(n)
+        self.context.ident = CIdent(self.context.ident, ast.name)
+        trace("namespace: '%s'" % self.context.ident.qual)
+
+    # accept_namespace:
+    def accept_namespace (self, ast) :
+        for n in ast.body : yield n
 
     # visit_class:
     def visit_class (self, ast) :
-        trace("class: %s" % repr(ast))
-        for n in ast.body :
-            self.visit(n)
+        self.context.ident = CIdent(self.context.ident, ast.name)
+        trace("class: '%s'" % self.context.ident.qual)
+
+    # accept_class:
+    def accept_class (self, ast) :
+        for n in ast.body : yield n
         
 # main:
 def main () :
