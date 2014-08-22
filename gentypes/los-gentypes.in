@@ -231,9 +231,64 @@ class ASTContext :
         else :
             s.__attrs[n] = v
 
+# WSection:
+class WSection :
+
+    # __init__:
+    def __init__ (self) :
+        self.nodes = []
+        self.children = {}
+
+    # add_child:
+    def add_child (self, name) :
+        assert name not in self.children
+        child = WSection()
+        self.nodes.append(child)
+        self.children[name] = child
+
+    # write:
+    def write (self, *lines) :
+        for l in lines :
+            self.nodes.append(WText(l))
+
+# WText:
+class WText :
+
+    # __init__:
+    def __init__ (self, text) :
+        self.text = text
+        
 # Writer:
 class Writer :
-    pass
+
+    # __init__:
+    def __init__ (self) :
+        self.root = WSection()
+        
+    # sections:
+    def sections (self, *sections) :
+        for path in sections :
+            dot = path.rfind('.')
+            if dot < 0 :
+                parent = self.root
+                name = path
+            else :
+                parent = self.get_section(path[:dot])
+                name = path[dot+1:]
+            parent.add_child(name)
+
+    # get_section:
+    def get_section (self, path) :
+        sec = self.root
+        if path :
+            for comp in path.split('.') :
+                sec = sec.children[comp]
+        return sec
+    
+    # write:
+    def write (self, secpath, *lines) :
+        sec = self.get_section(secpath)
+        sec.write(*lines)
 
 # Id:
 class Id :
@@ -277,6 +332,7 @@ class ASTProcessor :
         assert fname not in self.files, fname
         f = Writer()
         self.files[fname] = f
+        return f
 
     # process:
     def process (self, ast) :
@@ -312,7 +368,12 @@ class ASTProcessor :
     def visit_class (self, ast) :
         ident = self.context.ident = CIdent(self.context.ident, ast.name)
         trace("class: '%s'" % self.context.ident.qual)
-        self.context.hfile = self.open_file(ident.full.strip + '-def.h')
+        hfile = self.context.hfile = self.open_file(ident.full.strip + '-def.h')
+        hfile.sections('typedefs')
+        # instance/class typedefs
+        hfile.write('typedefs',
+                    'typedef struct _%s %s;\n' % (ident.full.cml, ident.full.cml),
+                    'typedef struct _%sClass %sClass;\n' % (ident.full.cml, ident.full.cml))
 
     # accept_class:
     def accept_class (self, ast) :
