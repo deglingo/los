@@ -4,10 +4,12 @@
 #ifndef _LOBJECT_H_
 #define _LOBJECT_H_
 
+#include "los/ltype.h"
+
 
 
 /* [FIXME] */
-typedef unsigned int LType;
+#define L_TYPE_OBJECT (0)
 
 typedef struct _LObject LObject;
 typedef struct _LObjectClass LObjectClass;

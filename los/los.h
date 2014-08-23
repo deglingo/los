@@ -5,6 +5,8 @@
 #define _LOS_H_
 
 
+#include <los/ltype.h>
+
 #include <los/lobject.h>
 
 

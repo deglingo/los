@@ -1,0 +1,20 @@
+/* -*- c -*- */
+
+header {
+##include "los/ltype.h"
+}
+
+data {  }
+
+setup { }
+
+teardown { }
+
+test 
+  {
+    LType tp;
+    LTypeInfo info = {
+    };
+    tp = l_type_register("FakeType", 0, &info);
+    PIF_CHECK(tp > 0);
+  }

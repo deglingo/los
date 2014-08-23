@@ -7,7 +7,9 @@ liblos_la_CFLAGS = -I$(top_srcdir)
 include_HEADERS = los.h
 
 includelos_HEADERS = \
+	ltype.h \
 	lobject.h
 
 liblos_la_SOURCES = \
+	ltype.c \
 	lobject.c
