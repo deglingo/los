@@ -17,7 +17,7 @@ LType l_object_get_type ( void )
   if (type == 0) {
     LTypeInfo info = { 0, };
     info.class_size = sizeof(LObjectClass);
-    /* info.instance_size = sizeof(LObject); */
+    info.instance_size = sizeof(LObject);
     type = l_type_register("LObject", 0, &info);
   }
   return type;
@@ -32,7 +32,6 @@ LObject *l_object_new ( LType type,
                         ... )
 {
   LObject *obj;
-  obj = malloc(sizeof(LObject));
-  memset(obj, 0, sizeof(LObject));
+  obj = l_type_instantiate(type);
   return obj;
 }
