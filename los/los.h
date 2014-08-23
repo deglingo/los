@@ -7,8 +7,6 @@
 
 #include <los/lbase.h>
 
-#include <los/ltype.h>
-
 #include <los/lobject.h>
 
 

@@ -4,12 +4,11 @@
 #ifndef _LOBJECT_H_
 #define _LOBJECT_H_
 
-#include "los/ltype.h"
+#include "los/lbase.h"
 
 
 
 /* [FIXME] */
-#define L_TYPE_OBJECT (l_object_get_type())
 #define L_CLASS_OBJECT (l_object_get_class())
 
 typedef struct _LObject LObject;
@@ -53,7 +52,6 @@ LObjectClass *l_object_get_class ( void );
 LObjectClass *l_object_class_register ( const gchar *name,
                                         LObjectClass *parent,
                                         LClassInfo *info );
-LType l_object_get_type ( void );
 LObject *l_object_new ( LObjectClass *cls,
                         const char *first_prop,
                         ... );

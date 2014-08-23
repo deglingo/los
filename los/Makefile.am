@@ -8,9 +8,7 @@ include_HEADERS = los.h
 
 includelos_HEADERS = \
 	lbase.h \
-	ltype.h \
 	lobject.h
 
 liblos_la_SOURCES = \
-	ltype.c \
 	lobject.c
