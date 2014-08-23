@@ -13,7 +13,13 @@
  */
 LObjectClass *l_object_get_class ( void )
 {
-  return NULL;
+  static LObjectClass *cls=NULL;
+  if (!cls) {
+    cls = g_malloc0(sizeof(LObjectClass));
+    cls->l_class_info.class_size = sizeof(LObjectClass);
+    cls->l_class_info.instance_size = sizeof(LObject);
+  }
+  return cls;
 }
 
 
@@ -26,6 +32,7 @@ LObjectClass *l_object_class_register ( const gchar *name,
 {
   LObjectClass *cls;
   cls = g_malloc0(info->class_size);
+  cls->l_class_info = *info;
   return cls;
 }
 
@@ -49,11 +56,13 @@ LType l_object_get_type ( void )
 
 /* l_object_new:
  */
-LObject *l_object_new ( LType type,
+LObject *l_object_new ( LObjectClass *cls,
                         const char *first_prop,
                         ... )
 {
   LObject *obj;
-  obj = l_type_instantiate(type);
+  obj = g_malloc0(cls->l_class_info.instance_size);
+  /* [FIXME] ref cls */
+  /* obj->l_class = cls; */
   return obj;
 }

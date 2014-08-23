@@ -44,7 +44,7 @@ struct _LObject
  */
 struct _LObjectClass
 {
-  int _dummy;
+  LClassInfo l_class_info;
 };
 
 
@@ -54,7 +54,7 @@ LObjectClass *l_object_class_register ( const gchar *name,
                                         LObjectClass *parent,
                                         LClassInfo *info );
 LType l_object_get_type ( void );
-LObject *l_object_new ( LType type,
+LObject *l_object_new ( LObjectClass *cls,
                         const char *first_prop,
                         ... );
 
