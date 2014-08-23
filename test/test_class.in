@@ -1,0 +1,25 @@
+/* -*- c -*- */
+
+header {
+##include "los/lobject.h"
+
+  typedef struct _FakeClass
+  {
+    int dummy;
+  }
+ FakeClass;
+}
+
+data { }
+
+setup { }
+
+teardown { }
+
+test {
+  LObjectClass *cls;
+  LClassInfo info = { 0, };
+  info.class_size = sizeof(FakeClass);
+  cls = l_object_class_register("Fake", L_CLASS_OBJECT, &info);
+  PIF_CHECK(cls);
+}

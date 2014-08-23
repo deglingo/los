@@ -9,6 +9,28 @@
 
 
 
+/* l_object_get_class:
+ */
+LObjectClass *l_object_get_class ( void )
+{
+  return NULL;
+}
+
+
+
+/* l_object_class_register:
+ */
+LObjectClass *l_object_class_register ( const gchar *name,
+                                        LObjectClass *parent,
+                                        LClassInfo *info )
+{
+  LObjectClass *cls;
+  cls = g_malloc0(info->class_size);
+  return cls;
+}
+
+
+
 /* l_object_get_type:
  */
 LType l_object_get_type ( void )
