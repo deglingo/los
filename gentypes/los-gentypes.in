@@ -3,9 +3,12 @@
 
 import sys, os, pprint, traceback, re, collections
 
+DEBUG = False
+
 # trace:
 def trace (msg) :
-    sys.stderr.write('los-gentypes: %s\n' % msg)
+    if DEBUG :
+        sys.stderr.write('los-gentypes: %s\n' % msg)
 
 # print_exception:
 def print_exception (exc_info=None, f=None) :
