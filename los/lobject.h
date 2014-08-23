@@ -9,7 +9,7 @@
 
 
 /* [FIXME] */
-#define L_TYPE_OBJECT (0)
+#define L_TYPE_OBJECT (l_object_get_type())
 
 typedef struct _LObject LObject;
 typedef struct _LObjectClass LObjectClass;
@@ -37,6 +37,7 @@ struct _LObjectClass
 
 
 
+LType l_object_get_type ( void );
 LObject *l_object_new ( LType type,
                         const char *first_prop,
                         ... );
