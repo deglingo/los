@@ -474,8 +474,10 @@ class ASTProcessor :
         # header sections
         hfile.sections('defines')
         hfile.sections('typedefs')
+        hfile.sections('fndecls')
         # inl sections
         ifile.sections('header')
+        ifile.sections('fndefs')
         # instance header macro
         hfile.write('defines',
                     '#define %s_INSTANCE_HEADER %s __l_instance_super\n' %
@@ -484,9 +486,10 @@ class ASTProcessor :
         hfile.write('defines',
                     '#define %s_CLASS_HEADER %s __l_class_super\n' %
                     (n.ident.full.up, n.base.ident.full.cml))
-        # [TODO] type define
+        # class define
         hfile.write('defines',
-                    '#define %sTYPE_%s (0)\n' % (ident.pfx.up, ident.sfx.up))
+                    '#define %sCLASS_%s (%s_get_class())\n' %
+                    (ident.pfx.up, ident.sfx.up, ident.full.low))
         # cast macros
         hfile.write('defines',
                     '#define %s(obj) (L_OBJECT_CHECK_INSTANCE_CAST((obj), %sTYPE_%s, %s))\n' %
@@ -495,8 +498,24 @@ class ASTProcessor :
         hfile.write('typedefs',
                     'typedef struct _%s %s;\n' % (n.ident.full.cml, n.ident.full.cml),
                     'typedef struct _%sClass %sClass;\n' % (n.ident.full.cml, n.ident.full.cml))
-        # [fixme]
-        ifile.write('header', '/* [TODO] */\n')
+        # get_class func
+        hfile.write('fndecls',
+                    'LObjectClass *%s_get_class ( void );\n' % ident.full.low)
+        ifile.write('fndefs',
+                    'LObjectClass *%s_get_class ( void )\n' % ident.full.low,
+                    '{\n',
+                    '  static LObjectClass *cls = NULL;\n',
+                    '  if (!cls) {\n',
+                    '    LClassInfo info = {\n',
+                    '      sizeof(%sClass),\n' % ident.full.cml,
+                    '      sizeof(%s),\n' % ident.full.cml,
+                    '    };\n'
+                    '    cls = l_object_class_register("%s", %sCLASS_%s, &info);\n' %
+                    (ident.full.cml, n.base.ident.pfx.up, n.base.ident.sfx.up),
+                    '  }\n',
+                    '  return cls;\n',
+                    '}\n')
+                    
 
     # accept_nclass:
     def accept_nclass (self, n) :
