@@ -6,6 +6,10 @@
 
 #include <glib.h>
 
+/* [FIXME] */
+#include <stdio.h>
+#include <stdlib.h>
+
 
 
 #endif

@@ -9,6 +9,7 @@ header {
 data { LType type; }
 
 setup { 
+  l_type_init();
   /* [FIXME] not good to use global vars */
   if (_type == 0) {
     LTypeInfo info = {

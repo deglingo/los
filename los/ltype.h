@@ -22,6 +22,7 @@ struct _LTypeInfo
 
 
 
+void l_type_init ( void );
 LType l_type_register ( const char *name,
                         LType parent,
                         LTypeInfo *info );
