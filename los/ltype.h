@@ -4,10 +4,11 @@
 #ifndef _LTYPE_H_
 #define _LTYPE_H_
 
+#include "los/lbase.h"
 
 
-/* [FIXME] guint, guint32 ? */
-typedef unsigned int LType;
+
+typedef guint LType;
 typedef struct _LTypeInfo LTypeInfo;
 
 
