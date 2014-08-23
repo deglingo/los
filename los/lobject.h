@@ -9,6 +9,9 @@
 typedef struct _LObject LObject;
 typedef struct _LObjectClass LObjectClass;
 
+/* [TODO] check/cast macros */
+#define L_OBJECT_CHECK_INSTANCE_CAST(obj, type, s_type) ((s_type *)(obj))
+
 
 
 /* LObject:

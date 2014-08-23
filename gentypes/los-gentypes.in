@@ -171,15 +171,19 @@ class CIdent :
         if parent is None :
             assert spec == '', spec # [fixme]
             self.qual = '::'
-            self.full = Id('', '', '')
+            self.pfx = self.sfx = self.full = Id('', '', '')
         else :
             if parent.parent is None :
                 self.qual = parent.qual + spec
+                self.pfx = Id('', '', '')
                 self.full = Id(self.sfx.cml,
                                self.sfx.low,
                                self.sfx.up)
             else :
                 self.qual = parent.qual + '::' + spec
+                self.pfx = Id(cml=parent.full.cml,
+                              low=parent.full.low + '_',
+                              up =parent.full.up  + '_')
                 self.full = Id(cml=parent.full.cml + self.sfx.cml,
                                low=parent.full.low + '_' + self.sfx.low,
                                up =parent.full.up  + '_' + self.sfx.up)
@@ -461,6 +465,7 @@ class ASTProcessor :
         trace("class: '%s'" % n.ident.qual)
         if n.extern :
             return
+        ident = n.ident
         hfile = self.context.hfile = self.open_file(n.ident.full.strip + '-def.h')
         ifile = self.context.ifile = self.open_file(n.ident.full.strip + '.inl')
         # header sections
@@ -476,6 +481,13 @@ class ASTProcessor :
         hfile.write('defines',
                     '#define %s_CLASS_HEADER %s __l_class_super\n' %
                     (n.ident.full.up, n.base.ident.full.cml))
+        # [TODO] type define
+        hfile.write('defines',
+                    '#define %sTYPE_%s (0)\n' % (ident.pfx.up, ident.sfx.up))
+        # cast macros
+        hfile.write('defines',
+                    '#define %s(obj) (L_OBJECT_CHECK_INSTANCE_CAST((obj), %sTYPE_%s, %s))\n' %
+                    (ident.full.up, ident.pfx.up, ident.sfx.up, ident.full.cml))
         # instance/class typedefs
         hfile.write('typedefs',
                     'typedef struct _%s %s;\n' % (n.ident.full.cml, n.ident.full.cml),
