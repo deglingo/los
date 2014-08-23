@@ -1,0 +1,13 @@
+/* -*- c -*- */
+
+header {
+##include "los/lobject.h"
+}
+
+data { LObject *obj; }
+
+setup { data->obj = l_object_new(0, 0); }
+
+teardown { /* L_OBJECT_CLEAR(data->obj); */ }
+
+test { PIF_CHECK(data->obj); }

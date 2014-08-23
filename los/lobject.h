@@ -6,6 +6,9 @@
 
 
 
+/* [FIXME] */
+typedef unsigned int LType;
+
 typedef struct _LObject LObject;
 typedef struct _LObjectClass LObjectClass;
 
@@ -29,6 +32,12 @@ struct _LObjectClass
 {
   int _dummy;
 };
+
+
+
+LObject *l_object_new ( LType type,
+                        const char *first_prop,
+                        ... );
 
 
 
