@@ -2,19 +2,22 @@
 
 header {
 ##include "los/ltype.h"
+
+  static LType _type = 0;
 }
 
-data {  }
+data { LType type; }
 
-setup { }
+setup { 
+  /* [FIXME] not good to use global vars */
+  if (_type == 0) {
+    LTypeInfo info = {
+    };
+    _type = l_type_register("FakeType", 0, &info);
+  }
+  data->type = _type;
+}
 
 teardown { }
 
-test 
-  {
-    LType tp;
-    LTypeInfo info = {
-    };
-    tp = l_type_register("FakeType", 0, &info);
-    PIF_CHECK(tp > 0);
-  }
+test { PIF_CHECK(data->type > 0); }
