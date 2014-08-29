@@ -66,6 +66,7 @@ class Lexer :
         ('OPENBRACE',  r'\{'),
         ('CLOSEBRACE', r'\}'),
         ('SEMICOLON', r';'),
+        ('COLON', r':'),
     )
 
     KEYWORDS = set((
@@ -225,6 +226,13 @@ class NNamespace (NDecl) :
     def _add (self, decl) :
         self.body.append(decl)
 
+    # get_decl:
+    def get_decl (self, name) :
+        for d in self.body :
+            if d.name == name :
+                return d
+        assert 0, (self, name)
+
 # NClass:
 class NClass (NDecl) :
 
@@ -287,11 +295,24 @@ class Parser :
     def parse_class (self, ctxt) :
         self.lex('CLASS')
         tok_name = self.lex('ID')
-        base = self.l_object_class
+        # base clause
+        tok = self.look()
+        if tok.tp == 'COLON' :
+            base = self.parse_base_clause(ctxt)
+        else :
+            base = self.l_object_class
+        # create node
         node = NClass(ctxt, tok_name.val, base=base)
         # self.lex('OPENBRACE')
         # self.lex('CLOSEBRACE')
         self.lex('SEMICOLON')
+
+    # parse_base_clause:
+    def parse_base_clause (self, ctxt) :
+        self.lex('COLON')
+        tok = self.lex('ID')
+        base = ctxt.get_decl(tok.val)
+        return base
 
 # ASTContext:
 class ASTContext :
