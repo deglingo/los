@@ -55,6 +55,8 @@ LObjectClass *l_object_class_register ( const gchar *name,
 LObject *l_object_new ( LObjectClass *cls,
                         const char *first_prop,
                         ... );
+/* [FIXME] */
+#define l_object_ref(obj) (obj)
 
 
 
