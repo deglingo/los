@@ -505,7 +505,7 @@ class ASTProcessor :
                     (n.ident.full.up, n.base.ident.full.cml))
         # class header macro
         hfile.write('defines',
-                    '#define %s_CLASS_HEADER %s __l_class_super\n' %
+                    '#define %s_CLASS_HEADER %sClass __l_class_super\n' %
                     (n.ident.full.up, n.base.ident.full.cml))
         # class define
         hfile.write('defines',
