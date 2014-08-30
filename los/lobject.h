@@ -15,6 +15,8 @@ typedef struct _LObject LObject;
 typedef struct _LObjectClass LObjectClass;
 typedef struct _LClassInfo LClassInfo;
 
+typedef void (* LObjectClassInitFunc) ( LObjectClass *cls );
+
 /* [TODO] check/cast macros */
 #define L_OBJECT_CHECK_INSTANCE_CAST(obj, type, s_type) ((s_type *)(obj))
 #define L_OBJECT_GET_CLASS_CAST(obj, type, s_type) ((s_type *)(((LObject *)(obj))->l_class))
@@ -26,6 +28,7 @@ typedef struct _LClassInfo LClassInfo;
 struct _LClassInfo
 {
   guint class_size;
+  LObjectClassInitFunc class_init;
   guint instance_size;
 };
 

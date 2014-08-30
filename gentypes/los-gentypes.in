@@ -498,6 +498,7 @@ class ASTProcessor :
         hfile.sections('fndecls')
         # inl sections
         ifile.sections('header')
+        ifile.sections('fndecls')
         ifile.sections('fndefs')
         # instance header macro
         hfile.write('defines',
@@ -523,6 +524,15 @@ class ASTProcessor :
         hfile.write('typedefs',
                     'typedef struct _%s %s;\n' % (n.ident.full.cml, n.ident.full.cml),
                     'typedef struct _%sClass %sClass;\n' % (n.ident.full.cml, n.ident.full.cml))
+        # class_init handler
+        ifile.write('fndecls',
+                    'static void __%s_class_init ( LObjectClass *cls );\n' % ident.full.low,
+                    'static void %s_class_init ( LObjectClass *cls );\n' % ident.full.low)
+        ifile.write('fndefs',
+                    'static void __%s_class_init ( LObjectClass *cls )\n' % ident.full.low,
+                    '{\n',
+                    '  %s_class_init(cls);\n' % ident.full.low,
+                    '}\n')
         # get_class func
         hfile.write('fndecls',
                     'LObjectClass *%s_get_class ( void );\n' % ident.full.low)
@@ -533,6 +543,7 @@ class ASTProcessor :
                     '  if (!cls) {\n',
                     '    LClassInfo info = {\n',
                     '      sizeof(%sClass),\n' % ident.full.cml,
+                    '      __%s_class_init,\n' % ident.full.low,
                     '      sizeof(%s),\n' % ident.full.cml,
                     '    };\n'
                     '    cls = l_object_class_register("%s", %sCLASS_%s, &info);\n' %

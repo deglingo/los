@@ -5,9 +5,15 @@ header {
 
   typedef struct _FakeClass
   {
+    LObjectClass super_class;
     int dummy;
   }
  FakeClass;
+
+ static void _fake_class_init ( LObjectClass *cls )
+ {
+   ((FakeClass *) cls)->dummy = 42;
+ }
 }
 
 data { }
@@ -20,6 +26,9 @@ test {
   LObjectClass *cls;
   LClassInfo info = { 0, };
   info.class_size = sizeof(FakeClass);
+  info.class_init = _fake_class_init;
   cls = l_object_class_register("Fake", L_CLASS_OBJECT, &info);
   PIF_CHECK(cls);
+  /* class initialization must call the class_init handler */
+  PIF_CHECK(((FakeClass *) cls)->dummy == 42);
 }

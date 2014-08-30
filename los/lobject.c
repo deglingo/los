@@ -33,6 +33,9 @@ LObjectClass *l_object_class_register ( const gchar *name,
   LObjectClass *cls;
   cls = g_malloc0(info->class_size);
   cls->l_class_info = *info;
+  /* class init handler */
+  if (info->class_init)
+    info->class_init(cls);
   return cls;
 }
 
