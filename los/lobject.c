@@ -46,7 +46,6 @@ LObject *l_object_new ( LObjectClass *cls,
 {
   LObject *obj;
   obj = g_malloc0(cls->l_class_info.instance_size);
-  /* [FIXME] ref cls */
-  /* obj->l_class = cls; */
+  obj->l_class = l_object_ref(cls);
   return obj;
 }

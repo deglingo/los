@@ -11,6 +11,7 @@ setup { data->obj = l_object_new(L_CLASS_OBJECT, 0); }
 teardown { /* L_OBJECT_CLEAR(data->obj); */ }
 
 test { PIF_CHECK(data->obj); }
+test { PIF_CHECK(data->obj->l_class == L_CLASS_OBJECT); }
 test {
   l_object_ref(data->obj);
   /* [TODO] check ref_count */

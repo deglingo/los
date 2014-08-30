@@ -34,7 +34,7 @@ struct _LClassInfo
  */
 struct _LObject
 {
-  int _dummy;
+  LObjectClass *l_class;
 };
 
 
