@@ -1,0 +1,38 @@
+/* -*- c -*- */
+
+header {
+##include "los/lobject.h"
+
+##define CLASS_FAKE (fake_get_class())
+
+  typedef struct _Fake {
+    LObject _super;
+  } Fake;
+
+ typedef struct _FakeClass {
+   LObjectClass _super_class;
+ } FakeClass;
+
+  static LObjectClass *fake_get_class ( void )
+  {
+    static LObjectClass *cls = NULL;
+    if (!cls) {
+      static LClassInfo info = { 0, };
+      info.class_size = sizeof(FakeClass);
+      info.instance_size = sizeof(Fake);
+      cls = l_object_class_register("Fake", L_CLASS_OBJECT, &info);
+    }
+    return cls;
+  }
+}
+
+data { LObject *obj; }
+
+setup { data->obj = l_object_new(CLASS_FAKE, 0); }
+
+teardown { /* L_OBJECT_CLEAR(data->obj); */ }
+
+test { 
+  PIF_CHECK(data->obj);
+  PIF_CHECK(data->obj->l_class == CLASS_FAKE);
+}
