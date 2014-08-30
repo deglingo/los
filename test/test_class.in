@@ -4,10 +4,12 @@ header
 {
 ##include "los/lobject.h"
 ##define CLASS_FAKE (fake_get_class())
+##define CLASS_FAKE2 (fake2_get_class())
 }
 
 header
 {
+  /* Fake */
   typedef struct _FakeClass
   {
     LObjectClass super_class;
@@ -31,6 +33,31 @@ header
     }
     return cls;
   }
+
+  /* Fake2Class */
+  typedef struct _Fake2Class
+  {
+    FakeClass super_class;
+  }
+  Fake2Class;
+
+  static void _fake2_class_init ( LObjectClass *cls )
+  {
+    ((FakeClass *) cls)->dummy *= 2;
+  }
+
+  static LObjectClass *fake2_get_class ( void )
+  {
+    static LObjectClass *cls = NULL;
+    if (!cls) {
+      LClassInfo info = { 0, };
+      info.class_size = sizeof(Fake2Class);
+      info.class_init = _fake2_class_init;
+      cls = l_object_class_register("Fake2", CLASS_FAKE, &info);
+    }
+    return cls;
+  }
+
 }
 
 unit /* Fake */
@@ -46,5 +73,17 @@ unit /* Fake */
     PIF_CHECK(cls);
     /* class initialization must call the class_init handler */
     PIF_CHECK(((FakeClass *) cls)->dummy == 42);
+  }
+}
+
+unit /* Fake2 */
+{
+  setup { CLASS_FAKE2; }
+  test {
+    LObjectClass *cls = CLASS_FAKE2;
+    PIF_CHECK(cls);
+    /* class initialization must copy the base class and call the
+       class_init handler */
+    PIF_CHECK(((FakeClass *) cls)->dummy == 84);
   }
 }

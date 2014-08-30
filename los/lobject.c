@@ -32,6 +32,10 @@ LObjectClass *l_object_class_register ( const gchar *name,
 {
   LObjectClass *cls;
   cls = g_malloc0(info->class_size);
+  /* raw-copy the base class */
+  /* [FIXME] should only the relevant part and avoid the header */
+  memcpy(cls, parent, parent->l_class_info.class_size);
+  /* copy info */
   cls->l_class_info = *info;
   /* class init handler */
   if (info->class_init)
