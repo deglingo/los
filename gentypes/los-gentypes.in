@@ -149,19 +149,18 @@ class Id :
 # CIdent:
 class CIdent :
 
+    # [fixme] handle '_' and digits
+    RE_CMLWORD = re.compile(r"[A-Z]+[a-z]*")
+    
     @staticmethod
     def split_cml (ident) :
         words = []
-        w = ''
-        for c in ident :
-            if c.isupper() :
-                if w :
-                    words.append(w)
-                w = c
-            else :
-                w += c
-        if w :
-            words.append(w)
+        pos = 0
+        while pos < len(ident) :
+            m = CIdent.RE_CMLWORD.match(ident, pos)
+            assert m is not None, (ident, ident[pos:])
+            words.append(ident[pos:m.end()])
+            pos = m.end()
         return words
         
     # __init__:
@@ -191,6 +190,10 @@ class CIdent :
                 self.full = Id(cml=parent.full.cml + self.sfx.cml,
                                low=parent.full.low + '_' + self.sfx.low,
                                up =parent.full.up  + '_' + self.sfx.up)
+        trace("ident: '%s' + '%s'" % (('<None>' if parent is None else parent.full.cml), spec))
+        trace(" > %s" % self.full.cml)
+        trace(" > %s" % self.full.low)
+        trace(" > %s" % self.full.up)
 
 # Node:
 class Node :
