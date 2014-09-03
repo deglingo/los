@@ -65,6 +65,8 @@ class Lexer :
         ('ID', r'[a-zA-Z_][a-zA-Z0-9_]*'),
         ('OPENBRACE',  r'\{'),
         ('CLOSEBRACE', r'\}'),
+        ('OPENPAR', r'\('),
+        ('CLOSEPAR', r'\)'),
         ('SEMICOLON', r';'),
         ('COLON', r':'),
     )
@@ -243,6 +245,8 @@ class NClass (NDecl) :
     def __init__ (self, ctxt, name, base, extern=False) :
         NDecl.__init__(self, ctxt, name, extern=extern)
         self.base = base
+        self.has_instance_init = False
+        self.has_class_init = False
 
 # Parser:
 class Parser :
@@ -306,8 +310,10 @@ class Parser :
             base = self.l_object_class
         # create node
         node = NClass(ctxt, tok_name.val, base=base)
-        # self.lex('OPENBRACE')
-        # self.lex('CLOSEBRACE')
+        # body
+        tok = self.look()
+        if tok.tp == 'OPENBRACE' :
+            self.parse_class_body(node)
         self.lex('SEMICOLON')
 
     # parse_base_clause:
@@ -316,6 +322,34 @@ class Parser :
         tok = self.lex('ID')
         base = ctxt.get_decl(tok.val)
         return base
+
+    # parse_class_body:
+    def parse_class_body (self, ctxt) :
+        self.lex('OPENBRACE')
+        while True :
+            tok = self.look()
+            if tok.tp == 'CLOSEBRACE' :
+                self.lex()
+                break
+            else :
+                self.parse_method(ctxt)
+
+    # parse_method:
+    def parse_method (self, ctxt) :
+        # [TODO]
+        self.lex('ID', 'void')
+        tok_name = self.lex('ID')
+        self.lex('OPENPAR')
+        self.lex('CLOSEPAR')
+        self.lex('SEMICOLON')
+        #
+        name = tok_name.val
+        if name == 'init' :
+            ctxt.has_instance_init = True
+        elif name == 'class_init' :
+            ctxt.has_class_init = True
+        else :
+            assert 0, name
 
 # ASTContext:
 class ASTContext :
@@ -503,6 +537,14 @@ class ASTProcessor :
         ifile.sections('header')
         ifile.sections('fndecls')
         ifile.sections('fndefs')
+        ifile.sections('fndefs.class_init')
+        ifile.sections('fndefs.class_init.head')
+        ifile.sections('fndefs.class_init.body')
+        ifile.sections('fndefs.class_init.foot')
+        ifile.sections('fndefs.init')
+        ifile.sections('fndefs.init.head')
+        ifile.sections('fndefs.init.body')
+        ifile.sections('fndefs.init.foot')
         # instance header macro
         hfile.write('defines',
                     '#define %s_INSTANCE_HEADER %s __l_instance_super\n' %
@@ -529,13 +571,30 @@ class ASTProcessor :
                     'typedef struct _%sClass %sClass;\n' % (n.ident.full.cml, n.ident.full.cml))
         # class_init handler
         ifile.write('fndecls',
-                    'static void __%s_class_init ( LObjectClass *cls );\n' % ident.full.low,
-                    'static void %s_class_init ( LObjectClass *cls );\n' % ident.full.low)
-        ifile.write('fndefs',
+                    'static void __%s_class_init ( LObjectClass *cls );\n' % ident.full.low)
+        ifile.write('fndefs.class_init.head',
                     'static void __%s_class_init ( LObjectClass *cls )\n' % ident.full.low,
-                    '{\n',
-                    '  %s_class_init(cls);\n' % ident.full.low,
+                    '{\n')
+        ifile.write('fndefs.class_init.foot',
                     '}\n')
+        if n.has_class_init :
+            ifile.write('fndecls',
+                        'static void %s_class_init ( LObjectClass *cls );\n' % ident.full.low)
+            ifile.write('fndefs.class_init.body',
+                        '  %s_class_init(cls);\n' % ident.full.low)
+        # instance_init handler
+        ifile.write('fndecls',
+                    'static void __%s_init ( LObject *obj );\n' % ident.full.low)
+        ifile.write('fndefs.init.head',
+                    'static void __%s_init ( LObject *obj )' % ident.full.low,
+                    '{\n')
+        ifile.write('fndefs.init.foot',
+                    '}\n')
+        if n.has_instance_init :
+            ifile.write('fndecls',
+                    'static void %s_init ( LObject *obj ); \n' % ident.full.low)
+            ifile.write('fndefs.init.body',
+                    '  %s_init(obj);\n' % ident.full.low)
         # get_class func
         hfile.write('fndecls',
                     'LObjectClass *%s_get_class ( void );\n' % ident.full.low)
@@ -548,6 +607,7 @@ class ASTProcessor :
                     '      sizeof(%sClass),\n' % ident.full.cml,
                     '      __%s_class_init,\n' % ident.full.low,
                     '      sizeof(%s),\n' % ident.full.cml,
+                    '      __%s_init,\n' % ident.full.low,
                     '    };\n'
                     '    cls = l_object_class_register("%s", %sCLASS_%s, &info);\n' %
                     (ident.full.cml, n.base.ident.pfx.up, n.base.ident.sfx.up),
