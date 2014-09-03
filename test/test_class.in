@@ -48,5 +48,7 @@ unit /* Fake2 */
   teardown { /* l_object_unref(data->fake); */ }
   test {
     PIF_CHECK(data->fake);
+    /* l_object_new() must all the instance init handlers in order */
+    PIF_CHECK(((Fake *)data->fake)->instval == 6);
   }
 }

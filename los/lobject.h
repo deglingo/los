@@ -49,7 +49,9 @@ struct _LObject
  */
 struct _LObjectClass
 {
+  /* [fixme] */
   LClassInfo l_class_info;
+  LObjectClass *l_parent_class;
 };
 
 
