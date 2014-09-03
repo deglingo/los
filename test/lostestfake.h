@@ -13,6 +13,7 @@
 typedef struct _Fake
 {
   LObject super;
+  gint instval;
 }
   Fake;
 
@@ -29,6 +30,11 @@ static void _fake_class_init ( LObjectClass *cls )
   ((FakeClass *) cls)->dummy = 42;
 }
 
+static void _fake_init ( LObject *obj )
+{
+  ((Fake *) obj)->instval = 3;
+}
+
 static LObjectClass *fake_get_class ( void )
 {
   static LObjectClass *cls = NULL;
@@ -37,6 +43,7 @@ static LObjectClass *fake_get_class ( void )
     info.class_size = sizeof(FakeClass);
     info.class_init = _fake_class_init;
     info.instance_size = sizeof(Fake);
+    info.init = _fake_init;
     cls = l_object_class_register("Fake", L_CLASS_OBJECT, &info);
   }
   return cls;

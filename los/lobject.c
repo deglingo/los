@@ -54,5 +54,8 @@ LObject *l_object_new ( LObjectClass *cls,
   LObject *obj;
   obj = g_malloc0(cls->l_class_info.instance_size);
   obj->l_class = l_object_ref(cls);
+  /* [fixme] instance init */
+  if (cls->l_class_info.init)
+    cls->l_class_info.init(obj);
   return obj;
 }
