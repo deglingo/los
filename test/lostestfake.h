@@ -36,6 +36,7 @@ static LObjectClass *fake_get_class ( void )
     LClassInfo info = { 0, };
     info.class_size = sizeof(FakeClass);
     info.class_init = _fake_class_init;
+    info.instance_size = sizeof(Fake);
     cls = l_object_class_register("Fake", L_CLASS_OBJECT, &info);
   }
   return cls;
@@ -67,6 +68,7 @@ static LObjectClass *fake2_get_class ( void )
     LClassInfo info = { 0, };
     info.class_size = sizeof(Fake2Class);
     info.class_init = _fake2_class_init;
+    info.instance_size = sizeof(Fake2);
     cls = l_object_class_register("Fake2", CLASS_FAKE, &info);
   }
   return cls;

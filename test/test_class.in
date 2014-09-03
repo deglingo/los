@@ -26,3 +26,25 @@ unit /* Fake2Class */
     PIF_CHECK(((FakeClass *) cls)->dummy == 84);
   }
 }
+
+/* [FIXME] the tests below should ge in test_instance */
+
+unit /* Fake */
+{
+  data { LObject *fake; }
+  setup { data->fake = l_object_new(CLASS_FAKE, NULL); }
+  teardown { /* l_object_unref(data->fake); */ }
+  test {
+    PIF_CHECK(data->fake);
+  }
+}
+
+unit /* Fake2 */
+{
+  data { LObject *fake; }
+  setup { data->fake = l_object_new(CLASS_FAKE2, NULL); }
+  teardown { /* l_object_unref(data->fake); */ }
+  test {
+    PIF_CHECK(data->fake);
+  }
+}
