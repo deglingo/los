@@ -6,14 +6,8 @@ header
 ##include "test/lostestfake.h"
 }
 
-unit /* Fake */
+unit /* FakeClass */
 {
-  data { }
-
-  setup { CLASS_FAKE; }
-
-  teardown { }
-
   test {
     LObjectClass *cls = CLASS_FAKE;
     PIF_CHECK(cls);
@@ -22,9 +16,8 @@ unit /* Fake */
   }
 }
 
-unit /* Fake2 */
+unit /* Fake2Class */
 {
-  setup { CLASS_FAKE2; }
   test {
     LObjectClass *cls = CLASS_FAKE2;
     PIF_CHECK(cls);

@@ -10,6 +10,13 @@
 
 
 /* Fake */
+typedef struct _Fake
+{
+  LObject super;
+}
+  Fake;
+
+/* FakeClass */
 typedef struct _FakeClass
 {
   LObjectClass super_class;
@@ -33,6 +40,13 @@ static LObjectClass *fake_get_class ( void )
   }
   return cls;
 }
+
+/* Fake2 */
+typedef struct _Fake2
+{
+  Fake super;
+}
+  Fake2;
 
 /* Fake2Class */
 typedef struct _Fake2Class
