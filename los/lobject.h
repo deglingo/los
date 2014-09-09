@@ -66,6 +66,12 @@ LObject *l_object_new ( LObjectClass *cls,
                         const char *first_prop,
                         ... );
 /* ref counting */
+#define L_OBJECT_CLEAR(ptr) do {                \
+    gpointer __l_object_clear_tmp = (ptr);      \
+    (ptr) = NULL;                               \
+    l_object_unref(__l_object_clear_tmp);       \
+  } while (0)
+
 gpointer l_object_ref ( gpointer obj );
 void l_object_unref ( gpointer obj );
 
