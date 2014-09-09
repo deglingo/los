@@ -9,5 +9,7 @@
 
 #include <los/lobject.h>
 
+#include <los/lstring.h>
+
 
 #endif

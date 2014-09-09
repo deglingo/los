@@ -1,0 +1,18 @@
+/* -*- c -*- */
+
+header {
+##include "los/lstring.h"
+##include <string.h>
+}
+
+data { LString *str; }
+
+setup { data->str = l_string_new("test-string"); }
+
+teardown { /* L_OBJECT_CLEAR(data->obj); */ }
+
+test { 
+  PIF_CHECK(data->str);
+  PIF_CHECK(data->str->len == 11);
+  PIF_CHECK(!strcmp(data->str->str, "test-string"));
+}
