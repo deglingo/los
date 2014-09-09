@@ -41,6 +41,8 @@ struct _LClassInfo
 struct _LObject
 {
   LObjectClass *l_class;
+
+  guint ref_count;
 };
 
 
@@ -63,8 +65,9 @@ LObjectClass *l_object_class_register ( const gchar *name,
 LObject *l_object_new ( LObjectClass *cls,
                         const char *first_prop,
                         ... );
-/* [FIXME] */
-#define l_object_ref(obj) (obj)
+/* ref counting */
+gpointer l_object_ref ( gpointer obj );
+void l_object_unref ( gpointer obj );
 
 
 

@@ -2,7 +2,7 @@
 
 lib_LTLIBRARIES = liblos.la
 
-liblos_la_CFLAGS = -I$(top_srcdir) -I$(top_builddir) @GLIB_CFLAGS@
+liblos_la_CFLAGS = -DCL_LOG_DOMAIN=\"los\" -I$(top_srcdir) -I$(top_builddir) @GLIB_CFLAGS@ @CLOG_CFLAGS@
 
 include_HEADERS = los.h
 

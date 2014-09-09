@@ -15,6 +15,7 @@ AC_PATH_PROG([PYTHON], [python3])
 test x"$PYTHON" != x || AC_ERROR([python3 not found])
 
 PKG_CHECK_MODULES([GLIB], [glib-2.0])
+PKG_CHECK_MODULES([CLOG], [clog])
 
 # test suite
 AM_PIFTEST_SUITE([test])

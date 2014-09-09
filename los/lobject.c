@@ -1,6 +1,7 @@
 /* lobject.c -
  */
 
+#include "los/private.h"
 #include "los/lobject.h"
 
 /* [REMOVEME] */
@@ -71,7 +72,30 @@ LObject *l_object_new ( LObjectClass *cls,
   LObject *obj;
   obj = g_malloc0(cls->l_class_info.instance_size);
   obj->l_class = l_object_ref(cls);
+  obj->ref_count = 1;
   /* instance init */
   _instance_init(obj, cls);
   return obj;
+}
+
+
+
+/* l_object_ref:
+ */
+gpointer l_object_ref ( gpointer obj )
+{
+  g_atomic_int_inc(&((LObject *)obj)->ref_count);
+  return obj;
+}
+
+
+
+/* l_object_unref:
+ */
+void l_object_unref ( gpointer obj )
+{
+  if (g_atomic_int_dec_and_test(&((LObject *)obj)->ref_count))
+    {
+      CL_DEBUG("[TODO] destroy object %p", obj);
+    }
 }
