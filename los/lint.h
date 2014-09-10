@@ -29,6 +29,8 @@ struct _LIntClass
 
 
 
+#define L_INT_VALUE(obj) (L_INT(obj)->value)
+
 LInt *l_int_new ( gint value );
 
 

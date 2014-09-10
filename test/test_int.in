@@ -12,5 +12,5 @@ teardown { L_OBJECT_CLEAR(data->val); }
 
 test { 
   PIF_CHECK(data->val);
-  PIF_CHECK(data->val->value == 24);
+  PIF_CHECK(L_INT_VALUE(data->val) == 24);
 }
