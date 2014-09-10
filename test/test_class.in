@@ -49,6 +49,8 @@ unit /* Fake */
     PIF_CHECK(data->fake);
     /* l_object_new() must call the instance_init handler */
     PIF_CHECK(((Fake *)data->fake)->instval == 3);
+    /* test the get_class macro */
+    PIF_CHECK(L_OBJECT_GET_CLASS(data->fake) == CLASS_FAKE);
     /* isclass must be false for an instance */
     PIF_CHECK(!l_object_isclass(data->fake));
   }
@@ -63,5 +65,7 @@ unit /* Fake2 */
     PIF_CHECK(data->fake);
     /* l_object_new() must all the instance init handlers in order */
     PIF_CHECK(((Fake *)data->fake)->instval == 6);
+    /* test the get_class macro */
+    PIF_CHECK(L_OBJECT_GET_CLASS(data->fake) == CLASS_FAKE2);
   }
 }
