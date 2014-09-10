@@ -561,6 +561,10 @@ class ASTProcessor :
         hfile.write('defines',
                     '#define %s(obj) (L_OBJECT_CHECK_INSTANCE_CAST((obj), %sTYPE_%s, %s))\n' %
                     (ident.full.up, ident.pfx.up, ident.sfx.up, ident.full.cml))
+        # check instance type macro
+        hfile.write('defines',
+                    '#define %sIS_%s(obj) (L_OBJECT_CHECK_INSTANCE_TYPE((obj), %sCLASS_%s))\n' %
+                    (ident.pfx.up, ident.sfx.up, ident.pfx.up, ident.sfx.up))
         # get_class macro
         hfile.write('defines',
                     '#define %s_GET_CLASS(obj) (L_OBJECT_GET_CLASS_CAST((obj), %sTYPE_%s, %sClass))\n' %
