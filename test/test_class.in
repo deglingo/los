@@ -13,6 +13,8 @@ unit /* FakeClass */
     PIF_CHECK(cls);
     /* class initialization must call the class_init handler */
     PIF_CHECK(((FakeClass *) cls)->dummy == 42);
+    /* isclass must be true for a class object */
+    PIF_CHECK(l_object_isclass((LObject *) cls));
   }
 }
 
@@ -38,6 +40,8 @@ unit /* Fake */
     PIF_CHECK(data->fake);
     /* l_object_new() must call the instance_init handler */
     PIF_CHECK(((Fake *)data->fake)->instval == 3);
+    /* isclass must be false for an instance */
+    PIF_CHECK(!l_object_isclass(data->fake));
   }
 }
 

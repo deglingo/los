@@ -48,6 +48,15 @@ LObjectClass *l_object_class_register ( const gchar *name,
 
 
 
+/* l_object_isclass:
+ */
+gboolean l_object_isclass ( LObject *obj )
+{
+  return obj->l_class ? FALSE : TRUE;
+}
+
+
+
 /* _instance_init:
  *
  * [fixme] use some mro list to avoid these recursive calls

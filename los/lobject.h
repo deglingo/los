@@ -54,6 +54,7 @@ struct _LObject
  */
 struct _LObjectClass
 {
+  LObject l_object;
   /* [fixme] */
   LClassInfo l_class_info;
   LObjectClass *l_parent_class;
@@ -65,6 +66,7 @@ LObjectClass *l_object_get_class ( void );
 LObjectClass *l_object_class_register ( const gchar *name,
                                         LObjectClass *parent,
                                         LClassInfo *info );
+gboolean l_object_isclass ( LObject *obj );
 LObject *l_object_new ( LObjectClass *cls,
                         const char *first_prop,
                         ... );
