@@ -8,4 +8,12 @@
 
 
 
+#define ASSERT(expr) do {                           \
+    if (!(expr)) {                                  \
+      CL_ERROR("ASSERTION FAILED: `" #expr "'");    \
+    }                                               \
+  } while (0)
+
+
+
 #endif

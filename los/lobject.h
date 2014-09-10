@@ -67,6 +67,8 @@ LObjectClass *l_object_class_register ( const gchar *name,
                                         LObjectClass *parent,
                                         LClassInfo *info );
 gboolean l_object_isclass ( LObject *obj );
+gboolean l_object_issubclass ( LObject *cls1,
+                               LObject *cls2 );
 LObject *l_object_new ( LObjectClass *cls,
                         const char *first_prop,
                         ... );

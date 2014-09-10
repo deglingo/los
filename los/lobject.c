@@ -57,6 +57,23 @@ gboolean l_object_isclass ( LObject *obj )
 
 
 
+/* l_object_issubclass:
+ */
+gboolean l_object_issubclass ( LObject *cls1,
+                               LObject *cls2 )
+{
+  ASSERT(l_object_isclass(cls1));
+  ASSERT(l_object_isclass(cls2));
+  while (cls1) {
+    if (cls1 == cls2)
+      return TRUE;
+    cls1 = (LObject *) (((LObjectClass *) cls1)->l_parent_class);
+  }
+  return FALSE;
+}
+
+
+
 /* _instance_init:
  *
  * [fixme] use some mro list to avoid these recursive calls

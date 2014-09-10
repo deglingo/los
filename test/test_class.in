@@ -15,6 +15,11 @@ unit /* FakeClass */
     PIF_CHECK(((FakeClass *) cls)->dummy == 42);
     /* isclass must be true for a class object */
     PIF_CHECK(l_object_isclass((LObject *) cls));
+    /* Fake is a subclass of LObject (and of itself) ... */
+    PIF_CHECK(l_object_issubclass((LObject *) cls, (LObject *) L_CLASS_OBJECT));
+    PIF_CHECK(l_object_issubclass((LObject *) cls, (LObject *) CLASS_FAKE));
+    /* ... but it is not a Fake2 subclass */
+    PIF_CHECK(!l_object_issubclass((LObject *) cls, (LObject *) CLASS_FAKE2));
   }
 }
 
@@ -26,6 +31,10 @@ unit /* Fake2Class */
     /* class initialization must copy the base class and call the
        class_init handler */
     PIF_CHECK(((FakeClass *) cls)->dummy == 84);
+    /* Fake2 is a subclass of LObject, Fake and of itself */
+    PIF_CHECK(l_object_issubclass((LObject *) cls, (LObject *) L_CLASS_OBJECT));
+    PIF_CHECK(l_object_issubclass((LObject *) cls, (LObject *) CLASS_FAKE));
+    PIF_CHECK(l_object_issubclass((LObject *) cls, (LObject *) CLASS_FAKE2));
   }
 }
 
