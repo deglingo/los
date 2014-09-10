@@ -22,6 +22,9 @@ typedef void (* LObjectInstanceInitFunc) ( LObject *obj );
 #define L_OBJECT_CHECK_INSTANCE_CAST(obj, type, s_type) ((s_type *)(obj))
 #define L_OBJECT_GET_CLASS_CAST(obj, type, s_type) ((s_type *)(((LObject *)(obj))->l_class))
 
+/* [FIXME] */
+#define L_OBJECT(obj) (L_OBJECT_CHECK_INSTANCE_CAST((obj), L_CLASS_OBJECT, LObject))
+
 
 
 /* LClassInfo:
