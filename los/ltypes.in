@@ -2,5 +2,6 @@
 
 namespace L
 {
+  class Int;
   class String;
 }

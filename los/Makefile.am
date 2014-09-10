@@ -9,15 +9,19 @@ include_HEADERS = los.h
 includelos_HEADERS = \
 	lbase.h \
 	lobject.h \
+	lint.h lint-def.h \
 	lstring.h lstring-def.h
 
 liblos_la_SOURCES = \
 	lobject.c \
+	lint.c \
 	lstring.c
 
 BUILT_SOURCES = \
+	lint-def.h lint.inl \
 	lstring-def.h lstring.inl
 
+lint-def.h lint.inl \
 lstring-def.h lstring.inl \
 : ltypes.stamp-h
 

@@ -1,0 +1,16 @@
+/* -*- c -*- */
+
+header {
+##include "los/lint.h"
+}
+
+data { LInt *val; }
+
+setup { data->val = l_int_new(24); }
+
+teardown { L_OBJECT_CLEAR(data->val); }
+
+test { 
+  PIF_CHECK(data->val);
+  PIF_CHECK(data->val->value == 24);
+}
