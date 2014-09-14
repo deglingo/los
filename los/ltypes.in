@@ -6,6 +6,7 @@ namespace L
   class String;
   class Stream;
   class MemStream : Stream;
+  class File : Stream;
   class Packer;
   class Unpacker;
 }

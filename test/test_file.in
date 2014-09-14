@@ -1,0 +1,51 @@
+/* -*- c -*- */
+
+header {
+##include "los/lfile.h"
+##include <fcntl.h>
+##include <unistd.h>
+}
+
+data
+{
+  gchar *tmpfile;
+  LStream *stream;
+}
+
+setup
+{
+  gint fd;
+  GError *err = NULL;
+  if ((fd = g_file_open_tmp(NULL, &data->tmpfile, &err)) < 0)
+    abort(); /* [FIXME] */
+  close(fd);
+}
+
+teardown
+{
+  unlink(data->tmpfile);
+}
+
+unit
+{
+  data { gint fd; }
+
+  setup
+    {
+      if ((data->fd = open(data->tmpfile, O_WRONLY)) < 0)
+        abort(); /* [FIXME] */
+      if (!(data->stream = l_file_fdopen(data->fd, "w", &err)))
+        abort(); /* [FIXME] */
+    }
+
+  teardown
+    {
+      /* [FIXME] close ? */
+      L_OBJECT_CLEAR(data->stream);
+    }
+
+  test
+    {
+      PIF_CHECK(data->stream);
+    }    
+}

@@ -13,6 +13,7 @@ includelos_HEADERS = \
 	lstring.h lstring-def.h \
 	lstream.h lstream-def.h \
 	lmemstream.h lmemstream-def.h \
+	lfile.h lfile-def.h \
 	lpacker.h lpacker-def.h \
 	lunpacker.h lunpacker-def.h
 
@@ -22,6 +23,7 @@ liblos_la_SOURCES = \
 	lstring.c \
 	lstream.c \
 	lmemstream.c \
+	lfile.c \
 	lpacker.c \
 	lunpacker.c
 
@@ -30,6 +32,7 @@ BUILT_SOURCES = \
 	lstring-def.h lstring.inl \
 	lstream-def.h lstream.inl \
 	lmemstream-def.h lmemstream.inl \
+	lfile-def.h lfile.inl \
 	lpacker-def.h lpacker.inl \
 	lunpacker-def.h lunpacker.inl
 
@@ -37,6 +40,7 @@ lint-def.h lint.inl \
 lstring-def.h lstring.inl \
 lstream-def.h lstream.inl \
 lmemstream-def.h lmemstream.inl \
+lfile-def.h lfile.inl \
 lpacker-def.h lpacker.inl \
 lunpacker-def.h lunpacker.inl \
 : ltypes.stamp-h
