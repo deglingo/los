@@ -1,0 +1,30 @@
+/* -*- c -*- */
+
+header {
+##include "los/lmemstream.h"
+##include "los/lpacker.h"
+##include "los/lunpacker.h"
+}
+
+data {
+  LStream *stream;
+  LPacker *packer;
+  LUnpacker *unpacker;
+}
+
+setup { 
+  data->stream = l_mem_stream_new("", 0);
+  data->packer = l_packer_new(data->stream);
+  data->unpacker = l_unpacker_new(data->stream);
+}
+
+teardown {
+  L_OBJECT_CLEAR(data->unpacker);
+  L_OBJECT_CLEAR(data->packer);
+  L_OBJECT_CLEAR(data->stream);
+}
+
+test { 
+  PIF_CHECK(data->packer);
+  PIF_CHECK(data->unpacker);
+}

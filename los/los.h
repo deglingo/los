@@ -13,5 +13,9 @@
 
 #include <los/lstring.h>
 
+#include <los/lpacker.h>
+
+#include <los/lunpacker.h>
+
 
 #endif
