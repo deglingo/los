@@ -13,6 +13,12 @@
 
 #include <los/lstring.h>
 
+#include <los/lstream.h>
+
+#include <los/lmemstream.h>
+
+#include <los/lfile.h>
+
 #include <los/lpacker.h>
 
 #include <los/lunpacker.h>
