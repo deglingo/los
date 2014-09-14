@@ -29,6 +29,9 @@ struct _LPackerClass
 
 
 LPacker *l_packer_new ( LStream *stream );
+gboolean l_packer_put ( LPacker *packer,
+                        LObject *object,
+                        GError **error );
 
 
 

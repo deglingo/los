@@ -4,6 +4,7 @@ header {
 ##include "los/lmemstream.h"
 ##include "los/lpacker.h"
 ##include "los/lunpacker.h"
+##include "los/lint.h"
 }
 
 data {
@@ -24,7 +25,14 @@ teardown {
   L_OBJECT_CLEAR(data->stream);
 }
 
-test { 
+test {
+  GError *err = NULL;
   PIF_CHECK(data->packer);
   PIF_CHECK(data->unpacker);
+  {
+    LObject *obj = L_OBJECT(l_int_new(92));
+    gboolean r = l_packer_put(data->packer, obj, &err);
+    PIF_CHECK(r);
+    l_object_unref(obj);
+  }
 }
