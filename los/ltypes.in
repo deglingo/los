@@ -4,4 +4,6 @@ namespace L
 {
   class Int;
   class String;
+  class Stream;
+  class MemStream : Stream;
 }

@@ -1,0 +1,25 @@
+/* -*- c -*- */
+
+header {
+##include "los/lmemstream.h"
+}
+
+data
+{ 
+  LStream *stream;
+}
+
+setup
+{
+  data->stream = l_mem_stream_new("", 0);
+}
+
+teardown
+{
+  L_OBJECT_CLEAR(data->stream);
+}
+
+test
+{ 
+  PIF_CHECK(data->stream);
+}

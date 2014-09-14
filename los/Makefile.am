@@ -10,19 +10,27 @@ includelos_HEADERS = \
 	lbase.h \
 	lobject.h \
 	lint.h lint-def.h \
-	lstring.h lstring-def.h
+	lstring.h lstring-def.h \
+	lstream.h lstream-def.h \
+	lmemstream.h lmemstream-def.h
 
 liblos_la_SOURCES = \
 	lobject.c \
 	lint.c \
-	lstring.c
+	lstring.c \
+	lstream.c \
+	lmemstream.c
 
 BUILT_SOURCES = \
 	lint-def.h lint.inl \
-	lstring-def.h lstring.inl
+	lstring-def.h lstring.inl \
+	lstream-def.h lstream.inl \
+	lmemstream-def.h lmemstream.inl
 
 lint-def.h lint.inl \
 lstring-def.h lstring.inl \
+lstream-def.h lstream.inl \
+lmemstream-def.h lmemstream.inl \
 : ltypes.stamp-h
 
 ltypes.stamp-h: ltypes.in
