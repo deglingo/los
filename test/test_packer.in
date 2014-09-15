@@ -5,6 +5,8 @@ header {
 ##include "los/lpacker.h"
 ##include "los/lunpacker.h"
 ##include "los/lint.h"
+##include "los/lstring.h"
+##include <string.h>
 }
 
 data {
@@ -43,4 +45,18 @@ test
   PIF_CHECK(obj);
   PIF_CHECK(L_IS_INT(obj));
   PIF_CHECK(L_INT_VALUE(obj) == 92);
+}
+
+test
+{
+  GError *err = NULL;
+  LObject *obj = L_OBJECT(l_string_new("test-string"));
+  gboolean r = l_packer_put(data->packer, obj, &err);
+  PIF_CHECK(r);
+  l_object_unref(obj);
+  l_stream_seek(data->stream, 0, L_STREAM_SEEK_SET);
+  obj = l_unpacker_get(data->unpacker, &err);
+  PIF_CHECK(obj);
+  PIF_CHECK(L_IS_STRING(obj));
+  PIF_CHECK(!strcmp(L_STRING(obj)->str, "test-string"));
 }
