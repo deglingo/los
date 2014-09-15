@@ -39,6 +39,10 @@ struct _LStreamClass
 
 
 
+gboolean l_stream_write ( LStream *stream,
+                          gpointer buffer,
+                          gsize size,
+                          GError **error );
 void l_stream_seek ( LStream *stream,
                      glong offset,
                      LStreamSeekType whence );

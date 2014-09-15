@@ -24,3 +24,15 @@ test
   PIF_CHECK(data->stream);
   l_stream_seek(data->stream, 0, L_STREAM_SEEK_SET);
 }
+
+test /* write */
+{
+  GError *err = NULL;
+  /* gchar *buf; */
+  /* gsize len; */
+  PIF_CHECK(l_stream_write(data->stream, "abcd", 4, &err));
+  /* buf = l_stream_get_buffer(data->stream, &len); */
+  /* PIF_CHECK(buf); */
+  /* PIF_CHECK(len == 4); */
+  /* PIF_CHECK(!strncmp(buf, "abcd", 4)); */
+}
