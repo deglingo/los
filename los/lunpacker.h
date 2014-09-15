@@ -29,6 +29,8 @@ struct _LUnpackerClass
 
 
 LUnpacker *l_unpacker_new ( LStream *stream );
+LObject *l_unpacker_get ( LUnpacker *unpacker,
+                          GError **error );
 
 
 
