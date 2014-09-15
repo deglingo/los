@@ -26,23 +26,26 @@ test
   l_stream_seek(data->stream, 0, L_STREAM_SEEK_SET);
 }
 
+#define CHECK_BUF(content) do {                                         \
+    gsize cont_len = strlen(content);                                   \
+    gsize len;                                                          \
+    gpointer buf;                                                       \
+    buf = l_mem_stream_get_buffer(L_MEM_STREAM(data->stream), &len);    \
+    PIF_CHECK(cont_len == len);                                         \
+    PIF_CHECK(len == 0 || buf);                                         \
+    PIF_CHECK(!strncmp(buf, (content), len));                           \
+  } while (0)
+
 test /* empty buffer */
 {
-  gchar *buf;
-  gsize len;
-  buf = l_mem_stream_get_buffer(L_MEM_STREAM(data->stream), &len);
-  PIF_CHECK(buf || !buf); /* [FIXME] !? */
-  PIF_CHECK(len == 0);
+  CHECK_BUF("");
 }
 
 test /* write */
 {
   GError *err = NULL;
-  gchar *buf;
-  gsize len;
   PIF_CHECK(l_stream_write(data->stream, "abcd", 4, &err));
-  buf = l_mem_stream_get_buffer(L_MEM_STREAM(data->stream), &len);
-  PIF_CHECK(buf);
-  PIF_CHECK(len == 4);
-  PIF_CHECK(!strncmp(buf, "abcd", 4));
+  CHECK_BUF("abcd");
+  PIF_CHECK(l_stream_write(data->stream, "efgh", 4, &err));
+  CHECK_BUF("abcdefgh");
 }
