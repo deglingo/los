@@ -16,9 +16,9 @@ struct _LMemStream
   L_MEM_STREAM_INSTANCE_HEADER;
 
   gpointer buffer;
-  gsize buffer_size;
-  gsize data_size;
-  gsize pos;
+  gint64 buffer_size;
+  gint64 data_size;
+  gint64 pos;
 };
 
 
@@ -33,9 +33,9 @@ struct _LMemStreamClass
 
 
 LStream *l_mem_stream_new ( const gchar *content,
-                            gsize size );
+                            gint64 size );
 gpointer l_mem_stream_get_buffer ( LMemStream *stream,
-                                   gsize *len );
+                                   gint64 *len );
 
 
 

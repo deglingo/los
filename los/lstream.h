@@ -38,19 +38,28 @@ struct _LStreamClass
 
   void (* write) ( LStream *stream,
                    gpointer buffer,
-                   gsize size,
+                   gint64 size,
                    GError **error );
+
+  gint64 (* read) ( LStream *stream,
+                    gpointer buffer,
+                    gint64 size,
+                    GError **error );
 };
 
 
 
 gboolean l_stream_write ( LStream *stream,
                           gpointer buffer,
-                          gsize size,
+                          gint64 size,
                           GError **error );
 gboolean l_stream_write_u8 ( LStream *stream,
                              guint8 value,
                              GError **error );
+gint64 l_stream_read ( LStream *stream,
+                       gpointer buf,
+                       gint64 size,
+                       GError **error );
 void l_stream_seek ( LStream *stream,
                      glong offset,
                      LStreamSeekType whence );

@@ -1,18 +1,25 @@
 /* -*- c -*- */
 
-header {
+header
+{
 ##include "los/lmemstream.h"
 ##include <string.h>
 }
 
+#define CHECK_BUF(content) do {                                         \
+    gint64 cont_len = strlen(content);                                  \
+    gint64 len;                                                         \
+    gpointer buf;                                                       \
+    buf = l_mem_stream_get_buffer(L_MEM_STREAM(data->stream), &len);    \
+    PIF_CHECK(cont_len == len);                                         \
+    PIF_CHECK(len == 0 || buf);                                         \
+    if (len)                                                            \
+      PIF_CHECK(!strncmp(buf, (content), len));                         \
+  } while (0)
+
 data
 { 
   LStream *stream;
-}
-
-setup
-{
-  data->stream = l_mem_stream_new("", 0);
 }
 
 teardown
@@ -20,39 +27,83 @@ teardown
   L_OBJECT_CLEAR(data->stream);
 }
 
-test
-{ 
-  PIF_CHECK(data->stream);
-  l_stream_seek(data->stream, 0, L_STREAM_SEEK_SET);
+unit /* new */
+{
+  test
+    {
+      PIF_CHECK((data->stream = l_mem_stream_new("", 0)));
+      CHECK_BUF("");
+    }
+
+  test
+    {
+      PIF_CHECK((data->stream = l_mem_stream_new("ABCDEFGH", -1)));
+      CHECK_BUF("ABCDEFGH");
+    }
+
+  test
+    {
+      PIF_CHECK((data->stream = l_mem_stream_new("ABCDEFGH", 4)));
+      CHECK_BUF("ABCD");
+    }
 }
 
-#define CHECK_BUF(content) do {                                         \
-    gsize cont_len = strlen(content);                                   \
-    gsize len;                                                          \
-    gpointer buf;                                                       \
-    buf = l_mem_stream_get_buffer(L_MEM_STREAM(data->stream), &len);    \
-    PIF_CHECK(cont_len == len);                                         \
-    PIF_CHECK(len == 0 || buf);                                         \
-    PIF_CHECK(!strncmp(buf, (content), len));                           \
-  } while (0)
-
-test /* empty buffer */
+unit /* write */
 {
-  CHECK_BUF("");
+  setup
+    {
+      data->stream = l_mem_stream_new("", 0);
+    }
+
+  test
+    { 
+      PIF_CHECK(data->stream);
+      /* [fixme] */
+      l_stream_seek(data->stream, 0, L_STREAM_SEEK_SET);
+    }
+
+  test /* empty buffer */
+    {
+      CHECK_BUF("");
+    }
+
+  test /* write */
+    {
+      GError *err = NULL;
+      PIF_CHECK(l_stream_write(data->stream, "abcd", 4, &err));
+      CHECK_BUF("abcd");
+      PIF_CHECK(l_stream_write(data->stream, "efgh", 4, &err));
+      CHECK_BUF("abcdefgh");
+    }
+
+  test /* write types */
+    {
+      GError *err = NULL;
+      PIF_CHECK(l_stream_write_u8(data->stream, 'A', &err));
+      CHECK_BUF("A");
+    }
 }
 
-test /* write */
+unit /* read */
 {
-  GError *err = NULL;
-  PIF_CHECK(l_stream_write(data->stream, "abcd", 4, &err));
-  CHECK_BUF("abcd");
-  PIF_CHECK(l_stream_write(data->stream, "efgh", 4, &err));
-  CHECK_BUF("abcdefgh");
-}
+  setup
+    {
+      data->stream = l_mem_stream_new("ABCDEFGH", 8);
+    }
 
-test /* write types */
-{
-  GError *err = NULL;
-  PIF_CHECK(l_stream_write_u8(data->stream, 'A', &err));
-  CHECK_BUF("A");
+  test
+    { 
+      PIF_CHECK(data->stream);
+      CHECK_BUF("ABCDEFGH");
+    }
+
+  test /* read */
+    {
+      gchar buf[6] = { 0, };
+      GError *err = NULL;
+      PIF_CHECK(l_stream_read(data->stream, buf, 2, &err) == 2);
+      PIF_CHECK(!strncmp(buf, "AB", 2));
+      PIF_CHECK(l_stream_read(data->stream, buf, 6, &err) == 6);
+      PIF_CHECK(!strncmp(buf, "CDEFGH", 6));
+    }
 }

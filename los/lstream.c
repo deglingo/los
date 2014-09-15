@@ -11,7 +11,7 @@
  */
 gboolean l_stream_write ( LStream *stream,
                           gpointer buffer,
-                          gsize size,
+                          gint64 size,
                           GError **error )
 {
   GError *tmperr = NULL;
@@ -34,6 +34,28 @@ gboolean l_stream_write_u8 ( LStream *stream,
                              GError **error )
 {
   return l_stream_write(stream, &value, sizeof(value), error);
+}
+
+
+
+/* l_stream_read:
+ */
+gint64 l_stream_read ( LStream *stream,
+                       gpointer buffer,
+                       gint64 size,
+                       GError **error )
+{
+  GError *tmperr = NULL;
+  gint64 r;
+  ASSERT(L_STREAM_GET_CLASS(stream)->read);
+  r = L_STREAM_GET_CLASS(stream)->read(stream, buffer, size, &tmperr);
+  if (size < 0) {
+    ASSERT(tmperr);
+    g_propagate_error(error, tmperr);
+  } else {
+    ASSERT(!tmperr);
+  }
+  return r;
 }
 
 
