@@ -9,6 +9,18 @@
 
 
 
+/* LStreamSeekType:
+ */
+typedef enum _LStreamSeekType
+  {
+    L_STREAM_SEEK_SET,
+    L_STREAM_SEEK_CUR,
+    L_STREAM_SEEK_END,
+  }
+  LStreamSeekType;
+
+
+
 /* LStream:
  */
 struct _LStream
@@ -24,6 +36,13 @@ struct _LStreamClass
 {
   L_STREAM_CLASS_HEADER;
 };
+
+
+
+void l_stream_seek ( LStream *stream,
+                     glong offset,
+                     LStreamSeekType whence );
+
 
 
 

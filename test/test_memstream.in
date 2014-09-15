@@ -22,4 +22,5 @@ teardown
 test
 { 
   PIF_CHECK(data->stream);
+  l_stream_seek(data->stream, 0, L_STREAM_SEEK_SET);
 }
