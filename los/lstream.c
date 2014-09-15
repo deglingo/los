@@ -1,6 +1,7 @@
 /* lstream.c -
  */
 
+#include "los/private.h"
 #include "los/lstream.h"
 #include "los/lstream.inl"
 
@@ -13,8 +14,15 @@ gboolean l_stream_write ( LStream *stream,
                           gsize size,
                           GError **error )
 {
-  /* [TODO] */
-  return TRUE;
+  GError *tmperr = NULL;
+  ASSERT(L_STREAM_GET_CLASS(stream)->write);
+  L_STREAM_GET_CLASS(stream)->write(stream, buffer, size, &tmperr);
+  if (tmperr) {
+    g_propagate_error(error, tmperr);
+    return FALSE;
+  } else {
+    return TRUE;
+  }
 }
 
 

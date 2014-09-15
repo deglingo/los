@@ -35,6 +35,11 @@ struct _LStream
 struct _LStreamClass
 {
   L_STREAM_CLASS_HEADER;
+
+  void (* write) ( LStream *stream,
+                   gpointer buffer,
+                   gsize size,
+                   GError **error );
 };
 
 

@@ -14,6 +14,11 @@
 struct _LMemStream
 {
   L_MEM_STREAM_INSTANCE_HEADER;
+
+  gpointer buffer;
+  gsize buffer_size;
+  gsize data_size;
+  gsize pos;
 };
 
 

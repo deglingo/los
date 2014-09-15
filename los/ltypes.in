@@ -5,7 +5,9 @@ namespace L
   class Int;
   class String;
   class Stream;
-  class MemStream : Stream;
+  class MemStream : Stream {
+    void class_init ();
+  };
   class File : Stream;
   class Packer;
   class Unpacker;
