@@ -25,6 +25,15 @@ test
   l_stream_seek(data->stream, 0, L_STREAM_SEEK_SET);
 }
 
+test /* empty buffer */
+{
+  gchar *buf;
+  gsize len;
+  buf = l_mem_stream_get_buffer(L_MEM_STREAM(data->stream), &len);
+  PIF_CHECK(buf || !buf); /* [FIXME] !? */
+  PIF_CHECK(len == 0);
+}
+
 test /* write */
 {
   GError *err = NULL;

@@ -29,6 +29,8 @@ struct _LMemStreamClass
 
 LStream *l_mem_stream_new ( const gchar *content,
                             gsize size );
+gpointer l_mem_stream_get_buffer ( LMemStream *stream,
+                                   gsize *len );
 
 
 
