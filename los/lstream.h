@@ -48,6 +48,9 @@ gboolean l_stream_write ( LStream *stream,
                           gpointer buffer,
                           gsize size,
                           GError **error );
+gboolean l_stream_write_u8 ( LStream *stream,
+                             guint8 value,
+                             GError **error );
 void l_stream_seek ( LStream *stream,
                      glong offset,
                      LStreamSeekType whence );

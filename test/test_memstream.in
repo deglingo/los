@@ -49,3 +49,10 @@ test /* write */
   PIF_CHECK(l_stream_write(data->stream, "efgh", 4, &err));
   CHECK_BUF("abcdefgh");
 }
+
+test /* write types */
+{
+  GError *err = NULL;
+  PIF_CHECK(l_stream_write_u8(data->stream, 'A', &err));
+  CHECK_BUF("A");
+}

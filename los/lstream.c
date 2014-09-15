@@ -27,6 +27,17 @@ gboolean l_stream_write ( LStream *stream,
 
 
 
+/* l_stream_write_u8:
+ */
+gboolean l_stream_write_u8 ( LStream *stream,
+                             guint8 value,
+                             GError **error )
+{
+  return l_stream_write(stream, &value, sizeof(value), error);
+}
+
+
+
 /* l_stream_seek:
  */
 void l_stream_seek ( LStream *stream,
