@@ -106,4 +106,12 @@ unit /* read */
       PIF_CHECK(l_stream_read(data->stream, buf, 6, &err) == 6);
       PIF_CHECK(!strncmp(buf, "CDEFGH", 6));
     }
+
+  test /* read_u8 */
+    {
+      GError *err = NULL;
+      guint8 val;
+      PIF_CHECK(l_stream_read_u8(data->stream, &val, &err) == 1);
+      PIF_CHECK(val == 'A');
+    }
 }

@@ -60,6 +60,9 @@ gint64 l_stream_read ( LStream *stream,
                        gpointer buf,
                        gint64 size,
                        GError **error );
+gint64 l_stream_read_u8 ( LStream *stream,
+                          guint8 *value,
+                          GError **error );
 void l_stream_seek ( LStream *stream,
                      glong offset,
                      LStreamSeekType whence );

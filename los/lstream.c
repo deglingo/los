@@ -60,6 +60,17 @@ gint64 l_stream_read ( LStream *stream,
 
 
 
+/* l_stream_read_u8:
+ */
+gint64 l_stream_read_u8 ( LStream *stream,
+                          guint8 *value,
+                          GError **error )
+{
+  return l_stream_read(stream, value, sizeof(guint8), error);
+}
+
+
+
 /* l_stream_seek:
  */
 void l_stream_seek ( LStream *stream,
