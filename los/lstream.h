@@ -45,6 +45,10 @@ struct _LStreamClass
                     gpointer buffer,
                     gint64 size,
                     GError **error );
+
+  void (* seek) ( LStream *stream,
+                  gint64 offset,
+                  LStreamSeekType whence );
 };
 
 
@@ -64,7 +68,7 @@ gint64 l_stream_read_u8 ( LStream *stream,
                           guint8 *value,
                           GError **error );
 void l_stream_seek ( LStream *stream,
-                     glong offset,
+                     gint64 offset,
                      LStreamSeekType whence );
 
 

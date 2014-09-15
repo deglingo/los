@@ -19,6 +19,9 @@ static gint64 _read ( LStream *stream,
                       gpointer buffer,
                       gint64 size,
                       GError **error );
+static void _seek ( LStream *stream,
+                    gint64 offset,
+                    LStreamSeekType whence );
 
 
 
@@ -42,6 +45,7 @@ static void l_mem_stream_class_init ( LObjectClass *cls )
 {
   ((LStreamClass *) cls)->write = _write;
   ((LStreamClass *) cls)->read = _read;
+  ((LStreamClass *) cls)->seek = _seek;
 }
 
 
@@ -117,5 +121,26 @@ static gint64 _read ( LStream *stream,
   memcpy(buffer, m->buffer + m->pos, size);
   m->pos = pos2;
   return size;
+#undef m
+}
+
+
+
+/* _seek:
+ */
+static void _seek ( LStream *stream,
+                    gint64 offset,
+                    LStreamSeekType whence )
+{
+#define m (L_MEM_STREAM(stream))
+  switch (whence)
+    {
+    case L_STREAM_SEEK_SET:
+      ASSERT(offset >= 0 && offset <= m->data_size); /* [fixme] clamp ? */
+      m->pos = offset;
+      break;
+    default:
+      CL_ERROR("[TODO] seek(whence=%d)", whence);
+    }
 #undef m
 }

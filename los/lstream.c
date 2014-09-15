@@ -74,8 +74,9 @@ gint64 l_stream_read_u8 ( LStream *stream,
 /* l_stream_seek:
  */
 void l_stream_seek ( LStream *stream,
-                     glong offset,
+                     gint64 offset,
                      LStreamSeekType whence )
 {
-  /* [TODO] */
+  ASSERT(L_STREAM_GET_CLASS(stream)->seek);
+  L_STREAM_GET_CLASS(stream)->seek(stream, offset, whence);
 }
