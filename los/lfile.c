@@ -13,6 +13,11 @@ static LStreamStatus _write ( LStream *stream,
                               gint64 size,
                               gint64 *bytes_written,
                               GError **error );
+static LStreamStatus _read ( LStream *stream,
+                             gpointer buffer,
+                             gint64 size,
+                             gint64 *bytes_read,
+                             GError **error );
 static void _close ( LStream *stream );
 
 
@@ -22,6 +27,7 @@ static void _close ( LStream *stream );
 static void l_file_class_init ( LObjectClass *cls )
 {
   ((LStreamClass *) cls)->write = _write;
+  ((LStreamClass *) cls)->read = _read;
   ((LStreamClass *) cls)->close = _close;
 }
 
@@ -52,6 +58,22 @@ static LStreamStatus _write ( LStream *stream,
   if (write(L_FILE(stream)->fd, buffer, size) != size)
     CL_ERROR("[TODO] write error");
   *bytes_written = size;
+  return L_STREAM_STATUS_OK;
+}
+
+
+
+/* _read:
+ */
+static LStreamStatus _read ( LStream *stream,
+                             gpointer buffer,
+                             gint64 size,
+                             gint64 *bytes_read,
+                             GError **error )
+{
+  if (read(L_FILE(stream)->fd, buffer, size) != size)
+    CL_ERROR("[TODO] read error");
+  *bytes_read = size;
   return L_STREAM_STATUS_OK;
 }
 

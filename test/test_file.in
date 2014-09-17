@@ -78,3 +78,42 @@ unit /* write */
       CHECK_FILE("ABCDEFGH");
     }    
 }
+
+unit /* write */
+{
+  data { gint fd; }
+
+  setup
+    {
+      FILE *f;
+      if (!(f = fopen(data->tmpfile, "w")))
+        abort(); /* [FIXME] */
+      if (fwrite("IJKLMNOP", 8, 1, f) != 1)
+        abort(); /* [FIXME] */
+      fclose(f);
+      if ((data->fd = open(data->tmpfile, O_RDONLY)) < 0)
+        abort(); /* [FIXME] */
+      if (!(data->stream = l_file_fdopen(data->fd, "r", &err)))
+        abort(); /* [FIXME] */
+    }
+
+  teardown
+    {
+      /* [FIXME] close ? */
+      L_OBJECT_CLEAR(data->stream);
+    }
+
+  test
+    {
+      GError *err = NULL;
+      gint64 w = 0;
+      gchar buf[6] = { 0, };
+      PIF_CHECK(l_stream_read(data->stream, buf, 2, &w, &err) == L_STREAM_STATUS_OK);
+      PIF_CHECK(w == 2);
+      PIF_CHECK(!strncmp(buf, "IJ", 2));
+      /* [fixme] check content ? */
+      PIF_CHECK(l_stream_read(data->stream, buf, 6, &w, &err) == L_STREAM_STATUS_OK);
+      PIF_CHECK(w == 6);
+      PIF_CHECK(!strncmp(buf, "KLMNOP", 2));
+    }    
+}
