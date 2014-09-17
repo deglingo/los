@@ -52,10 +52,11 @@ struct _LStreamClass
                             gint64 *bytes_written,
                             GError **error );
 
-  gint64 (* read) ( LStream *stream,
-                    gpointer buffer,
-                    gint64 size,
-                    GError **error );
+  LStreamStatus (* read) ( LStream *stream,
+                           gpointer buffer,
+                           gint64 size,
+                           gint64 *bytes_read,
+                           GError **error );
 
   void (* seek) ( LStream *stream,
                   gint64 offset,
@@ -69,13 +70,11 @@ LStreamStatus l_stream_write ( LStream *stream,
                                gint64 size,
                                gint64 *bytes_written,
                                GError **error );
-gint64 l_stream_read ( LStream *stream,
-                       gpointer buf,
-                       gint64 size,
-                       GError **error );
-gint64 l_stream_read_u8 ( LStream *stream,
-                          guint8 *value,
-                          GError **error );
+LStreamStatus l_stream_read ( LStream *stream,
+                              gpointer buffer,
+                              gint64 size,
+                              gint64 *bytes_read,
+                              GError **error );
 void l_stream_seek ( LStream *stream,
                      gint64 offset,
                      LStreamSeekType whence );

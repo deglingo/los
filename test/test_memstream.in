@@ -90,18 +90,13 @@ unit /* read */
     {
       gchar buf[6] = { 0, };
       GError *err = NULL;
-      PIF_CHECK(l_stream_read(data->stream, buf, 2, &err) == 2);
+      gint64 w = 0;
+      PIF_CHECK(l_stream_read(data->stream, buf, 2, &w, &err) == L_STREAM_STATUS_OK);
+      PIF_CHECK(w == 2);
       PIF_CHECK(!strncmp(buf, "AB", 2));
-      PIF_CHECK(l_stream_read(data->stream, buf, 6, &err) == 6);
+      PIF_CHECK(l_stream_read(data->stream, buf, 6, &w, &err) == L_STREAM_STATUS_OK);
+      PIF_CHECK(w == 6);
       PIF_CHECK(!strncmp(buf, "CDEFGH", 6));
-    }
-
-  test /* read_u8 */
-    {
-      GError *err = NULL;
-      guint8 val;
-      PIF_CHECK(l_stream_read_u8(data->stream, &val, &err) == 1);
-      PIF_CHECK(val == 'A');
     }
 }
 

@@ -16,10 +16,11 @@ static LStreamStatus _write ( LStream *stream,
                               gint64 size,
                               gint64 *bytes_written,
                               GError **error );
-static gint64 _read ( LStream *stream,
-                      gpointer buffer,
-                      gint64 size,
-                      GError **error );
+static LStreamStatus _read ( LStream *stream,
+                             gpointer buffer,
+                             gint64 size,
+                             gint64 *bytes_read,
+                             GError **error );
 static void _seek ( LStream *stream,
                     gint64 offset,
                     LStreamSeekType whence );
@@ -115,17 +116,20 @@ static LStreamStatus _write ( LStream *stream,
 
 /* _read:
  */
-static gint64 _read ( LStream *stream,
-                      gpointer buffer,
-                      gint64 size,
-                      GError **error )
+static LStreamStatus _read ( LStream *stream,
+                             gpointer buffer,
+                             gint64 size,
+                             gint64 *bytes_read,
+                             GError **error )
 {
 #define m (L_MEM_STREAM(stream))
   gint64 pos2 = m->pos + size;
   ASSERT(pos2 <= m->data_size); /* [TODO] */
   memcpy(buffer, m->buffer + m->pos, size);
   m->pos = pos2;
-  return size;
+  if (bytes_read)
+    *bytes_read = size;
+  return L_STREAM_STATUS_OK;
 #undef m
 }
 

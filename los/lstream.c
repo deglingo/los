@@ -23,33 +23,14 @@ LStreamStatus l_stream_write ( LStream *stream,
 
 /* l_stream_read:
  */
-gint64 l_stream_read ( LStream *stream,
-                       gpointer buffer,
-                       gint64 size,
-                       GError **error )
+LStreamStatus l_stream_read ( LStream *stream,
+                              gpointer buffer,
+                              gint64 size,
+                              gint64 *bytes_read,
+                              GError **error )
 {
-  GError *tmperr = NULL;
-  gint64 r;
   ASSERT(L_STREAM_GET_CLASS(stream)->read);
-  r = L_STREAM_GET_CLASS(stream)->read(stream, buffer, size, &tmperr);
-  if (size < 0) {
-    ASSERT(tmperr);
-    g_propagate_error(error, tmperr);
-  } else {
-    ASSERT(!tmperr);
-  }
-  return r;
-}
-
-
-
-/* l_stream_read_u8:
- */
-gint64 l_stream_read_u8 ( LStream *stream,
-                          guint8 *value,
-                          GError **error )
-{
-  return l_stream_read(stream, value, sizeof(guint8), error);
+  return L_STREAM_GET_CLASS(stream)->read(stream, buffer, size, bytes_read, error);
 }
 
 

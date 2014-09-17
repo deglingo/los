@@ -28,8 +28,10 @@ LObject *l_unpacker_get ( LUnpacker *unpacker,
 {
   guint8 t;
   GError *err = NULL;
-  if (!l_stream_read_u8(unpacker->stream, &t, &err))
+  gint64 r;
+  if (l_stream_read(unpacker->stream, &t, sizeof(guint8), &r, &err) != L_STREAM_STATUS_OK)
     CL_ERROR("[TODO] read error");
+  ASSERT(r == sizeof(guint8));
   if (t == 0)
     return L_OBJECT(l_int_new(92));
   else
