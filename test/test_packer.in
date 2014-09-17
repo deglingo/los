@@ -42,30 +42,29 @@ test /* eof */
   PIF_CHECK(err->code == L_PACK_ERROR_EOF);
 }
 
-test
-{
-  GError *err = NULL;
-  LObject *obj = L_OBJECT(l_int_new(92));
-  gboolean r = l_packer_put(data->packer, obj, &err);
-  PIF_CHECK(r);
-  l_object_unref(obj);
-  l_stream_seek(data->stream, 0, L_STREAM_SEEK_SET);
-  obj = l_unpacker_get(data->unpacker, &err);
-  PIF_CHECK(obj);
-  PIF_CHECK(L_IS_INT(obj));
-  PIF_CHECK(L_INT_VALUE(obj) == 92);
-}
+#define TEST_PACK_OBJECT(obj_new, check_val) do {                       \
+    LObject *obj1, *obj2;                                               \
+    GError *err = NULL;                                                 \
+    obj1 = L_OBJECT(obj_new);                                           \
+    guint8 buf;                                                         \
+    /* pack */                                                          \
+    PIF_CHECK(l_packer_put(data->packer, obj1, &err));                  \
+    /* unpack */                                                        \
+    l_stream_seek(data->stream, 0, L_STREAM_SEEK_SET);                  \
+    obj2 = l_unpacker_get(data->unpacker, &err);                        \
+    /* compare the results */                                           \
+    PIF_CHECK(obj2);                                                    \
+    PIF_CHECK(L_OBJECT_GET_CLASS(obj1) == L_OBJECT_GET_CLASS(obj2));    \
+    PIF_CHECK(check_val);                                               \
+    L_OBJECT_CLEAR(obj1);                                               \
+    L_OBJECT_CLEAR(obj2);                                               \
+    /* make sure we didn't leave any data behind */                     \
+    PIF_CHECK(l_stream_read(data->stream, &buf, 1, NULL, NULL)          \
+              == L_STREAM_STATUS_EOF);                                  \
+  } while (0)
 
-test
-{
-  GError *err = NULL;
-  LObject *obj = L_OBJECT(l_string_new("test-string"));
-  gboolean r = l_packer_put(data->packer, obj, &err);
-  PIF_CHECK(r);
-  l_object_unref(obj);
-  l_stream_seek(data->stream, 0, L_STREAM_SEEK_SET);
-  obj = l_unpacker_get(data->unpacker, &err);
-  PIF_CHECK(obj);
-  PIF_CHECK(L_IS_STRING(obj));
-  PIF_CHECK(!strcmp(L_STRING(obj)->str, "test-string"));
-}
+test { TEST_PACK_OBJECT(l_int_new(92),
+                        L_INT_VALUE(obj1) == L_INT_VALUE(obj2)); }
+
+test { TEST_PACK_OBJECT(l_string_new("test-string"),
+                        !strcmp(L_STRING(obj1)->str, L_STRING(obj2)->str)); }
