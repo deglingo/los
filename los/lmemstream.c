@@ -11,10 +11,11 @@
 
 #define DEFAULT_BUFFER_SIZE (1024)
 
-static void _write ( LStream *stream,
-                     gpointer buffer,
-                     gint64 size,
-                     GError **error );
+static LStreamStatus _write ( LStream *stream,
+                              gpointer buffer,
+                              gint64 size,
+                              gint64 *bytes_written,
+                              GError **error );
 static gint64 _read ( LStream *stream,
                       gpointer buffer,
                       gint64 size,
@@ -91,10 +92,11 @@ gpointer l_mem_stream_get_buffer ( LMemStream *stream,
 
 /* _write:
  */
-static void _write ( LStream *stream,
-                     gpointer buffer,
-                     gint64 size,
-                     GError **error )
+static LStreamStatus _write ( LStream *stream,
+                              gpointer buffer,
+                              gint64 size,
+                              gint64 *bytes_written,
+                              GError **error )
 {
 #define m (L_MEM_STREAM(stream))
   gint64 pos2 = m->pos + size;
@@ -103,6 +105,9 @@ static void _write ( LStream *stream,
   memcpy(m->buffer + m->pos, buffer, size);
   m->pos = pos2;
   m->data_size = new_size;
+  if (bytes_written)
+    *bytes_written = size;
+  return L_STREAM_STATUS_OK;
 #undef m
 }
 

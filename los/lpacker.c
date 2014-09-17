@@ -26,7 +26,10 @@ gboolean l_packer_put ( LPacker *packer,
                         LObject *object,
                         GError **error )
 {
-  if (!l_stream_write_u8(packer->stream, (L_IS_INT(object) ? 0 : 1), error))
+  gint64 w;
+  guint8 tp = L_IS_INT(object) ? 0 : 1;
+  if (l_stream_write(packer->stream, &tp, sizeof(guint8), &w, error) != L_STREAM_STATUS_OK)
     CL_ERROR("[TODO] write error");
+  ASSERT(w == sizeof(guint8));
   return TRUE;
 }

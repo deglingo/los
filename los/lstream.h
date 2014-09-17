@@ -9,6 +9,16 @@
 
 
 
+/* LStreamStatus:
+ */
+typedef enum _LStreamStatus
+  {
+    L_STREAM_STATUS_OK,
+  }
+  LStreamStatus;
+
+
+
 /* LStreamSeekType:
  */
 typedef enum _LStreamSeekType
@@ -36,10 +46,11 @@ struct _LStreamClass
 {
   L_STREAM_CLASS_HEADER;
 
-  void (* write) ( LStream *stream,
-                   gpointer buffer,
-                   gint64 size,
-                   GError **error );
+  LStreamStatus (* write) ( LStream *stream,
+                            gpointer buffer,
+                            gint64 size,
+                            gint64 *bytes_written,
+                            GError **error );
 
   gint64 (* read) ( LStream *stream,
                     gpointer buffer,
@@ -53,13 +64,11 @@ struct _LStreamClass
 
 
 
-gboolean l_stream_write ( LStream *stream,
-                          gpointer buffer,
-                          gint64 size,
-                          GError **error );
-gboolean l_stream_write_u8 ( LStream *stream,
-                             guint8 value,
-                             GError **error );
+LStreamStatus l_stream_write ( LStream *stream,
+                               gpointer buffer,
+                               gint64 size,
+                               gint64 *bytes_written,
+                               GError **error );
 gint64 l_stream_read ( LStream *stream,
                        gpointer buf,
                        gint64 size,

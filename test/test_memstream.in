@@ -63,17 +63,13 @@ unit /* write */
   test /* write */
     {
       GError *err = NULL;
-      PIF_CHECK(l_stream_write(data->stream, "abcd", 4, &err));
-      CHECK_BUF("abcd");
-      PIF_CHECK(l_stream_write(data->stream, "efgh", 4, &err));
+      gint64 w = 0;
+      PIF_CHECK(l_stream_write(data->stream, "ab", 2, &w, &err) == L_STREAM_STATUS_OK);
+      PIF_CHECK(w == 2);
+      CHECK_BUF("ab");
+      PIF_CHECK(l_stream_write(data->stream, "cdefgh", 6, &w, &err) == L_STREAM_STATUS_OK);
+      PIF_CHECK(w == 6);
       CHECK_BUF("abcdefgh");
-    }
-
-  test /* write types */
-    {
-      GError *err = NULL;
-      PIF_CHECK(l_stream_write_u8(data->stream, 'A', &err));
-      CHECK_BUF("A");
     }
 }
 
@@ -118,9 +114,9 @@ unit /* seek */
 
   test
     {
-      l_stream_write(data->stream, "abcdefgh", 8, NULL);
+      l_stream_write(data->stream, "abcdefgh", 8, NULL, NULL);
       l_stream_seek(data->stream, 2, L_STREAM_SEEK_SET);
-      l_stream_write(data->stream, "i", 1, NULL);
+      l_stream_write(data->stream, "i", 1, NULL, NULL);
       CHECK_BUF("abidefgh");
     }
 }

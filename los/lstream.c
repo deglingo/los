@@ -9,31 +9,14 @@
 
 /* l_stream_write:
  */
-gboolean l_stream_write ( LStream *stream,
-                          gpointer buffer,
-                          gint64 size,
-                          GError **error )
+LStreamStatus l_stream_write ( LStream *stream,
+                               gpointer buffer,
+                               gint64 size,
+                               gint64 *bytes_written,
+                               GError **error )
 {
-  GError *tmperr = NULL;
   ASSERT(L_STREAM_GET_CLASS(stream)->write);
-  L_STREAM_GET_CLASS(stream)->write(stream, buffer, size, &tmperr);
-  if (tmperr) {
-    g_propagate_error(error, tmperr);
-    return FALSE;
-  } else {
-    return TRUE;
-  }
-}
-
-
-
-/* l_stream_write_u8:
- */
-gboolean l_stream_write_u8 ( LStream *stream,
-                             guint8 value,
-                             GError **error )
-{
-  return l_stream_write(stream, &value, sizeof(value), error);
+  return L_STREAM_GET_CLASS(stream)->write(stream, buffer, size, bytes_written, error);
 }
 
 
