@@ -14,6 +14,7 @@
 typedef enum _LStreamStatus
   {
     L_STREAM_STATUS_OK,
+    L_STREAM_STATUS_EOF,
   }
   LStreamStatus;
 

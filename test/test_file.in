@@ -115,5 +115,7 @@ unit /* write */
       PIF_CHECK(l_stream_read(data->stream, buf, 6, &w, &err) == L_STREAM_STATUS_OK);
       PIF_CHECK(w == 6);
       PIF_CHECK(!strncmp(buf, "KLMNOP", 2));
+      /* eof */
+      PIF_CHECK(l_stream_read(data->stream, buf, 1, &w, &err) == L_STREAM_STATUS_EOF);
     }    
 }

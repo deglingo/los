@@ -71,10 +71,21 @@ static LStreamStatus _read ( LStream *stream,
                              gint64 *bytes_read,
                              GError **error )
 {
-  if (read(L_FILE(stream)->fd, buffer, size) != size)
-    CL_ERROR("[TODO] read error");
-  *bytes_read = size;
-  return L_STREAM_STATUS_OK;
+  gint64 s;
+  if (((s = read(L_FILE(stream)->fd, buffer, size))) > 0)
+    {
+      *bytes_read = s;
+      return L_STREAM_STATUS_OK;
+    }
+  else if (s == 0)
+    {
+      return L_STREAM_STATUS_EOF;
+    }
+  else
+    {
+      CL_ERROR("[TODO] read error: %s", STRERROR);
+      return -1;
+    }
 }
 
 

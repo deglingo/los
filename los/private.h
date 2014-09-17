@@ -5,6 +5,8 @@
 #define _PRIVATE_H_
 
 #include <clog.h>
+#include <string.h>
+#include <errno.h>
 
 
 
@@ -13,6 +15,8 @@
       CL_ERROR("ASSERTION FAILED: `" #expr "'");    \
     }                                               \
   } while (0)
+
+#define STRERROR (strerror(errno))
 
 
 
