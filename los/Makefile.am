@@ -14,6 +14,7 @@ includelos_HEADERS = \
 	lstream.h lstream-def.h \
 	lmemstream.h lmemstream-def.h \
 	lfile.h lfile-def.h \
+	lpackerbase.h \
 	lpacker.h lpacker-def.h \
 	lunpacker.h lunpacker-def.h
 
@@ -24,6 +25,7 @@ liblos_la_SOURCES = \
 	lstream.c \
 	lmemstream.c \
 	lfile.c \
+	lpackerbase.c \
 	lpacker.c \
 	lunpacker.c
 

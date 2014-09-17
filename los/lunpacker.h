@@ -5,6 +5,7 @@
 #define _LUNPACKER_H_
 
 #include "los/lobject.h"
+#include "los/lpackerbase.h"
 #include "los/lstream.h"
 #include "los/lunpacker-def.h"
 

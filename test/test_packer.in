@@ -33,6 +33,15 @@ test
   PIF_CHECK(data->unpacker);
 }
 
+test /* eof */
+{
+  GError *err = NULL;
+  PIF_CHECK(!l_unpacker_get(data->unpacker, &err));
+  PIF_CHECK(err);
+  PIF_CHECK(err->domain == L_PACK_ERROR);
+  PIF_CHECK(err->code == L_PACK_ERROR_EOF);
+}
+
 test
 {
   GError *err = NULL;

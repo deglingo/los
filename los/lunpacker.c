@@ -29,8 +29,17 @@ LObject *l_unpacker_get ( LUnpacker *unpacker,
   guint8 t;
   GError *err = NULL;
   gint64 r;
-  if (l_stream_read(unpacker->stream, &t, sizeof(guint8), &r, &err) != L_STREAM_STATUS_OK)
+  LStreamStatus s;
+  s = l_stream_read(unpacker->stream, &t, sizeof(guint8), &r, &err);
+  switch (s) {
+  case L_STREAM_STATUS_OK:
+    break;
+  case L_STREAM_STATUS_EOF:
+    g_set_error(error, L_PACK_ERROR, L_PACK_ERROR_EOF, "no more object to read");
+    return NULL;
+  default:
     CL_ERROR("[TODO] read error");
+  }
   ASSERT(r == sizeof(guint8));
   if (t == 0)
     return L_OBJECT(l_int_new(92));
