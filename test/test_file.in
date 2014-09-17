@@ -4,6 +4,8 @@ header {
 ##include "los/lfile.h"
 ##include <fcntl.h>
 ##include <unistd.h>
+##include <string.h>
+##include <sys/stat.h>
 }
 
 data
@@ -26,7 +28,26 @@ teardown
   unlink(data->tmpfile);
 }
 
-unit
+/* [TODO] test_new */
+
+#define CHECK_FILE(content) do {                    \
+    struct stat st;                                 \
+    gint64 cont_len = strlen(content);              \
+    gchar *buf;                                     \
+    FILE *f;                                        \
+    if (stat(data->tmpfile, &st) != 0)              \
+      abort(); /* [FIXME] */                        \
+    PIF_CHECK(st.st_size == cont_len);              \
+    if (!(f = fopen(data->tmpfile, "r")))           \
+      abort(); /* [FIXME] */                        \
+    buf = malloc(cont_len);                         \
+    if (fread(buf, cont_len, 1, f) != 1)            \
+      abort(); /* [FIXME] */                        \
+    fclose(f);                                      \
+    PIF_CHECK(!strncmp((content), buf, cont_len));  \
+  } while (0)
+
+unit /* write */
 {
   data { gint fd; }
 
@@ -46,6 +67,14 @@ unit
 
   test
     {
-      PIF_CHECK(data->stream);
+      GError *err = NULL;
+      gint64 w = 0;
+      PIF_CHECK(l_stream_write(data->stream, "AB", 2, &w, &err) == L_STREAM_STATUS_OK);
+      PIF_CHECK(w == 2);
+      /* [fixme] check content ? */
+      PIF_CHECK(l_stream_write(data->stream, "CDEFGH", 6, &w, &err) == L_STREAM_STATUS_OK);
+      PIF_CHECK(w == 6);
+      l_stream_close(data->stream);
+      CHECK_FILE("ABCDEFGH");
     }    
 }

@@ -48,6 +48,8 @@ unit /* new */
     }
 }
 
+/* [TODO] test l_stream_close() */
+
 unit /* write */
 {
   setup

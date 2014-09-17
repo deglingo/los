@@ -8,7 +8,9 @@ namespace L
   class MemStream : Stream {
     void class_init ();
   };
-  class File : Stream;
+  class File : Stream {
+    void class_init ();
+  };
   class Packer;
   class Unpacker;
 }

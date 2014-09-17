@@ -61,6 +61,8 @@ struct _LStreamClass
   void (* seek) ( LStream *stream,
                   gint64 offset,
                   LStreamSeekType whence );
+
+  void (* close) ( LStream *stream );
 };
 
 
@@ -78,6 +80,7 @@ LStreamStatus l_stream_read ( LStream *stream,
 void l_stream_seek ( LStream *stream,
                      gint64 offset,
                      LStreamSeekType whence );
+void l_stream_close ( LStream *stream );
 
 
 

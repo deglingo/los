@@ -44,3 +44,13 @@ void l_stream_seek ( LStream *stream,
   ASSERT(L_STREAM_GET_CLASS(stream)->seek);
   L_STREAM_GET_CLASS(stream)->seek(stream, offset, whence);
 }
+
+
+
+/* l_stream_close:
+ */
+void l_stream_close ( LStream *stream )
+{
+  ASSERT(L_STREAM_GET_CLASS(stream)->close);
+  L_STREAM_GET_CLASS(stream)->close(stream);
+}
