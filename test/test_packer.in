@@ -63,7 +63,7 @@ test /* eof */
               == L_STREAM_STATUS_EOF);                                  \
   } while (0)
 
-test { TEST_PACK_OBJECT(l_int_new(92),
+test { TEST_PACK_OBJECT(l_int_new(91),
                         L_INT_VALUE(obj1) == L_INT_VALUE(obj2)); }
 
 test { TEST_PACK_OBJECT(l_string_new("test-string"),

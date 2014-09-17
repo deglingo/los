@@ -21,6 +21,19 @@ LUnpacker *l_unpacker_new ( LStream *stream )
 
 
 
+LObject *_l_unpacker_get_int ( LUnpacker *unpacker,
+                              GError **error )
+{
+  gint val;
+  gint64 w;
+  if (l_stream_read(unpacker->stream, &val, sizeof(gint), &w, error) != L_STREAM_STATUS_OK)
+    return NULL;
+  ASSERT(w == sizeof(gint));
+  return L_OBJECT(l_int_new(GINT_FROM_BE(val)));
+}
+
+
+
 /* l_unpacker_get:
  */
 LObject *l_unpacker_get ( LUnpacker *unpacker,
@@ -30,6 +43,7 @@ LObject *l_unpacker_get ( LUnpacker *unpacker,
   GError *err = NULL;
   gint64 r;
   LStreamStatus s;
+  /* read tp */
   s = l_stream_read(unpacker->stream, &t, sizeof(guint8), &r, &err);
   switch (s) {
   case L_STREAM_STATUS_OK:
@@ -42,7 +56,7 @@ LObject *l_unpacker_get ( LUnpacker *unpacker,
   }
   ASSERT(r == sizeof(guint8));
   if (t == 0)
-    return L_OBJECT(l_int_new(92));
+    return _l_unpacker_get_int(unpacker, error);
   else
     return L_OBJECT(l_string_new("test-string"));
 }
