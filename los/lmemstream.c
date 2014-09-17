@@ -123,8 +123,14 @@ static LStreamStatus _read ( LStream *stream,
                              GError **error )
 {
 #define m (L_MEM_STREAM(stream))
-  gint64 pos2 = m->pos + size;
-  ASSERT(pos2 <= m->data_size); /* [TODO] */
+  gint64 pos2;
+  if ((pos2 = m->pos + size) > m->data_size) {
+    /* eof reached */
+    if ((size = m->data_size - m->pos) == 0)
+      return L_STREAM_STATUS_EOF;
+    ASSERT(size > 0);
+    pos2 = m->pos + size;
+  }
   memcpy(buffer, m->buffer + m->pos, size);
   m->pos = pos2;
   if (bytes_read)
