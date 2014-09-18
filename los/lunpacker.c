@@ -34,6 +34,36 @@ LObject *_l_unpacker_get_int ( LUnpacker *unpacker,
 
 
 
+LObject *_l_unpacker_get_string ( LUnpacker *unpacker,
+                                  GError **error )
+{
+  guint32 nlen, len;
+  gint64 w;
+  gchar *str;
+  LString *lstr;
+  /* read len */
+  if (l_stream_read(unpacker->stream, &nlen, sizeof(nlen), &w, error) != L_STREAM_STATUS_OK)
+    return NULL;
+  ASSERT(w == sizeof(nlen));
+  len = GUINT32_FROM_BE(nlen);
+  /* read string */
+  str = g_malloc(len+1);
+  if (l_stream_read(unpacker->stream, str, len, &w, error) != L_STREAM_STATUS_OK) {
+    g_free(str);
+    return NULL;
+  }
+  ASSERT(w == len);
+  str[len] = 0;
+  /* create the LString */
+  /* [FIXME] we should have a way to give str without copying it */
+  lstr = l_string_new(str);
+  g_free(str);
+  /* ok */
+  return L_OBJECT(lstr);
+}
+
+
+
 /* l_unpacker_get:
  */
 LObject *l_unpacker_get ( LUnpacker *unpacker,
@@ -55,8 +85,12 @@ LObject *l_unpacker_get ( LUnpacker *unpacker,
     CL_ERROR("[TODO] read error");
   }
   ASSERT(r == sizeof(guint8));
-  if (t == 0)
+  if (t == 0) { /* [FIXME] */
     return _l_unpacker_get_int(unpacker, error);
-  else
-    return L_OBJECT(l_string_new("test-string"));
+  } else if (t == 1) {
+    return _l_unpacker_get_string(unpacker, error);
+  } else {
+    CL_ERROR("[TODO] tp %d", t);
+    return NULL;
+  }
 }

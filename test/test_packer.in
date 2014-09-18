@@ -55,7 +55,7 @@ test /* eof */
     /* compare the results */                                           \
     PIF_CHECK(obj2);                                                    \
     PIF_CHECK(L_OBJECT_GET_CLASS(obj1) == L_OBJECT_GET_CLASS(obj2));    \
-    PIF_CHECK(check_val);                                               \
+    check_val;                                               \
     L_OBJECT_CLEAR(obj1);                                               \
     L_OBJECT_CLEAR(obj2);                                               \
     /* make sure we didn't leave any data behind */                     \
@@ -64,7 +64,7 @@ test /* eof */
   } while (0)
 
 test { TEST_PACK_OBJECT(l_int_new(91),
-                        L_INT_VALUE(obj1) == L_INT_VALUE(obj2)); }
+                        PIF_CHECK(L_INT_VALUE(obj2) == 91)); }
 
-test { TEST_PACK_OBJECT(l_string_new("test-string"),
-                        !strcmp(L_STRING(obj1)->str, L_STRING(obj2)->str)); }
+test { TEST_PACK_OBJECT(l_string_new("string-test"),
+                        PIF_CHECK_EQ_STR(L_STRING(obj2)->str, "string-test")); }
