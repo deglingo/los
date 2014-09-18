@@ -56,6 +56,23 @@ unit /* Fake */
   }
 }
 
+unit /* destructor */
+{
+  test {
+    LObject *fake = l_object_new(CLASS_FAKE, NULL);
+    PIF_CHECK(fake_dispose_count == 0); /* just in case */
+    PIF_CHECK(fake_finalize_count == 0); /* just in case */
+    /* dispose may be called 'by hand' */
+    l_object_dispose(fake);
+    PIF_CHECK(fake_dispose_count == 1);
+    PIF_CHECK(fake_finalize_count == 0);
+    /* now dropping ref count to 0 should call dispose and finalize */
+    l_object_unref(fake);
+    PIF_CHECK(fake_dispose_count == 2);
+    PIF_CHECK(fake_finalize_count == 1);
+  }
+}
+
 unit /* Fake2 */
 {
   data { LObject *fake; }

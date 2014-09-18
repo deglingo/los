@@ -96,6 +96,7 @@ LObject *l_object_new ( LObjectClass *cls,
                         ... )
 {
   LObject *obj;
+  /* [FIXME] use object allocator */
   obj = g_malloc0(cls->l_class_info.instance_size);
   obj->l_class = l_object_ref(cls);
   obj->ref_count = 1;
@@ -122,6 +123,20 @@ void l_object_unref ( gpointer obj )
 {
   if (g_atomic_int_dec_and_test(&((LObject *)obj)->ref_count))
     {
-      CL_DEBUG("[TODO] destroy object %p", obj);
+      l_object_dispose(obj);
+      if (L_OBJECT_GET_CLASS(obj)->finalize)
+        L_OBJECT_GET_CLASS(obj)->finalize(obj);
+      /* [FIXME] use object allocator */
+      g_free(obj);
     }
+}
+
+
+
+/* l_object_dispose:
+ */
+void l_object_dispose ( LObject *object )
+{
+  if (L_OBJECT_GET_CLASS(object)->dispose)
+    L_OBJECT_GET_CLASS(object)->dispose(object);
 }

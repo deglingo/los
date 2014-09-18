@@ -25,8 +25,24 @@ typedef struct _FakeClass
 }
   FakeClass;
 
+/* some globals to check the callbacks */
+static gint fake_dispose_count = 0;
+static gint fake_finalize_count = 0;
+
+static void _fake_dispose ( LObject *obj )
+{
+  fake_dispose_count++;
+}
+
+static void _fake_finalize ( LObject *obj )
+{
+  fake_finalize_count++;
+}
+
 static void _fake_class_init ( LObjectClass *cls )
 {
+  cls->dispose = _fake_dispose;
+  cls->finalize = _fake_finalize;
   ((FakeClass *) cls)->dummy = 42;
 }
 

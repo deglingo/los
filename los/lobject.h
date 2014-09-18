@@ -62,6 +62,10 @@ struct _LObjectClass
   /* [fixme] */
   LClassInfo l_class_info;
   LObjectClass *l_parent_class;
+
+  /* destructor and finalization */
+  void (* dispose) ( LObject *object );
+  void (* finalize) ( LObject *object );
 };
 
 
@@ -85,6 +89,7 @@ LObject *l_object_new ( LObjectClass *cls,
 
 gpointer l_object_ref ( gpointer obj );
 void l_object_unref ( gpointer obj );
+void l_object_dispose ( LObject *object );
 
 
 
