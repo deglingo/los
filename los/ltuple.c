@@ -7,6 +7,19 @@
 
 
 
+static void _dispose ( LObject *object );
+
+
+
+/* l_tuple_class_init:
+ */
+static void l_tuple_class_init ( LObjectClass *cls )
+{
+  cls->dispose = _dispose;
+}
+
+
+
 /* l_tuple_new:
  */
 LTuple *l_tuple_new ( guint size )
@@ -15,6 +28,25 @@ LTuple *l_tuple_new ( guint size )
   t->_size = size;
   t->_items = g_new0(LObject *, size);
   return t;
+}
+
+
+
+/* _dispose:
+ */
+static void _dispose ( LObject *object )
+{
+  if (L_TUPLE(object)->_items)
+    {
+      guint i;
+      for (i = 0; i < L_TUPLE_SIZE(object); i++)
+        L_OBJECT_CLEAR(L_TUPLE(object)->_items[i]);
+      g_free(L_TUPLE(object)->_items);
+      L_TUPLE(object)->_items = NULL;
+      L_TUPLE(object)->_size = 0;
+    }
+  /* [FIXME] */
+  ((LObjectClass *) parent_class)->dispose(object);
 }
 
 
