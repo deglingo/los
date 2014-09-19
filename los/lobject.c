@@ -10,17 +10,33 @@
 
 
 
+static void _class_init ( LObjectClass *cls );
+static void _dispose ( LObject *object );
+
+
+
 /* l_object_get_class:
  */
 LObjectClass *l_object_get_class ( void )
 {
   static LObjectClass *cls=NULL;
   if (!cls) {
-    cls = g_malloc0(sizeof(LObjectClass));
-    cls->l_class_info.class_size = sizeof(LObjectClass);
-    cls->l_class_info.instance_size = sizeof(LObject);
+    LClassInfo info = { 0, };
+    info.class_size = sizeof(LObjectClass);
+    info.class_init = _class_init;
+    info.instance_size = sizeof(LObject);
+    cls = l_object_class_register("LObject", NULL, &info);
   }
   return cls;
+}
+
+
+
+/* _class_init:
+ */
+static void _class_init ( LObjectClass *cls )
+{
+  cls->dispose = _dispose;
 }
 
 
@@ -35,7 +51,8 @@ LObjectClass *l_object_class_register ( const gchar *name,
   cls = g_malloc0(info->class_size);
   /* raw-copy the base class */
   /* [FIXME] should only the relevant part and avoid the header */
-  memcpy(cls, parent, parent->l_class_info.class_size);
+  if (parent)
+    memcpy(cls, parent, parent->l_class_info.class_size);
   /* copy info */
   cls->l_class_info = *info;
   /* [fixme] */
@@ -137,6 +154,13 @@ void l_object_unref ( gpointer obj )
  */
 void l_object_dispose ( LObject *object )
 {
-  if (L_OBJECT_GET_CLASS(object)->dispose)
-    L_OBJECT_GET_CLASS(object)->dispose(object);
+  L_OBJECT_GET_CLASS(object)->dispose(object);
+}
+
+
+
+/* _dispose:
+ */
+static void _dispose ( LObject *object )
+{
 }

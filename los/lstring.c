@@ -28,6 +28,8 @@ static void _dispose ( LObject *object )
   g_free(L_STRING(object)->str);
   L_STRING(object)->str = NULL;
   L_STRING(object)->len = 0;
+  /* [fixme] */
+  ((LObjectClass *) parent_class)->dispose(object);
 }
 
 
