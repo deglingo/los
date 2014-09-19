@@ -1,0 +1,15 @@
+/* -*- c -*- */
+
+header {
+##include "los/ltuple.h"
+}
+
+data { LTuple *tuple; }
+
+setup { data->tuple = l_tuple_new(4); }
+
+teardown { L_OBJECT_CLEAR(data->tuple); }
+
+test { 
+  PIF_CHECK(data->tuple);
+}

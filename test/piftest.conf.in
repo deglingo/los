@@ -10,6 +10,7 @@ modules =
   test_instance
   test_int
   test_string
+  test_tuple
   test_memstream
   test_file
   test_packer

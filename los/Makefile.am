@@ -18,6 +18,7 @@ includelos_HEADERS = \
 	lobject.h \
 	lint.h lint-def.h \
 	lstring.h lstring-def.h \
+	ltuple.h ltuple-def.h \
 	lstream.h lstream-def.h \
 	lmemstream.h lmemstream-def.h \
 	lfile.h lfile-def.h \
@@ -29,6 +30,7 @@ liblos_la_SOURCES = \
 	lobject.c \
 	lint.c \
 	lstring.c \
+	ltuple.c \
 	lstream.c \
 	lmemstream.c \
 	lfile.c \
@@ -39,6 +41,7 @@ liblos_la_SOURCES = \
 BUILT_SOURCES = \
 	lint-def.h lint.inl \
 	lstring-def.h lstring.inl \
+	ltuple-def.h ltuple.inl \
 	lstream-def.h lstream.inl \
 	lmemstream-def.h lmemstream.inl \
 	lfile-def.h lfile.inl \
@@ -47,6 +50,7 @@ BUILT_SOURCES = \
 
 lint-def.h lint.inl \
 lstring-def.h lstring.inl \
+ltuple-def.h ltuple.inl \
 lstream-def.h lstream.inl \
 lmemstream-def.h lmemstream.inl \
 lfile-def.h lfile.inl \

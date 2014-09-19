@@ -6,6 +6,7 @@ namespace L
   class String {
     void class_init ();
   };
+  class Tuple;
   class Stream;
   class MemStream : Stream {
     void class_init ();
