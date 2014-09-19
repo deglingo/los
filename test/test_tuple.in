@@ -2,14 +2,32 @@
 
 header {
 ##include "los/ltuple.h"
+##include "los/lint.h"
 }
 
 data { LTuple *tuple; }
 
-setup { data->tuple = l_tuple_new(4); }
+setup
+{
+  unsigned int i;
+  data->tuple = l_tuple_new(4);
+  for (i = 0; i < 4; i++)
+    l_tuple_give_item(data->tuple, i, L_OBJECT(l_int_new(i)));
+}
 
 teardown { L_OBJECT_CLEAR(data->tuple); }
 
-test { 
+test
+{ 
   PIF_CHECK(data->tuple);
 }
+
+/* test */
+/* { */
+/*   int i; */
+/*   for (i = 0; i < 4; i++) { */
+/*     LObject *obj = L_TUPLE_GET_ITEM(data->tuple, i); */
+/*     PIF_CHECK(L_IS_INT(obj)); */
+/*     PIF_CHECK(L_INT_GET_VALUE(obj) == i); */
+/*   } */
+/* } */

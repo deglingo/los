@@ -14,3 +14,13 @@ LTuple *l_tuple_new ( guint size )
   LTuple *t = L_TUPLE(l_object_new(L_CLASS_TUPLE, NULL));
   return t;
 }
+
+
+
+/* l_tuple_give_item:
+ */
+void l_tuple_give_item ( LTuple *tuple,
+                         guint index,
+                         LObject *item )
+{
+}

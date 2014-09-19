@@ -28,6 +28,9 @@ struct _LTupleClass
 
 
 LTuple *l_tuple_new ( guint size );
+void l_tuple_give_item ( LTuple *tuple,
+                         guint index,
+                         LObject *item );
 
 
 
