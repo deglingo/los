@@ -535,6 +535,7 @@ class ASTProcessor :
         hfile.sections('fndecls')
         # inl sections
         ifile.sections('header')
+        ifile.sections('defines')
         ifile.sections('fndecls')
         ifile.sections('fndefs')
         ifile.sections('fndefs.class_init')
@@ -545,6 +546,10 @@ class ASTProcessor :
         ifile.sections('fndefs.init.head')
         ifile.sections('fndefs.init.body')
         ifile.sections('fndefs.init.foot')
+        # parent_class macro
+        ifile.write('defines',
+                    '#define parent_class (%sCLASS_%s)\n' %
+                    (n.base.ident.pfx.up, n.base.ident.sfx.up))
         # instance header macro
         hfile.write('defines',
                     '#define %s_INSTANCE_HEADER %s __l_instance_super\n' %
