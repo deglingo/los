@@ -1,5 +1,12 @@
 #
 
+EXTRA_DIST = \
+	ltypes.in \
+	private.h
+
+clean-local:
+	-rm -f *-def.h *.inl *.stamp-h
+
 lib_LTLIBRARIES = liblos.la
 
 liblos_la_CFLAGS = -DCL_LOG_DOMAIN=\"los\" -I$(top_srcdir) -I$(top_builddir) @GLIB_CFLAGS@ @CLOG_CFLAGS@
