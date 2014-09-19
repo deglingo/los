@@ -9,7 +9,7 @@ data { LString *str; }
 
 setup { data->str = l_string_new("test-string"); }
 
-teardown { /* L_OBJECT_CLEAR(data->obj); */ }
+teardown { L_OBJECT_CLEAR(data->str); }
 
 test { 
   PIF_CHECK(data->str);

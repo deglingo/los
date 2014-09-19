@@ -3,7 +3,9 @@
 namespace L
 {
   class Int;
-  class String;
+  class String {
+    void class_init ();
+  };
   class Stream;
   class MemStream : Stream {
     void class_init ();

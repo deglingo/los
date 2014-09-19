@@ -30,7 +30,7 @@ data { LObject *obj; }
 
 setup { data->obj = l_object_new(CLASS_FAKE, 0); }
 
-teardown { /* L_OBJECT_CLEAR(data->obj); */ }
+teardown { L_OBJECT_CLEAR(data->obj); }
 
 test { 
   PIF_CHECK(data->obj);

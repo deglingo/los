@@ -8,15 +8,16 @@ data { LObject *obj; }
 
 setup { data->obj = l_object_new(L_CLASS_OBJECT, 0); }
 
-teardown { /* L_OBJECT_CLEAR(data->obj); */ }
+teardown { L_OBJECT_CLEAR(data->obj); }
 
 test { PIF_CHECK(data->obj); }
+
 test { PIF_CHECK(data->obj->l_class == L_CLASS_OBJECT); }
+
 test /* ref_count */ {
   PIF_CHECK(data->obj->ref_count == 1);
   l_object_ref(data->obj);
   PIF_CHECK(data->obj->ref_count == 2);
   l_object_unref(data->obj);
   PIF_CHECK(data->obj->ref_count == 1);
-  l_object_unref(data->obj);
 }

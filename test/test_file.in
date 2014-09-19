@@ -45,6 +45,7 @@ teardown
       abort(); /* [FIXME] */                        \
     fclose(f);                                      \
     PIF_CHECK(!strncmp((content), buf, cont_len));  \
+    free(buf);                                      \
   } while (0)
 
 unit /* write */

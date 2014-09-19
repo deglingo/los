@@ -44,7 +44,7 @@ unit /* Fake */
 {
   data { LObject *fake; }
   setup { data->fake = l_object_new(CLASS_FAKE, NULL); }
-  teardown { /* l_object_unref(data->fake); */ }
+  teardown { L_OBJECT_CLEAR(data->fake); }
   test {
     PIF_CHECK(data->fake);
     /* l_object_new() must call the instance_init handler */
@@ -60,8 +60,8 @@ unit /* destructor */
 {
   test {
     LObject *fake = l_object_new(CLASS_FAKE, NULL);
-    PIF_CHECK(fake_dispose_count == 0); /* just in case */
-    PIF_CHECK(fake_finalize_count == 0); /* just in case */
+    fake_dispose_count = 0; /* these may be modified by other tests */
+    fake_finalize_count = 0;
     /* dispose may be called 'by hand' */
     l_object_dispose(fake);
     PIF_CHECK(fake_dispose_count == 1);
@@ -77,7 +77,7 @@ unit /* Fake2 */
 {
   data { LObject *fake; }
   setup { data->fake = l_object_new(CLASS_FAKE2, NULL); }
-  teardown { /* l_object_unref(data->fake); */ }
+  teardown { L_OBJECT_CLEAR(data->fake); }
   test {
     PIF_CHECK(data->fake);
     /* l_object_new() must all the instance init handlers in order */

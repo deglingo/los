@@ -40,6 +40,7 @@ test /* eof */
   PIF_CHECK(err);
   PIF_CHECK(err->domain == L_PACK_ERROR);
   PIF_CHECK(err->code == L_PACK_ERROR_EOF);
+  g_clear_error(&err);
 }
 
 #define TEST_PACK_OBJECT(obj_new, check_val) do {                       \
@@ -55,12 +56,13 @@ test /* eof */
     /* compare the results */                                           \
     PIF_CHECK(obj2);                                                    \
     PIF_CHECK(L_OBJECT_GET_CLASS(obj1) == L_OBJECT_GET_CLASS(obj2));    \
-    check_val;                                               \
-    L_OBJECT_CLEAR(obj1);                                               \
-    L_OBJECT_CLEAR(obj2);                                               \
+    check_val;                                                          \
     /* make sure we didn't leave any data behind */                     \
     PIF_CHECK(l_stream_read(data->stream, &buf, 1, NULL, NULL)          \
               == L_STREAM_STATUS_EOF);                                  \
+    /* cleanup */                                                       \
+    l_object_unref(obj1);                                               \
+    l_object_unref(obj2);                                               \
   } while (0)
 
 test { TEST_PACK_OBJECT(l_int_new(91),
