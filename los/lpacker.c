@@ -17,6 +17,19 @@ enum
 
 
 
+static void _dispose ( LObject *object );
+
+
+
+/* l_packer_class_init:
+ */
+static void l_packer_class_init ( LObjectClass *cls )
+{
+  cls->dispose = _dispose;
+}
+
+
+
 /* l_packer_new:
  */
 LPacker *l_packer_new ( LStream *stream )
@@ -25,6 +38,17 @@ LPacker *l_packer_new ( LStream *stream )
   p = L_PACKER(l_object_new(L_CLASS_PACKER, NULL));
   p->stream = l_object_ref(stream);
   return p;
+}
+
+
+
+/* _dispose:
+ */
+static void _dispose ( LObject *object )
+{
+  L_OBJECT_CLEAR(L_PACKER(object)->stream);
+  /* [FIXME] */
+  ((LObjectClass *) parent_class)->dispose(object);
 }
 
 

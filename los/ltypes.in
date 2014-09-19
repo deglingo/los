@@ -13,6 +13,10 @@ namespace L
   class File : Stream {
     void class_init ();
   };
-  class Packer;
-  class Unpacker;
+  class Packer {
+    void class_init ();
+  };
+  class Unpacker {
+    void class_init ();
+  };
 }

@@ -9,6 +9,19 @@
 
 
 
+static void _dispose ( LObject *object );
+
+
+
+/* l_unpacker_class_init:
+ */
+static void l_unpacker_class_init ( LObjectClass *cls )
+{
+  cls->dispose = _dispose;
+}
+
+
+
 /* l_unpacker_new:
  */
 LUnpacker *l_unpacker_new ( LStream *stream )
@@ -17,6 +30,17 @@ LUnpacker *l_unpacker_new ( LStream *stream )
   u = L_UNPACKER(l_object_new(L_CLASS_UNPACKER, NULL));
   u->stream = l_object_ref(stream);
   return u;
+}
+
+
+
+/* _dispose:
+ */
+static void _dispose ( LObject *object )
+{
+  L_OBJECT_CLEAR(L_UNPACKER(object)->stream);
+  /* [FIXME] */
+  ((LObjectClass *) parent_class)->dispose(object);
 }
 
 

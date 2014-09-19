@@ -4,7 +4,7 @@ AM_INIT_AUTOMAKE
 AC_SUBST([pkgconfigdir], ['${libdir}/pkgconfig'])
 AC_SUBST([includelosdir], ['${includedir}/los'])
 
-: ${CFLAGS:=-g -Wall}
+: ${CFLAGS:=-g -O0 -Wall}
 
 AC_PROG_CC
 AM_PROG_CC_C_O

@@ -11,6 +11,7 @@
 
 #define DEFAULT_BUFFER_SIZE (1024)
 
+static void _dispose ( LObject *object );
 static LStreamStatus _write ( LStream *stream,
                               gpointer buffer,
                               gint64 size,
@@ -45,6 +46,7 @@ static inline void _grow_buffer ( LMemStream *m,
  */
 static void l_mem_stream_class_init ( LObjectClass *cls )
 {
+  cls->dispose = _dispose;
   ((LStreamClass *) cls)->write = _write;
   ((LStreamClass *) cls)->read = _read;
   ((LStreamClass *) cls)->seek = _seek;
@@ -74,6 +76,21 @@ LStream *l_mem_stream_new ( const gchar *content,
       ASSERT(size <= 0);
     }
   return L_STREAM(m);
+}
+
+
+
+/* _dispose:
+ */
+static void _dispose ( LObject *object )
+{
+  g_free(L_MEM_STREAM(object)->buffer);
+  L_MEM_STREAM(object)->buffer = NULL;
+  L_MEM_STREAM(object)->buffer_size = 0;
+  L_MEM_STREAM(object)->data_size = 0;
+  L_MEM_STREAM(object)->pos = 0;
+  /* [FIXME] */
+  ((LObjectClass *) parent_class)->dispose(object);
 }
 
 
