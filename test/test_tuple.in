@@ -20,14 +20,15 @@ teardown { L_OBJECT_CLEAR(data->tuple); }
 test
 { 
   PIF_CHECK(data->tuple);
+  PIF_CHECK(L_TUPLE_SIZE(data->tuple) == 4);
 }
 
-/* test */
-/* { */
-/*   int i; */
-/*   for (i = 0; i < 4; i++) { */
-/*     LObject *obj = L_TUPLE_GET_ITEM(data->tuple, i); */
-/*     PIF_CHECK(L_IS_INT(obj)); */
-/*     PIF_CHECK(L_INT_GET_VALUE(obj) == i); */
-/*   } */
-/* } */
+test
+{
+  int i;
+  for (i = 0; i < 4; i++) {
+    LObject *obj = L_TUPLE_ITEM(data->tuple, i);
+    PIF_CHECK(L_IS_INT(obj));
+    PIF_CHECK(L_INT_VALUE(obj) == i);
+  }
+}

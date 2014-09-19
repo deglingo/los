@@ -14,6 +14,9 @@
 struct _LTuple
 {
   L_TUPLE_INSTANCE_HEADER;
+
+  guint _size;
+  LObject **_items;
 };
 
 
@@ -26,6 +29,9 @@ struct _LTupleClass
 };
 
 
+
+#define L_TUPLE_SIZE(t)    (L_TUPLE(t)->_size)
+#define L_TUPLE_ITEM(t, i) (L_TUPLE(t)->_items[(i)])
 
 LTuple *l_tuple_new ( guint size );
 void l_tuple_give_item ( LTuple *tuple,
