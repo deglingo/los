@@ -13,6 +13,8 @@
 
 #include <los/lstring.h>
 
+#include <los/ltuple.h>
+
 #include <los/lstream.h>
 
 #include <los/lmemstream.h>
