@@ -24,10 +24,12 @@ typedef void (* LObjectInstanceInitFunc) ( LObject *obj );
   (l_object_issubclass((LObject *) /* [fixme] */ L_OBJECT_GET_CLASS(obj), \
                        (LObject *) /* [fixme] */ (type)))
 #define L_OBJECT_GET_CLASS_CAST(obj, type, s_type) ((s_type *)(((LObject *)(obj))->l_class))
+#define L_OBJECT_CHECK_CLASS_CAST(cls, type, s_type) ((s_type *)(cls))
 
 /* [FIXME] */
 #define L_OBJECT(obj) (L_OBJECT_CHECK_INSTANCE_CAST((obj), L_CLASS_OBJECT, LObject))
 #define L_OBJECT_GET_CLASS(obj) (L_OBJECT(obj)->l_class)
+#define L_OBJECT_CLASS(cls) (L_OBJECT_CHECK_CLASS_CAST((cls), L_CLASS_OBJECT, LObjectClass))
 
 
 
