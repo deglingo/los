@@ -6,6 +6,7 @@
 #include "los/lpackprivate.h"
 #include "los/lint.h" /* ?? */
 #include "los/lstring.h" /* ?? */
+#include "los/ltuple.h"
 #include "los/lunpacker.inl"
 
 
@@ -89,6 +90,33 @@ LObject *_l_unpacker_get_string ( LUnpacker *unpacker,
 
 
 
+LObject *_l_unpacker_get_tuple ( LUnpacker *unpacker,
+                                 GError **error )
+{
+  guint32 size, nsize, i;
+  gint64 w;
+  LTuple *t;
+  /* get size */
+  if (l_stream_read(unpacker->stream, &nsize, sizeof(nsize), &w, error) != L_STREAM_STATUS_OK)
+    return NULL;
+  size = GUINT32_FROM_BE(nsize);
+  /* create the tuple */
+  t = l_tuple_new(size);
+  /* get the items */
+  for (i = 0; i < size; i++) {
+    LObject *item;
+    if (!(item = l_unpacker_get(unpacker, error))) {
+      l_object_unref(t);
+      return NULL;
+    }
+    l_tuple_give_item(t, i, item);
+  }
+  /* ok */
+  return L_OBJECT(t);
+}
+
+
+
 /* l_unpacker_get:
  */
 LObject *l_unpacker_get ( LUnpacker *unpacker,
@@ -114,6 +142,8 @@ LObject *l_unpacker_get ( LUnpacker *unpacker,
     return _l_unpacker_get_int(unpacker, error);
   } else if (t == PACK_KEY_STRING) {
     return _l_unpacker_get_string(unpacker, error);
+  } else if (t == PACK_KEY_TUPLE) {
+    return _l_unpacker_get_tuple(unpacker, error);
   } else {
     CL_ERROR("[TODO] tp %d", t);
     return NULL;

@@ -1,11 +1,14 @@
 /* -*- c -*- */
 
 header {
-##include "los/lmemstream.h"
 ##include "los/lpacker.h"
 ##include "los/lunpacker.h"
+
+##include "los/lmemstream.h"
 ##include "los/lint.h"
 ##include "los/lstring.h"
+##include "los/ltuple.h"
+
 ##include <string.h>
 }
 
@@ -65,8 +68,56 @@ test /* eof */
     l_object_unref(obj2);                                               \
   } while (0)
 
+#define TEST_PACK_OBJECT_(obj) \
+  test_pack_object(L_OBJECT(obj), data->stream, data->packer, data->unpacker)
+
+header
+{
+  static LObject *test_pack_object ( LObject *obj1,
+                                     LStream *stream,
+                                     LPacker *packer,
+                                     LUnpacker *unpacker )
+  {
+    LObject *obj2 = NULL;
+    GError *err = NULL;
+    /* pack */
+    PIF_CHECK(l_packer_put(packer, obj1, &err));
+    PIF_CHECK(!err);
+    /* reset stream */
+    l_stream_seek(stream, 0, L_STREAM_SEEK_SET);                  \
+    /* unpack */
+    obj2 = l_unpacker_get(unpacker, &err);
+    PIF_CHECK(obj2);
+    PIF_CHECK(!err);
+    /* check obj type */
+    PIF_CHECK(L_OBJECT_GET_CLASS(obj1) == L_OBJECT_GET_CLASS(obj2));
+    /* ok */
+    return obj2;
+  }
+}
+
 test { TEST_PACK_OBJECT(l_int_new(91),
                         PIF_CHECK(L_INT_VALUE(obj2) == 91)); }
 
 test { TEST_PACK_OBJECT(l_string_new("string-test"),
                         PIF_CHECK_EQ_STR(L_STRING(obj2)->str, "string-test")); }
+
+test /* pack_tuple */
+{
+  LTuple *t1, *t2;
+  /* create some tuple */
+  t1 = l_tuple_new(2);
+  l_tuple_give_item(t1, 0, L_OBJECT(l_int_new(2)));
+  l_tuple_give_item(t1, 1, L_OBJECT(l_string_new("tuple-string-test")));
+  /* pack/unpack */
+  t2 = L_TUPLE(TEST_PACK_OBJECT_(t1));
+  L_OBJECT_CLEAR(t1);
+  /* check result */
+  PIF_CHECK(L_TUPLE_SIZE(t2) == 2);
+  PIF_CHECK(L_IS_INT(L_TUPLE_ITEM(t2, 0)));
+  PIF_CHECK(L_INT_VALUE(L_TUPLE_ITEM(t2, 0)) == 2);
+  PIF_CHECK(L_IS_STRING(L_TUPLE_ITEM(t2, 1)));
+  PIF_CHECK_EQ_STR(L_STRING(L_TUPLE_ITEM(t2, 1))->str, "tuple-string-test");
+  /* cleanup */
+  L_OBJECT_CLEAR(t2);
+}

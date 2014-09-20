@@ -11,6 +11,7 @@ enum
   {
     PACK_KEY_INT = 0,
     PACK_KEY_STRING,
+    PACK_KEY_TUPLE,
   };
 
 

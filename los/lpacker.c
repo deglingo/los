@@ -6,6 +6,7 @@
 #include "los/lpackprivate.h"
 #include "los/lint.h" /* ?? */
 #include "los/lstring.h"
+#include "los/ltuple.h"
 #include "los/lpacker.inl"
 
 
@@ -94,6 +95,33 @@ gboolean _l_packer_put_string ( LPacker *packer,
 
 
 
+gboolean _l_packer_put_tuple ( LPacker *packer,
+                               LObject *object,
+                               GError **error )
+{
+  gint64 w;
+  guint8 tp = PACK_KEY_TUPLE;
+  guint32 nsize = GUINT32_TO_BE(L_TUPLE_SIZE(object));
+  guint32 i;
+  /* write type */
+  if (l_stream_write(packer->stream, &tp, sizeof(guint8), &w, error) != L_STREAM_STATUS_OK)
+    return FALSE;
+  ASSERT(w == sizeof(guint8));
+  /* write size */
+  if (l_stream_write(packer->stream, &nsize, sizeof(nsize), &w, error) != L_STREAM_STATUS_OK)
+    return FALSE;
+  ASSERT(w == sizeof(nsize));
+  /* write items */
+  for (i = 0; i < L_TUPLE_SIZE(object); i++) {
+    if (!l_packer_put(packer, L_TUPLE_ITEM(object, i), error))
+      return FALSE;
+  }
+  /* ok */
+  return TRUE;
+}
+
+
+
 /* l_packer_put:
  */
 gboolean l_packer_put ( LPacker *packer,
@@ -104,6 +132,8 @@ gboolean l_packer_put ( LPacker *packer,
     return _l_packer_put_int(packer, object, error);
   } else if (L_IS_STRING(object)) {
     return _l_packer_put_string(packer, object, error);
+  } else if (L_IS_TUPLE(object)) {
+    return _l_packer_put_tuple(packer, object, error);
   } else {
     CL_ERROR("[TODO] pack type...");
     return 0;
