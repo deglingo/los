@@ -1,3 +1,14 @@
 /* -*- c -*- */
+header
+{
+##include "los/private.h"
+##include <glib.h>
+}
 
 test { PIF_CHECK(1); }
+
+/* test /\* just some infos *\/ */
+/* { */
+/*   CL_DEBUG("gc-friendly:   %s", (g_mem_gc_friendly ? "yes" : "no")); */
+/*   CL_DEBUG("system malloc: %s", (g_mem_is_system_malloc() ? "yes" : "no")); */
+/* } */
