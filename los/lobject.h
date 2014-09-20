@@ -63,6 +63,7 @@ struct _LObjectClass
   LObject l_object;
   /* [fixme] */
   LClassInfo l_class_info;
+  gchar *name;
   LObjectClass *l_parent_class;
 
   /* destructor and finalization */
@@ -79,6 +80,7 @@ LObjectClass *l_object_class_register ( const gchar *name,
 gboolean l_object_isclass ( LObject *obj );
 gboolean l_object_issubclass ( LObject *cls1,
                                LObject *cls2 );
+const gchar *l_object_class_name ( LObjectClass *cls );
 LObject *l_object_new ( LObjectClass *cls,
                         const char *first_prop,
                         ... );

@@ -56,6 +56,7 @@ LObjectClass *l_object_class_register ( const gchar *name,
   /* copy info */
   cls->l_class_info = *info;
   /* [fixme] */
+  cls->name = g_strdup(name);
   cls->l_parent_class = parent;
   /* class init handler */
   if (info->class_init)
@@ -87,6 +88,15 @@ gboolean l_object_issubclass ( LObject *cls1,
     cls1 = (LObject *) (((LObjectClass *) cls1)->l_parent_class);
   }
   return FALSE;
+}
+
+
+
+/* l_object_class_name:
+ */
+const gchar *l_object_class_name ( LObjectClass *cls )
+{
+  return cls->name;
 }
 
 
