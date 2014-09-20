@@ -1,1 +1,15 @@
-#
+# [TODO] class ref-counting and finalization...
+{
+   l_class_register
+   Memcheck:Leak
+   ...
+   fun:l_object_class_register
+}
+
+# # [TODO] same thing here
+# {
+#    <insert_a_suppression_name_here>
+#    Memcheck:Leak
+#    ...
+#    fun:l_object_get_class
+# }

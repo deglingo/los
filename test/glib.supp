@@ -1,8 +1,24 @@
-# a weird leak from glib/libc that i can't explain
+# # a weird leak from glib/libc that i can't explain
+# {
+#    <insert_a_suppression_name_here>
+#    Memcheck:Leak
+#    fun:malloc
+#    fun:standard_malloc
+#    obj:/lib/i386-linux-gnu/i686/cmov/libc-2.13.so
+# }
+
+# [FIXME]
 {
    <insert_a_suppression_name_here>
    Memcheck:Leak
-   fun:malloc
-   fun:standard_malloc
-   obj:/lib/i386-linux-gnu/i686/cmov/libc-2.13.so
+   ...
+   fun:g_file_open_tmp
+}
+
+# GQuark
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   ...
+   fun:g_quark_from_string
 }
