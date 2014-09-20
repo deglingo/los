@@ -5,30 +5,45 @@ header {
 ##include "los/lint.h"
 }
 
-data { LTuple *tuple; }
-
-setup
+test /* new_give_item */
 {
+  LTuple *t;
   unsigned int i;
-  data->tuple = l_tuple_new(4);
+  /* create the tuple */
+  t = l_tuple_new(4);
+  PIF_CHECK(t);
+  PIF_CHECK_EQ(L_TUPLE_SIZE(t), 4);
   for (i = 0; i < 4; i++)
-    l_tuple_give_item(data->tuple, i, L_OBJECT(l_int_new(i)));
-}
-
-teardown { L_OBJECT_CLEAR(data->tuple); }
-
-test
-{ 
-  PIF_CHECK(data->tuple);
-  PIF_CHECK(L_TUPLE_SIZE(data->tuple) == 4);
-}
-
-test
-{
-  int i;
+    l_tuple_give_item(t, i, L_OBJECT(l_int_new(i)));
+  /* check */
   for (i = 0; i < 4; i++) {
-    LObject *obj = L_TUPLE_ITEM(data->tuple, i);
+    LObject *obj = L_TUPLE_ITEM(t, i);
     PIF_CHECK(L_IS_INT(obj));
     PIF_CHECK(L_INT_VALUE(obj) == i);
   }
+  /* clean */
+  L_OBJECT_CLEAR(t);
+}
+
+test /* newl_give */
+{
+  LTuple *t;
+  unsigned int i;
+  /* create the tuple */
+  t = l_tuple_newl_give(4,
+                        l_int_new(0),
+                        l_int_new(1),
+                        l_int_new(2),
+                        l_int_new(3),
+                        NULL);
+  PIF_CHECK(t);
+  PIF_CHECK_EQ(L_TUPLE_SIZE(t), 4);
+  /* check */
+  for (i = 0; i < 4; i++) {
+    LObject *obj = L_TUPLE_ITEM(t, i);
+    PIF_CHECK(L_IS_INT(obj));
+    PIF_CHECK(L_INT_VALUE(obj) == i);
+  }
+  /* clean */
+  L_OBJECT_CLEAR(t);
 }

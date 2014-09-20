@@ -34,6 +34,11 @@ struct _LTupleClass
 #define L_TUPLE_ITEM(t, i) (L_TUPLE(t)->_items[(i)])
 
 LTuple *l_tuple_new ( guint size );
+LTuple *l_tuple_newl_give ( guint size,
+                            ... )
+G_GNUC_NULL_TERMINATED;
+LTuple *l_tuple_newv_give ( guint size,
+                            va_list args );
 void l_tuple_give_item ( LTuple *tuple,
                          guint index,
                          LObject *item );

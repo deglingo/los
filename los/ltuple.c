@@ -32,6 +32,39 @@ LTuple *l_tuple_new ( guint size )
 
 
 
+/* l_tuple_newl_give:
+ */
+LTuple *l_tuple_newl_give ( guint size,
+                            ... )
+{
+  LTuple *t;
+  va_list args;
+  va_start(args, size);
+  t = l_tuple_newv_give(size, args);
+  va_end(args);
+  return t;
+}
+
+
+
+/* l_tuple_newv_give:
+ */
+LTuple *l_tuple_newv_give ( guint size,
+                            va_list args )
+{
+  LTuple *t = l_tuple_new(size);
+  guint i;
+  LObject *item;
+  for (i = 0; i < size; i++) {
+    item = va_arg(args, LObject *);
+    ASSERT(item);
+    t->_items[i] = item;
+  }
+  return t;
+}
+
+
+
 /* _dispose:
  */
 static void _dispose ( LObject *object )
