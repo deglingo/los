@@ -3,17 +3,10 @@
 
 #include "los/private.h"
 #include "los/lpacker.h"
+#include "los/lpackprivate.h"
 #include "los/lint.h" /* ?? */
 #include "los/lstring.h"
 #include "los/lpacker.inl"
-
-
-
-enum
-  {
-    PACK_KEY_INT = 0,
-    PACK_KEY_STRING,
-  };
 
 
 

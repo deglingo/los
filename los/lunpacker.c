@@ -3,6 +3,7 @@
 
 #include "los/private.h"
 #include "los/lunpacker.h"
+#include "los/lpackprivate.h"
 #include "los/lint.h" /* ?? */
 #include "los/lstring.h" /* ?? */
 #include "los/lunpacker.inl"
@@ -109,9 +110,9 @@ LObject *l_unpacker_get ( LUnpacker *unpacker,
     CL_ERROR("[TODO] read error");
   }
   ASSERT(r == sizeof(guint8));
-  if (t == 0) { /* [FIXME] */
+  if (t == PACK_KEY_INT) { /* [FIXME] */
     return _l_unpacker_get_int(unpacker, error);
-  } else if (t == 1) {
+  } else if (t == PACK_KEY_STRING) {
     return _l_unpacker_get_string(unpacker, error);
   } else {
     CL_ERROR("[TODO] tp %d", t);
