@@ -17,7 +17,7 @@ modules =
 
 cflags = -DCL_LOG_DOMAIN=\"los-test\" -I@top_srcdir@ -I@top_builddir@ @PIFTEST_CFLAGS@ @GLIB_CFLAGS@ @CLOG_CFLAGS@
 
-ldflags = @top_builddir@/los/liblos.la @top_builddir@/libtest/libltest.la @PIFTEST_LIBS@ @GLIB_LIBS@ @CLOG_LIBS@
+ldflags = @top_builddir@/los/liblos.la @top_builddir@/libltest/libltest.la @PIFTEST_LIBS@ @GLIB_LIBS@ @CLOG_LIBS@
 
 extra_sources =
   lostestfake.c

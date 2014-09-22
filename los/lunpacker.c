@@ -117,6 +117,39 @@ LObject *_l_unpacker_get_tuple ( LUnpacker *unpacker,
 
 
 
+LObject *_l_unpacker_get_object ( LUnpacker *unpacker,
+                                 GError **error )
+{
+  guint32 clsnlen, clslen;
+  gchar *clsname;
+  LObjectClass *cls;
+  LObject *state, *obj;
+  gint64 w;
+  /* get class name */
+  if (l_stream_read(unpacker->stream, &clsnlen, sizeof(clsnlen), &w, error) != L_STREAM_STATUS_OK)
+    return NULL;
+  ASSERT(w == sizeof(clsnlen));
+  clslen = GUINT32_FROM_BE(clsnlen);
+  clsname = g_malloc(clslen + 1);
+  if (l_stream_read(unpacker->stream, clsname, clslen, &w, error) != L_STREAM_STATUS_OK)
+    return NULL;
+  ASSERT(w == clslen);
+  clsname[clslen] = 0;
+  /* get the class */
+  cls = l_object_class_from_name(clsname);
+  ASSERT(cls);
+  g_free(clsname);
+  /* get the state */
+  state = l_unpacker_get(unpacker, error);
+  ASSERT(state);
+  obj = l_object_new_from_state(cls, state);
+  ASSERT(obj);
+  l_object_unref(state);
+  return obj;
+}
+
+
+
 /* l_unpacker_get:
  */
 LObject *l_unpacker_get ( LUnpacker *unpacker,
@@ -144,6 +177,8 @@ LObject *l_unpacker_get ( LUnpacker *unpacker,
     return _l_unpacker_get_string(unpacker, error);
   } else if (t == PACK_KEY_TUPLE) {
     return _l_unpacker_get_tuple(unpacker, error);
+  } else if (t == PACK_KEY_OBJECT) {
+    return _l_unpacker_get_object(unpacker, error);
   } else {
     CL_ERROR("[TODO] tp %d", t);
     return NULL;

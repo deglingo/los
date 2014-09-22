@@ -152,6 +152,17 @@ LObject *l_object_new ( LObjectClass *cls,
 
 
 
+/* l_object_new_from_state:
+ */
+LObject *l_object_new_from_state ( LObjectClass *cls,
+                                   LObject *state )
+{
+  ASSERT(cls->from_state);
+  return cls->from_state(cls, state);
+}
+
+
+
 /* l_object_ref:
  */
 gpointer l_object_ref ( gpointer obj )
@@ -191,4 +202,14 @@ void l_object_dispose ( LObject *object )
  */
 static void _dispose ( LObject *object )
 {
+}
+
+
+
+/* l_object_get_state:
+ */
+LObject *l_object_get_state ( LObject *object )
+{
+  ASSERT(L_OBJECT_GET_CLASS(object)->get_state);
+  return L_OBJECT_GET_CLASS(object)->get_state(object);
 }

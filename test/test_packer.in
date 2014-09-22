@@ -125,7 +125,15 @@ test /* pack_tuple */
 
 test /* pack_packable */
 {
-  LTestPackable *p1;
-  p1 = LTEST_PACKABLE(l_object_new(LTEST_CLASS_PACKABLE, NULL));
+  LTestPackable *p1, *p2;
+  /* create the object */
+  p1 = ltest_packable_new(34, "test-packable");
+  /* pack/unpack */
+  p2 = LTEST_PACKABLE(TEST_PACK_OBJECT_(p1));
   L_OBJECT_CLEAR(p1);
+  /* check result */
+  PIF_CHECK_EQ(p2->a, 34);
+  PIF_CHECK_EQ_STR(p2->b, "test-packable");
+  /* cleanup */
+  L_OBJECT_CLEAR(p2);
 }

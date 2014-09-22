@@ -122,6 +122,37 @@ gboolean _l_packer_put_tuple ( LPacker *packer,
 
 
 
+gboolean _l_packer_put_object ( LPacker *packer,
+                                LObject *object,
+                                GError **error )
+{
+  guint8 tp = PACK_KEY_OBJECT;
+  const gchar *clsname = l_object_class_name(L_OBJECT_GET_CLASS(object));
+  guint32 clslen = strlen(clsname);
+  guint32 clsnlen = GUINT32_TO_BE(clslen);
+  LObject *state = l_object_get_state(object);
+  gint64 w;
+  gboolean r;
+  /* write type */
+  if (l_stream_write(packer->stream, &tp, sizeof(tp), &w, error) != L_STREAM_STATUS_OK)
+    return FALSE;
+  ASSERT(w == sizeof(tp));
+  /* write clslen */
+  if (l_stream_write(packer->stream, &clsnlen, sizeof(clsnlen), &w, error) != L_STREAM_STATUS_OK)
+    return FALSE;
+  ASSERT(w == sizeof(clsnlen));
+  /* write clsname */
+  if (l_stream_write(packer->stream, clsname, clslen, &w, error) != L_STREAM_STATUS_OK)
+    return FALSE;
+  ASSERT(w == clslen);
+  /* write object */
+  r = l_packer_put(packer, state, error);
+  l_object_unref(state);
+  return r;
+}
+
+
+
 /* l_packer_put:
  */
 gboolean l_packer_put ( LPacker *packer,
@@ -135,13 +166,6 @@ gboolean l_packer_put ( LPacker *packer,
   } else if (L_IS_TUPLE(object)) {
     return _l_packer_put_tuple(packer, object, error);
   } else {
-    CL_ERROR("[TODO] pack type...");
-    return 0;
-    /* gint64 w; */
-    /* guint8 tp = 1; */
-    /* if (l_stream_write(packer->stream, &tp, sizeof(guint8), &w, error) != L_STREAM_STATUS_OK) */
-    /*   CL_ERROR("[TODO] write error"); */
-    /* ASSERT(w == sizeof(guint8)); */
-    /* return TRUE; */
+    return _l_packer_put_object(packer, object, error);
   }
 }

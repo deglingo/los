@@ -14,6 +14,9 @@
 struct _LTestPackable
 {
   LTEST_PACKABLE_INSTANCE_HEADER;
+
+  gint a;
+  gchar *b;
 };
 
 
@@ -24,6 +27,11 @@ struct _LTestPackableClass
 {
   LTEST_PACKABLE_CLASS_HEADER;
 };
+
+
+
+LTestPackable *ltest_packable_new ( gint a,
+                                    const gchar *b );
 
 
 

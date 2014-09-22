@@ -69,6 +69,11 @@ struct _LObjectClass
   /* destructor and finalization */
   void (* dispose) ( LObject *object );
   void (* finalize) ( LObject *object );
+
+  /* serialization */
+  LObject * (* get_state) ( LObject *object );
+  LObject * (* from_state) ( LObjectClass *cls,
+                             LObject *state );
 };
 
 
@@ -85,6 +90,8 @@ LObjectClass *l_object_class_from_name ( const gchar *name );
 LObject *l_object_new ( LObjectClass *cls,
                         const char *first_prop,
                         ... );
+LObject *l_object_new_from_state ( LObjectClass *cls,
+                                   LObject *state );
 /* ref counting */
 #define L_OBJECT_CLEAR(ptr) do {                \
     gpointer __l_object_clear_tmp = (ptr);      \
@@ -95,6 +102,7 @@ LObject *l_object_new ( LObjectClass *cls,
 gpointer l_object_ref ( gpointer obj );
 void l_object_unref ( gpointer obj );
 void l_object_dispose ( LObject *object );
+LObject *l_object_get_state ( LObject *object );
 
 
 
