@@ -19,6 +19,9 @@ cflags = -DCL_LOG_DOMAIN=\"los-test\" -I@top_srcdir@ -I@top_builddir@ @PIFTEST_C
 
 ldflags = @top_builddir@/los/liblos.la @PIFTEST_LIBS@ @GLIB_LIBS@ @CLOG_LIBS@
 
+extra_sources =
+  lostestfake.c
+
 valgrind_supp_files =
   @srcdir@/glib.supp
   @srcdir@/los.supp

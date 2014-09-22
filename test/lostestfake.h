@@ -4,6 +4,8 @@
 #ifndef _LOSTESTFAKE_H_
 #define _LOSTESTFAKE_H_
 
+#include "los/lobject.h"
+
 #define CLASS_FAKE (fake_get_class())
 #define CLASS_FAKE2 (fake2_get_class())
 
@@ -26,44 +28,10 @@ typedef struct _FakeClass
   FakeClass;
 
 /* some globals to check the callbacks */
-static gint fake_dispose_count = 0;
-static gint fake_finalize_count = 0;
+extern gint fake_dispose_count;
+extern gint fake_finalize_count;
 
-static void _fake_dispose ( LObject *obj )
-{
-  fake_dispose_count++;
-}
-
-static void _fake_finalize ( LObject *obj )
-{
-  fake_finalize_count++;
-}
-
-static void _fake_class_init ( LObjectClass *cls )
-{
-  cls->dispose = _fake_dispose;
-  cls->finalize = _fake_finalize;
-  ((FakeClass *) cls)->dummy = 42;
-}
-
-static void _fake_init ( LObject *obj )
-{
-  ((Fake *) obj)->instval = 3;
-}
-
-static LObjectClass *fake_get_class ( void )
-{
-  static LObjectClass *cls = NULL;
-  if (!cls) {
-    LClassInfo info = { 0, };
-    info.class_size = sizeof(FakeClass);
-    info.class_init = _fake_class_init;
-    info.instance_size = sizeof(Fake);
-    info.init = _fake_init;
-    cls = l_object_class_register("Fake", L_CLASS_OBJECT, &info);
-  }
-  return cls;
-}
+LObjectClass *fake_get_class ( void );
 
 /* Fake2 */
 typedef struct _Fake2
@@ -79,30 +47,7 @@ typedef struct _Fake2Class
 }
   Fake2Class;
 
-static void _fake2_class_init ( LObjectClass *cls )
-{
-  ((FakeClass *) cls)->dummy *= 2;
-}
-
-static void _fake2_init ( LObject *obj )
-{
-  ((Fake *) obj)->instval *= 2;
-}
-
-static LObjectClass *fake2_get_class ( void )
-{
-  static LObjectClass *cls = NULL;
-  if (!cls) {
-    LClassInfo info = { 0, };
-    info.class_size = sizeof(Fake2Class);
-    info.class_init = _fake2_class_init;
-    info.instance_size = sizeof(Fake2);
-    info.init = _fake2_init;
-    cls = l_object_class_register("Fake2", CLASS_FAKE, &info);
-  }
-  return cls;
-}
-
+LObjectClass *fake2_get_class ( void );
 
 
 #endif
