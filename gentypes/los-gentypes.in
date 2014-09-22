@@ -63,6 +63,7 @@ class Lexer :
     TOKEN_SPECS = (
         ('SPC', r'[ \t\n\f\r]+'),
         ('ID', r'[a-zA-Z_][a-zA-Z0-9_]*'),
+        ('COLONCOLON', r'::'),
         ('OPENBRACE',  r'\{'),
         ('CLOSEBRACE', r'\}'),
         ('OPENPAR', r'\('),
@@ -237,7 +238,7 @@ class NNamespace (NDecl) :
         for d in self.body :
             if d.name == name :
                 return d
-        assert 0, (self, name)
+        return None
 
 # NClass:
 class NClass (NDecl) :
@@ -325,10 +326,49 @@ class Parser :
     # parse_base_clause:
     def parse_base_clause (self, ctxt) :
         self.lex('COLON')
-        tok = self.lex('ID')
-        base = ctxt.get_decl(tok.val)
+        base = self.parse_qual_type(ctxt)
         return base
 
+    # parse_qual_type:
+    def parse_qual_type (self, ctxt) :
+        tplist = []
+        tplist.append(self.lex('ID').val)
+        while True :
+            tok = self.look()
+            if tok.tp == 'COLONCOLON' :
+                self.lex()
+            else :
+                break
+            tplist.append(self.lex('ID').val)
+        tp = self._find_rel_type(ctxt, tplist)
+        return tp
+
+    def _find_rel_type (self, ctxt, tplist) :
+        # [FIXME]
+        match = []
+        c = ctxt
+        while c :
+            tp = self._find_type(c, tplist)
+            if tp is not None :
+                match.append(tp)
+            c = c.ctxt
+        if len(match) == 0 :
+            assert 0, "type not found: %s" % '::'.join(tplist)
+        elif len(match) > 1 :
+            assert 0, "ambiguous type name: %s" % '::'.join(tplist)
+        return match[0]
+
+    def _find_type (self, base, tplist) :
+        c = base
+        for t in tplist :
+            # [FIXME]
+            if not isinstance(c, NNamespace) :
+                return None
+            c = c.get_decl(t)
+            if c is None :
+                return None
+        return c
+    
     # parse_class_body:
     def parse_class_body (self, ctxt) :
         self.lex('OPENBRACE')
