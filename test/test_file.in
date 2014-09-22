@@ -102,6 +102,8 @@ unit /* read */
     {
       /* [FIXME] close ? */
       L_OBJECT_CLEAR(data->stream);
+      /* [FIXME] should be closed by the stream ? */
+      close(data->fd);
     }
 
   test
