@@ -24,6 +24,7 @@ AC_CONFIG_FILES([ \
   Makefile \
   gentypes/Makefile \
   los/Makefile \
+  libltest/Makefile \
   test/Makefile \
 ])
 AC_CONFIG_FILES([los.pc])

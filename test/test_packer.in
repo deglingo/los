@@ -3,6 +3,7 @@
 header {
 ##include "los/lpacker.h"
 ##include "los/lunpacker.h"
+##include "libltest/ltestpackable.h"
 
 ##include "los/lmemstream.h"
 ##include "los/lint.h"
@@ -120,4 +121,11 @@ test /* pack_tuple */
   PIF_CHECK_EQ_STR(L_STRING(L_TUPLE_ITEM(t2, 1))->str, "tuple-string-test");
   /* cleanup */
   L_OBJECT_CLEAR(t2);
+}
+
+test /* pack_packable */
+{
+  LTestPackable *p1;
+  p1 = LTEST_PACKABLE(l_object_new(LTEST_CLASS_PACKABLE, NULL));
+  L_OBJECT_CLEAR(p1);
 }
