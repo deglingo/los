@@ -74,6 +74,7 @@ class Lexer :
     KEYWORDS = set((
         'namespace',
         'class',
+        'extern',
     ))
 
     LEXER = re.compile('|'.join('(?P<%s>%s)' % (n, r)
@@ -288,18 +289,23 @@ class Parser :
         tok_name = self.lex('ID')
         node = NNamespace(ctxt, tok_name.val)
         self.lex('OPENBRACE')
+        isextern = False
         while True :
             tok = self.look()
             if tok.tp == 'CLOSEBRACE' :
                 break
+            elif tok.tp == 'EXTERN' :
+                isextern = True
+                self.lex('EXTERN')
             elif tok.tp == 'CLASS' :
-                self.parse_class(node)
+                self.parse_class(node, isextern=isextern)
+                isextern = False
             else :
                 assert 0, tok
         self.lex('CLOSEBRACE')
 
     # parse_class:
-    def parse_class (self, ctxt) :
+    def parse_class (self, ctxt, isextern) :
         self.lex('CLASS')
         tok_name = self.lex('ID')
         # base clause
@@ -309,7 +315,7 @@ class Parser :
         else :
             base = self.l_object_class
         # create node
-        node = NClass(ctxt, tok_name.val, base=base)
+        node = NClass(ctxt, tok_name.val, base=base, extern=isextern)
         # body
         tok = self.look()
         if tok.tp == 'OPENBRACE' :
