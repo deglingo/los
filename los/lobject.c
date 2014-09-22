@@ -10,6 +10,8 @@
 
 
 
+static GHashTable *_class_names = NULL;
+
 static void _class_init ( LObjectClass *cls );
 static void _dispose ( LObject *object );
 
@@ -22,6 +24,9 @@ LObjectClass *l_object_get_class ( void )
   static LObjectClass *cls=NULL;
   if (!cls) {
     LClassInfo info = { 0, };
+    /* [FIXME] should be in some global init func */
+    _class_names = g_hash_table_new(g_str_hash, g_str_equal);
+    /* class init */
     info.class_size = sizeof(LObjectClass);
     info.class_init = _class_init;
     info.instance_size = sizeof(LObject);
@@ -48,6 +53,8 @@ LObjectClass *l_object_class_register ( const gchar *name,
                                         LClassInfo *info )
 {
   LObjectClass *cls;
+  if (l_object_class_from_name(name))
+    CL_ERROR("class '%s' is already registered", name);
   cls = g_malloc0(info->class_size);
   /* raw-copy the base class */
   /* [FIXME] should only the relevant part and avoid the header */
@@ -61,6 +68,8 @@ LObjectClass *l_object_class_register ( const gchar *name,
   /* class init handler */
   if (info->class_init)
     info->class_init(cls);
+  /* register name */
+  g_hash_table_insert(_class_names, cls->name, cls);
   return cls;
 }
 
@@ -97,6 +106,15 @@ gboolean l_object_issubclass ( LObject *cls1,
 const gchar *l_object_class_name ( LObjectClass *cls )
 {
   return cls->name;
+}
+
+
+
+/* l_object_class_from_name:
+ */
+LObjectClass *l_object_class_from_name ( const gchar *name )
+{
+  return g_hash_table_lookup(_class_names, name);
 }
 
 

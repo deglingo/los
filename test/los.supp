@@ -6,6 +6,15 @@
    fun:l_object_class_register
 }
 
+# [TODO]
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:l_object_get_class
+}
+
 # # [TODO] same thing here
 # {
 #    <insert_a_suppression_name_here>

@@ -81,6 +81,7 @@ gboolean l_object_isclass ( LObject *obj );
 gboolean l_object_issubclass ( LObject *cls1,
                                LObject *cls2 );
 const gchar *l_object_class_name ( LObjectClass *cls );
+LObjectClass *l_object_class_from_name ( const gchar *name );
 LObject *l_object_new ( LObjectClass *cls,
                         const char *first_prop,
                         ... );

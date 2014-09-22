@@ -14,6 +14,7 @@ unit /* FakeClass */
     /* check the standard macros and functions */
     PIF_CHECK_EQ_PTR(L_OBJECT_CLASS(cls), CLASS_FAKE);
     PIF_CHECK_EQ_STR(l_object_class_name(cls), "Fake");
+    PIF_CHECK_EQ_PTR(l_object_class_from_name("Fake"), CLASS_FAKE);
     /* class initialization must call the class_init handler */
     PIF_CHECK(((FakeClass *) cls)->dummy == 42);
     /* isclass must be true for a class object */
@@ -34,6 +35,7 @@ unit /* Fake2Class */
     /* check the standard macros and functions */
     PIF_CHECK_EQ_PTR(L_OBJECT_CLASS(cls), CLASS_FAKE2);
     PIF_CHECK_EQ_STR(l_object_class_name(cls), "Fake2");
+    PIF_CHECK_EQ_PTR(l_object_class_from_name("Fake2"), CLASS_FAKE2);
     /* class initialization must copy the base class and call the
        class_init handler */
     PIF_CHECK(((FakeClass *) cls)->dummy == 84);
