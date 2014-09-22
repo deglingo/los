@@ -16,6 +16,7 @@ struct _LFile
   L_FILE_INSTANCE_HEADER;
 
   gint fd;
+  gboolean eof;
 };
 
 

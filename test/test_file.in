@@ -80,7 +80,7 @@ unit /* write */
     }    
 }
 
-unit /* write */
+unit /* read */
 {
   data { gint fd; }
 
@@ -111,12 +111,15 @@ unit /* write */
       gchar buf[6] = { 0, };
       PIF_CHECK(l_stream_read(data->stream, buf, 2, &w, &err) == L_STREAM_STATUS_OK);
       PIF_CHECK(w == 2);
+      PIF_CHECK(!l_stream_eof(data->stream));
       PIF_CHECK(!strncmp(buf, "IJ", 2));
       /* [fixme] check content ? */
       PIF_CHECK(l_stream_read(data->stream, buf, 6, &w, &err) == L_STREAM_STATUS_OK);
       PIF_CHECK(w == 6);
+      PIF_CHECK(!l_stream_eof(data->stream));
       PIF_CHECK(!strncmp(buf, "KLMNOP", 2));
       /* eof */
       PIF_CHECK(l_stream_read(data->stream, buf, 1, &w, &err) == L_STREAM_STATUS_EOF);
+      PIF_CHECK(l_stream_eof(data->stream));
     }    
 }

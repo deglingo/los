@@ -64,6 +64,8 @@ struct _LStreamClass
                   LStreamSeekType whence );
 
   void (* close) ( LStream *stream );
+
+  gboolean (* eof) ( LStream *stream );
 };
 
 
@@ -82,6 +84,7 @@ void l_stream_seek ( LStream *stream,
                      gint64 offset,
                      LStreamSeekType whence );
 void l_stream_close ( LStream *stream );
+gboolean l_stream_eof ( LStream *stream );
 
 
 

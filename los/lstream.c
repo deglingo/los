@@ -54,3 +54,13 @@ void l_stream_close ( LStream *stream )
   ASSERT(L_STREAM_GET_CLASS(stream)->close);
   L_STREAM_GET_CLASS(stream)->close(stream);
 }
+
+
+
+/* l_stream_eof:
+ */
+gboolean l_stream_eof ( LStream *stream )
+{
+  ASSERT(L_STREAM_GET_CLASS(stream)->close);
+  return L_STREAM_GET_CLASS(stream)->eof(stream);
+}

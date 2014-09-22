@@ -19,6 +19,7 @@ static LStreamStatus _read ( LStream *stream,
                              gint64 *bytes_read,
                              GError **error );
 static void _close ( LStream *stream );
+static gboolean _eof ( LStream *stream );
 
 
 
@@ -29,6 +30,7 @@ static void l_file_class_init ( LObjectClass *cls )
   ((LStreamClass *) cls)->write = _write;
   ((LStreamClass *) cls)->read = _read;
   ((LStreamClass *) cls)->close = _close;
+  ((LStreamClass *) cls)->eof = _eof;
 }
 
 
@@ -42,6 +44,7 @@ LStream *l_file_fdopen ( gint fd,
   LStream *s;
   s = L_STREAM(l_object_new(L_CLASS_FILE, NULL));
   L_FILE(s)->fd = fd;
+  L_FILE(s)->eof = FALSE;
   return s;
 }
 
@@ -75,10 +78,12 @@ static LStreamStatus _read ( LStream *stream,
   if (((s = read(L_FILE(stream)->fd, buffer, size))) > 0)
     {
       *bytes_read = s;
+      L_FILE(stream)->eof = FALSE;
       return L_STREAM_STATUS_OK;
     }
   else if (s == 0)
     {
+      L_FILE(stream)->eof = TRUE;
       return L_STREAM_STATUS_EOF;
     }
   else
@@ -96,4 +101,13 @@ static void _close ( LStream *stream )
 {
   if (close(L_FILE(stream)->fd) != 0)
     CL_ERROR("[TODO] close error");
+}
+
+
+
+/* _eof:
+ */
+static gboolean _eof ( LStream *stream )
+{
+  return L_FILE(stream)->eof;
 }
