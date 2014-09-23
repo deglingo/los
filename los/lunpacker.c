@@ -159,7 +159,7 @@ LObject *_l_unpacker_get_string ( LUnpacker *unpacker,
   str[len] = 0;
   /* create the LString */
   /* [FIXME] we should have a way to give str without copying it */
-  lstr = l_string_new(str);
+  lstr = l_string_new(str, -1);
   g_free(str);
   /* ok */
   return L_OBJECT(lstr);
