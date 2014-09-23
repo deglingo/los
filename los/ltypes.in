@@ -18,6 +18,7 @@ namespace L
   };
   class Packer {
     void class_init ();
+    void init ();
   };
   class Unpacker {
     void class_init ();

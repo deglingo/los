@@ -17,6 +17,7 @@ struct _LPacker
   L_PACKER_INSTANCE_HEADER;
 
   LStream *stream;
+  gpointer private;
 };
 
 

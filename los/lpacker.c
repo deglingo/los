@@ -11,6 +11,18 @@
 
 
 
+/* Private:
+ */
+typedef struct _Private
+{
+  int _dummy;
+}
+  Private;
+
+#define PRIVATE(p) ((Private *) (L_PACKER(p)->private))
+
+
+
 static void _dispose ( LObject *object );
 
 
@@ -20,6 +32,15 @@ static void _dispose ( LObject *object );
 static void l_packer_class_init ( LObjectClass *cls )
 {
   cls->dispose = _dispose;
+}
+
+
+
+/* l_packer_init:
+ */
+static void l_packer_init ( LObject *obj )
+{
+  L_PACKER(obj)->private = g_new0(Private, 1);
 }
 
 
@@ -41,6 +62,7 @@ LPacker *l_packer_new ( LStream *stream )
 static void _dispose ( LObject *object )
 {
   L_OBJECT_CLEAR(L_PACKER(object)->stream);
+  g_free(PRIVATE(object));
   /* [FIXME] */
   ((LObjectClass *) parent_class)->dispose(object);
 }
