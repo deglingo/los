@@ -40,9 +40,13 @@ static void _dispose ( LObject *object )
 LString *l_string_new ( const gchar *str,
                         gssize len )
 {
-  ASSERT(len < 0); /* [TODO] */
   LString *lstr = L_STRING(l_object_new(L_CLASS_STRING, NULL));
-  lstr->len = strlen(str);
-  lstr->str = g_strdup(str);
+  if (len < 0)
+    lstr->len = strlen(str);
+  else
+    lstr->len = len;
+  lstr->str = g_malloc(lstr->len+1);
+  memcpy(lstr->str, str, lstr->len);
+  lstr->str[lstr->len] = 0;
   return lstr;
 }
