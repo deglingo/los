@@ -280,6 +280,8 @@ class Parser :
                 break
             elif tok.tp == 'NAMESPACE' :
                 self.parse_namespace(self.root_nspc)
+            elif tok.tp == 'CLASS' :
+                self.parse_class(self.root_nspc, isextern=False)
             else :
                 assert 0, tok
         return self.root_nspc

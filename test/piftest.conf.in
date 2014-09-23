@@ -14,6 +14,7 @@ modules =
   test_memstream
   test_file
   test_packer
+  test_nbpacker
 
 cflags = -DCL_LOG_DOMAIN=\"los-test\" -I@top_srcdir@ -I@top_builddir@ @PIFTEST_CFLAGS@ @GLIB_CFLAGS@ @CLOG_CFLAGS@
 

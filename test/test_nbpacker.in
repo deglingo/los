@@ -1,0 +1,7 @@
+/* -*- c -*- */
+
+header
+{
+##include "los/lpacker.h"
+##include "libltest/bytestream.h"
+}

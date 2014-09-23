@@ -6,3 +6,8 @@ namespace LTest
     void class_init ();
   };
 }
+
+class ByteStream
+{
+  void class_init ();
+};
