@@ -21,7 +21,8 @@ typedef struct _Private
 {
   LObject *object;
   gint stage;
-  gchar buffer[BUFFER_SIZE];
+  gchar real_buffer[BUFFER_SIZE];
+  gchar *buffer;
   guint data_size;
   guint buffer_offset;
 }
@@ -44,6 +45,8 @@ enum
   {
     S_STRING_START = 0,
     S_STRING_WRITE_TYPE,
+    S_STRING_WRITE_LEN,
+    S_STRING_WRITE_VALUE,
   };
 
 
@@ -262,8 +265,17 @@ static gboolean _send ( LPacker *packer,
 
 #define BUFFER_SET(priv, tp, val) do {          \
     ASSERT(sizeof(tp) <= BUFFER_SIZE);          \
+    (priv)->buffer = (priv)->real_buffer;       \
     *((tp *)((priv)->buffer)) = (val);          \
     (priv)->data_size = sizeof(tp);             \
+    (priv)->buffer_offset = 0;                  \
+  } while (0)
+
+
+
+#define BUFFER_DIVERT(priv, src, len) do {      \
+    (priv)->buffer = (src);                     \
+    (priv)->data_size = (len);                  \
     (priv)->buffer_offset = 0;                  \
   } while (0)
 
@@ -308,6 +320,18 @@ static gboolean _send_string ( LPacker *packer,
       BUFFER_SET(priv, guint8, (guint8) PACK_KEY_STRING);
       priv->stage = S_STRING_WRITE_TYPE;
     case S_STRING_WRITE_TYPE:
+      if (!_send(packer, error))
+        return FALSE;
+      /* string len */
+      BUFFER_SET(priv, guint32, GUINT_TO_BE((guint32)(L_STRING(priv->object)->len)));
+      priv->stage = S_STRING_WRITE_LEN;
+    case S_STRING_WRITE_LEN:
+      if (!_send(packer, error))
+        return FALSE;
+      /* string value */
+      BUFFER_DIVERT(priv, L_STRING(priv->object)->str, L_STRING(priv->object)->len);
+      priv->stage = S_STRING_WRITE_VALUE;
+    case S_STRING_WRITE_VALUE:
       if (!_send(packer, error))
         return FALSE;
     }

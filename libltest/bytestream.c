@@ -4,6 +4,7 @@
 #include "libltest/bytestream.h"
 #include "libltest/bytestream.inl"
 
+#include <unistd.h>
 #include <string.h>
 #include <errno.h>
 
@@ -76,13 +77,15 @@ LStreamStatus _read ( LStream *stream,
 #define bs (BYTE_STREAM(stream))
   if (bs->ready)
     {
-      size_t s = fread(buffer, 1, 1, bs->f);
+      ssize_t s = read(fileno(bs->f), buffer, 1);
       if (s != 1) {
-        fprintf(stderr, "fread error: %s", strerror(errno));
+        fprintf(stderr, "fread error: %s (%d)\n", strerror(errno), s);
         abort();
       }
       *bytes_read = 1;
       bs->ready = FALSE;
+      /* fprintf(stderr, "%%"); */
+      /* fflush(stderr); */
       return L_STREAM_STATUS_OK;
     }
   else
@@ -108,11 +111,13 @@ LStreamStatus _write ( LStream *stream,
     {
       size_t s = fwrite(buffer, 1, 1, bs->f);
       if (s != 1) {
-        fprintf(stderr, "fwrite error: %s", strerror(errno));
+        fprintf(stderr, "fwrite error: %s\n", strerror(errno));
         abort();
       }
       *bytes_written = 1;
       bs->ready = FALSE;
+      /* fprintf(stderr, "#"); */
+      /* fflush(stderr); */
       return L_STREAM_STATUS_OK;
     }
   else

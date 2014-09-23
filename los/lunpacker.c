@@ -40,6 +40,17 @@ typedef struct _ContextInt
 
 
 
+/* ContextString:
+ */
+typedef struct _ContextString
+{
+  CONTEXT_HEADER;
+  guint32 len;
+}
+  ContextString;
+
+
+
 /* Context:
  */
 typedef union _Context
@@ -47,6 +58,7 @@ typedef union _Context
   gint c_type;
   ContextAny c_any;
   ContextInt c_int;
+  ContextString c_string;
 }
   Context;
 
@@ -60,13 +72,23 @@ enum
 
 
 
+enum
+  {
+    S_STRING_START = 0,
+    S_STRING_READ_LEN,
+    S_STRING_READ_VALUE,
+  };
+
+
+
 /* Private:
  */
 typedef struct _Private
 {
   Context context_stack[CONTEXT_STACK_SIZE];
   gint current_context;
-  gchar buffer[BUFFER_SIZE];
+  gchar *buffer;
+  guint buffer_size;
   guint data_size;
   guint buffer_offset;
 }
@@ -116,6 +138,9 @@ LUnpacker *l_unpacker_new ( LStream *stream )
 static void _dispose ( LObject *object )
 {
   L_OBJECT_CLEAR(L_UNPACKER(object)->stream);
+  g_free(PRIVATE(object)->buffer);
+  PRIVATE(object)->buffer = NULL;
+  PRIVATE(object)->buffer_size = 0;
   g_free(L_UNPACKER(object)->private);
   L_UNPACKER(object)->private = NULL;
   /* [FIXME] */
@@ -271,6 +296,9 @@ static gboolean _recv ( LUnpacker *unpacker,
   LStreamStatus s;
   gint64 size, w;
   size = priv->data_size - priv->buffer_offset;
+  ASSERT(size >= 0);
+  if (size == 0) /* just in case ? */
+    return TRUE;
   s = l_stream_read(unpacker->stream,
                     priv->buffer + priv->buffer_offset,
                     size,
@@ -294,10 +322,14 @@ static gboolean _recv ( LUnpacker *unpacker,
 
 
 
-#define BUFFER_SET(priv, tp) do {               \
-    ASSERT(sizeof(tp) <= BUFFER_SIZE);          \
-    (priv)->data_size = sizeof(tp);             \
-    (priv)->buffer_offset = 0;                  \
+#define BUFFER_SET(priv, size) do {                                     \
+    if ((size) > (priv)->buffer_size) {                                 \
+      while ((size) > (priv)->buffer_size)                              \
+        (priv)->buffer_size = (priv)->buffer_size ? ((priv)->buffer_size * 2) : 64; \
+      (priv)->buffer = g_realloc((priv)->buffer, (priv)->buffer_size);  \
+    }                                                                   \
+    (priv)->data_size = size;                                           \
+    (priv)->buffer_offset = 0;                                          \
   } while (0)
 
 
@@ -310,7 +342,7 @@ static LObject *_recv_int ( LUnpacker *unpacker,
   switch (ctxt->c_int.stage)
     {
     case S_INT_START:
-      BUFFER_SET(priv, gint32);
+      BUFFER_SET(priv, sizeof(gint32));
       ctxt->c_int.stage = S_INT_READ_VALUE;
     case S_INT_READ_VALUE:
       if (!_recv(unpacker, error))
@@ -320,6 +352,35 @@ static LObject *_recv_int ( LUnpacker *unpacker,
       ASSERT(0);
     }
   return L_OBJECT(l_int_new(GINT32_FROM_BE(*((gint32 *)(priv->buffer)))));
+}
+
+
+
+static LObject *_recv_string ( LUnpacker *unpacker,
+                               Context *ctxt,
+                               GError **error )
+{
+  Private *priv = PRIVATE(unpacker);
+  switch (ctxt->c_string.stage)
+    {
+    case S_STRING_START:
+      BUFFER_SET(priv, sizeof(guint32));
+      ctxt->c_string.stage = S_STRING_READ_LEN;
+    case S_STRING_READ_LEN:
+      if (!_recv(unpacker, error))
+        return NULL;
+      ctxt->c_string.len = GUINT32_FROM_BE(*((guint32 *)(priv->buffer)));
+      /* fprintf(stderr, "\nLEN=%d\n", ctxt->c_string.len); */
+      BUFFER_SET(priv, ctxt->c_string.len);
+      ctxt->c_string.stage = S_STRING_READ_VALUE;
+    case S_STRING_READ_VALUE:
+      if (!_recv(unpacker, error))
+        return NULL;
+      break;
+    default:
+      ASSERT(0);
+    }
+  return L_OBJECT(l_string_new(priv->buffer, ctxt->c_string.len));
 }
 
 
@@ -337,7 +398,7 @@ LObject *l_unpacker_recv ( LUnpacker *unpacker,
       priv->current_context = 0;
       ctxt = priv->context_stack + priv->current_context;
       ctxt->c_type = -1;
-      BUFFER_SET(priv, guint8);
+      BUFFER_SET(priv, sizeof(guint8));
     }
   else
     {
@@ -357,7 +418,7 @@ LObject *l_unpacker_recv ( LUnpacker *unpacker,
     case PACK_KEY_INT:
       return  _recv_int(unpacker, ctxt, error);
     case PACK_KEY_STRING:
-      return L_OBJECT(l_string_new("test-string-1"));
+      return _recv_string(unpacker, ctxt, error);
     default:
       CL_ERROR("[TODO] type = %d", ctxt->c_type);
     }
