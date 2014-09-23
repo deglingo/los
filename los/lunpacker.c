@@ -184,3 +184,13 @@ LObject *l_unpacker_get ( LUnpacker *unpacker,
     return NULL;
   }
 }
+
+
+
+/* l_unpacker_recv:
+ */
+LObject *l_unpacker_recv ( LUnpacker *unpacker,
+                           GError **error )
+{
+  return L_OBJECT(l_int_new(92));
+}
