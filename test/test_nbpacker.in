@@ -31,16 +31,23 @@ teardown
 
 test /* int */
 {
-  LStream *ostream = byte_stream_new(data->tmpfile, "w");
-  LPacker *packer = l_packer_new(ostream);
-  LObject *obj1 = L_OBJECT(l_int_new(92));
+  LStream *stream;
+  LPacker *packer;
+  LObject *obj;
   GError *err = NULL;
+  /* create the packer */
+  stream = byte_stream_new(data->tmpfile, "w");
+  packer = l_packer_new(stream);
+  L_OBJECT_CLEAR(stream);
   /* pack */
-  l_packer_add(packer, obj1);
-  L_OBJECT_CLEAR(obj1);
+  obj = L_OBJECT(l_int_new(92));
+  l_packer_add(packer, obj);
+  L_OBJECT_CLEAR(obj);
   /* process */
   while (!l_packer_send(packer, &err))
     {
       PIF_CHECK(!err);
     }
+  /* cleanup */
+  L_OBJECT_CLEAR(packer);
 }

@@ -9,6 +9,7 @@
 
 
 
+static void _dispose ( LObject *object );
 LStreamStatus _read ( LStream *stream,
                       gpointer buffer,
                       gint64 size,
@@ -26,8 +27,24 @@ LStreamStatus _write ( LStream *stream,
  */
 static void byte_stream_class_init ( LObjectClass *cls )
 {
+  cls->dispose = _dispose;
   ((LStreamClass *) cls)->read = _read;
   ((LStreamClass *) cls)->write = _write;
+}
+
+
+
+/* _dispose:
+ */
+static void _dispose ( LObject *object )
+{
+  ByteStream *b = BYTE_STREAM(object);
+  if (b->f) {
+    fclose(b->f);
+    b->f = NULL;
+  }
+  /* [fixme] */
+  ((LObjectClass *) parent_class)->dispose(object);
 }
 
 
