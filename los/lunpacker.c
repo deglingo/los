@@ -12,6 +12,51 @@
 
 
 #define BUFFER_SIZE 16
+#define CONTEXT_STACK_SIZE 16
+
+#define CONTEXT_HEADER \
+  gint type; \
+  gint stage
+
+
+
+/* ContextAny:
+ */
+typedef struct _ContextAny
+{
+  CONTEXT_HEADER;
+}
+  ContextAny;
+
+
+
+/* ContextInt:
+ */
+typedef struct _ContextInt
+{
+  CONTEXT_HEADER;
+}
+  ContextInt;
+
+
+
+/* Context:
+ */
+typedef union _Context
+{
+  gint c_type;
+  ContextAny c_any;
+  ContextInt c_int;
+}
+  Context;
+
+
+
+enum
+  {
+    S_INT_START = 0,
+    S_INT_READ_VALUE,
+  };
 
 
 
@@ -19,7 +64,8 @@
  */
 typedef struct _Private
 {
-  guint running : 1; /* [removeme] */
+  Context context_stack[CONTEXT_STACK_SIZE];
+  gint current_context;
   gchar buffer[BUFFER_SIZE];
   guint data_size;
   guint buffer_offset;
@@ -48,6 +94,7 @@ static void l_unpacker_class_init ( LObjectClass *cls )
 static void l_unpacker_init ( LObject *obj )
 {
   L_UNPACKER(obj)->private = g_new0(Private, 1);
+  PRIVATE(obj)->current_context = -1;
 }
 
 
@@ -217,7 +264,7 @@ LObject *l_unpacker_get ( LUnpacker *unpacker,
 
 
 
-static LObject *_recv ( LUnpacker *unpacker,
+static gboolean _recv ( LUnpacker *unpacker,
                         GError **error )
 {
   Private *priv = PRIVATE(unpacker);
@@ -234,22 +281,45 @@ static LObject *_recv ( LUnpacker *unpacker,
     priv->buffer_offset += w;
     ASSERT(priv->buffer_offset <= priv->data_size);
     if (priv->buffer_offset == priv->data_size)
-      {
-        gint32 val = GINT32_FROM_BE(*((gint32 *)(priv->buffer)));
-        LObject *obj = L_OBJECT(l_int_new(val));
-        return obj;
-      }
+      return TRUE;
     else
-      {
-        return NULL;
-      }
-    break;
+      return FALSE;
   case L_STREAM_STATUS_AGAIN:
-    return NULL;
+    return FALSE;
   default:
     CL_ERROR("[TODO] s = %d", s);
-    return NULL;
+    return FALSE;
   }
+}
+
+
+
+#define BUFFER_SET(priv, tp) do {               \
+    ASSERT(sizeof(tp) <= BUFFER_SIZE);          \
+    (priv)->data_size = sizeof(tp);             \
+    (priv)->buffer_offset = 0;                  \
+  } while (0)
+
+
+
+static LObject *_recv_int ( LUnpacker *unpacker,
+                           Context *ctxt,
+                           GError **error )
+{
+  Private *priv = PRIVATE(unpacker);
+  switch (ctxt->c_int.stage)
+    {
+    case S_INT_START:
+      BUFFER_SET(priv, gint32);
+      ctxt->c_int.stage = S_INT_READ_VALUE;
+    case S_INT_READ_VALUE:
+      if (!_recv(unpacker, error))
+        return NULL;
+      break;
+    default:
+      ASSERT(0);
+    }
+  return L_OBJECT(l_int_new(GINT32_FROM_BE(*((gint32 *)(priv->buffer)))));
 }
 
 
@@ -260,11 +330,44 @@ LObject *l_unpacker_recv ( LUnpacker *unpacker,
                            GError **error )
 {
   Private *priv = PRIVATE(unpacker);
-  if (!priv->running)
+  Context *ctxt;
+  /* get context */
+  if (priv->current_context < 0)
     {
-      priv->data_size = sizeof(gint32);
-      priv->buffer_offset = 0;
-      priv->running = 1;
+      priv->current_context = 0;
+      ctxt = priv->context_stack + priv->current_context;
+      ctxt->c_type = -1;
+      BUFFER_SET(priv, guint8);
     }
-  return _recv(unpacker, error);
+  else
+    {
+      ctxt = priv->context_stack + priv->current_context;
+    }
+  /* get type */
+  if (ctxt->c_type < 0)
+    {
+      if (!_recv(unpacker, error))
+        return NULL;
+      ctxt->c_type = *((guint8 *)(priv->buffer));
+      ctxt->c_any.stage = 0;
+    }
+  /* get object */
+  switch (ctxt->c_type)
+    {
+    case PACK_KEY_INT:
+      return  _recv_int(unpacker, ctxt, error);
+    case PACK_KEY_STRING:
+      return L_OBJECT(l_string_new("test-string-1"));
+    default:
+      CL_ERROR("[TODO] type = %d", ctxt->c_type);
+    }
+  return NULL;
+
+  /* if (!priv->running) */
+  /*   { */
+  /*     priv->data_size = sizeof(gint32); */
+  /*     priv->buffer_offset = 0; */
+  /*     priv->running = 1; */
+  /*   } */
+  /* return _recv(unpacker, error); */
 }

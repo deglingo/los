@@ -34,7 +34,16 @@ typedef struct _Private
 enum
   {
     S_INT_START = 0,
+    S_INT_WRITE_TYPE,
     S_INT_WRITE_VALUE,
+  };
+
+
+
+enum
+  {
+    S_STRING_START = 0,
+    S_STRING_WRITE_TYPE,
   };
 
 
@@ -215,7 +224,6 @@ gboolean l_packer_put ( LPacker *packer,
 void l_packer_add ( LPacker *packer,
                     LObject *object )
 {
-  ASSERT(L_IS_INT(object));
   PRIVATE(packer)->object = l_object_ref(object);
   PRIVATE(packer)->stage = 0;
 }
@@ -247,6 +255,62 @@ static gboolean _send ( LPacker *packer,
         return 0;
       }
     }
+  return TRUE;
+}
+
+
+
+#define BUFFER_SET(priv, tp, val) do {          \
+    ASSERT(sizeof(tp) <= BUFFER_SIZE);          \
+    *((tp *)((priv)->buffer)) = (val);          \
+    (priv)->data_size = sizeof(tp);             \
+    (priv)->buffer_offset = 0;                  \
+  } while (0)
+
+
+
+static gboolean _send_int ( LPacker *packer,
+                            GError **error )
+{
+  Private *priv = PRIVATE(packer);
+  switch (priv->stage)
+    {
+    case S_INT_START:
+      BUFFER_SET(priv, guint8, (guint8) PACK_KEY_INT);
+      priv->stage = S_INT_WRITE_TYPE;
+    case S_INT_WRITE_TYPE:
+      {
+        gint32 val;
+        val = L_INT_VALUE(priv->object);
+        if (!_send(packer, error))
+          return FALSE;
+        /* value */
+        BUFFER_SET(priv, gint32, GINT32_TO_BE(val));
+        priv->stage = S_INT_WRITE_VALUE;
+      }
+    case S_INT_WRITE_VALUE:
+      if (!_send(packer, error))
+        return FALSE;
+    }
+  L_OBJECT_CLEAR(priv->object);
+  return TRUE;
+}
+
+
+
+static gboolean _send_string ( LPacker *packer,
+                               GError **error )
+{
+  Private *priv = PRIVATE(packer);
+  switch (priv->stage)
+    {
+    case S_STRING_START:
+      BUFFER_SET(priv, guint8, (guint8) PACK_KEY_STRING);
+      priv->stage = S_STRING_WRITE_TYPE;
+    case S_STRING_WRITE_TYPE:
+      if (!_send(packer, error))
+        return FALSE;
+    }
   L_OBJECT_CLEAR(priv->object);
   return TRUE;
 }
@@ -258,18 +322,12 @@ static gboolean _send ( LPacker *packer,
 gboolean l_packer_send ( LPacker *packer,
                          GError **error )
 {
-  Private *priv = PRIVATE(packer);
-  switch (priv->stage)
-    {
-    case S_INT_START:
-      ASSERT(BUFFER_SIZE >= sizeof(gint32));
-      *((gint32 *) priv->buffer) = GINT32_TO_BE(L_INT_VALUE(priv->object));
-      priv->data_size = sizeof(gint32);
-      priv->buffer_offset = 0;
-      priv->stage = S_INT_WRITE_VALUE;
-    case S_INT_WRITE_VALUE:
-      if (!_send(packer, error))
-        return FALSE;
-    }
-  return TRUE;
+  if (L_IS_INT(PRIVATE(packer)->object)) {
+    return _send_int(packer, error);
+  } else if (L_IS_STRING(PRIVATE(packer)->object)) {
+    return _send_string(packer, error);
+  } else {
+    ASSERT(0);
+    return FALSE;
+  }
 }
