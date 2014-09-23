@@ -290,7 +290,7 @@ class Parser :
     def parse_namespace (self, ctxt) :
         self.lex('NAMESPACE')
         tok_name = self.lex('ID')
-        node = ctxt.get_child(tok_name.val)
+        node = ctxt.get_decl(tok_name.val)
         if node is None :
             node = NNamespace(ctxt, tok_name.val)
         else :
