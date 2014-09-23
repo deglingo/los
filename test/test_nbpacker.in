@@ -30,7 +30,7 @@ teardown
   unlink(data->tmpfile);
 }
 
-test /* int */
+test /* int_92 */
 {
   LStream *stream;
   LPacker *packer;
@@ -64,6 +64,45 @@ test /* int */
   /* check object */
   PIF_CHECK(L_IS_INT(obj));
   PIF_CHECK_EQ(L_INT_VALUE(obj), 92);
+  /* cleanup */
+  L_OBJECT_CLEAR(obj);
+  L_OBJECT_CLEAR(unpacker);
+}
+
+test /* int_0x12345678 */
+{
+  LStream *stream;
+  LPacker *packer;
+  LUnpacker *unpacker;
+  LObject *obj;
+  GError *err = NULL;
+  /* create the packer */
+  stream = byte_stream_new(data->tmpfile, "w");
+  packer = l_packer_new(stream);
+  L_OBJECT_CLEAR(stream);
+  /* pack */
+  obj = L_OBJECT(l_int_new(0x12345678));
+  l_packer_add(packer, obj);
+  L_OBJECT_CLEAR(obj);
+  /* process */
+  while (!l_packer_send(packer, &err))
+    {
+      PIF_CHECK(!err);
+    }
+  /* cleanup */
+  L_OBJECT_CLEAR(packer);
+  /* create the unpacker */
+  stream = byte_stream_new(data->tmpfile, "r");
+  unpacker = l_unpacker_new(stream);
+  L_OBJECT_CLEAR(stream);
+  /* unpack */
+  while (!(obj = l_unpacker_recv(unpacker, &err)))
+    {
+      PIF_CHECK(!err);
+    }
+  /* check object */
+  PIF_CHECK(L_IS_INT(obj));
+  PIF_CHECK_EQ(L_INT_VALUE(obj), 0x12345678);
   /* cleanup */
   L_OBJECT_CLEAR(obj);
   L_OBJECT_CLEAR(unpacker);

@@ -22,5 +22,6 @@ namespace L
   };
   class Unpacker {
     void class_init ();
+    void init ();
   };
 }

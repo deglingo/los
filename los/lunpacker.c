@@ -11,6 +11,25 @@
 
 
 
+#define BUFFER_SIZE 16
+
+
+
+/* Private:
+ */
+typedef struct _Private
+{
+  guint running : 1; /* [removeme] */
+  gchar buffer[BUFFER_SIZE];
+  guint data_size;
+  guint buffer_offset;
+}
+  Private;
+
+#define PRIVATE(u) ((Private *) (L_UNPACKER(u)->private))
+
+
+
 static void _dispose ( LObject *object );
 
 
@@ -20,6 +39,15 @@ static void _dispose ( LObject *object );
 static void l_unpacker_class_init ( LObjectClass *cls )
 {
   cls->dispose = _dispose;
+}
+
+
+
+/* l_unpacker_init:
+ */
+static void l_unpacker_init ( LObject *obj )
+{
+  L_UNPACKER(obj)->private = g_new0(Private, 1);
 }
 
 
@@ -41,6 +69,8 @@ LUnpacker *l_unpacker_new ( LStream *stream )
 static void _dispose ( LObject *object )
 {
   L_OBJECT_CLEAR(L_UNPACKER(object)->stream);
+  g_free(L_UNPACKER(object)->private);
+  L_UNPACKER(object)->private = NULL;
   /* [FIXME] */
   ((LObjectClass *) parent_class)->dispose(object);
 }
@@ -187,10 +217,54 @@ LObject *l_unpacker_get ( LUnpacker *unpacker,
 
 
 
+static LObject *_recv ( LUnpacker *unpacker,
+                        GError **error )
+{
+  Private *priv = PRIVATE(unpacker);
+  LStreamStatus s;
+  gint64 size, w;
+  size = priv->data_size - priv->buffer_offset;
+  s = l_stream_read(unpacker->stream,
+                    priv->buffer + priv->buffer_offset,
+                    size,
+                    &w,
+                    error);
+  switch (s) {
+  case L_STREAM_STATUS_OK:
+    priv->buffer_offset += w;
+    ASSERT(priv->buffer_offset <= priv->data_size);
+    if (priv->buffer_offset == priv->data_size)
+      {
+        gint32 val = GINT32_FROM_BE(*((gint32 *)(priv->buffer)));
+        LObject *obj = L_OBJECT(l_int_new(val));
+        return obj;
+      }
+    else
+      {
+        return NULL;
+      }
+    break;
+  case L_STREAM_STATUS_AGAIN:
+    return NULL;
+  default:
+    CL_ERROR("[TODO] s = %d", s);
+    return NULL;
+  }
+}
+
+
+
 /* l_unpacker_recv:
  */
 LObject *l_unpacker_recv ( LUnpacker *unpacker,
                            GError **error )
 {
-  return L_OBJECT(l_int_new(92));
+  Private *priv = PRIVATE(unpacker);
+  if (!priv->running)
+    {
+      priv->data_size = sizeof(gint32);
+      priv->buffer_offset = 0;
+      priv->running = 1;
+    }
+  return _recv(unpacker, error);
 }

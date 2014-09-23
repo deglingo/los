@@ -17,6 +17,7 @@ struct _LUnpacker
 {
   L_UNPACKER_INSTANCE_HEADER;
 
+  gpointer private;
   LStream *stream;
 };
 

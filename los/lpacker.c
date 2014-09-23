@@ -11,15 +11,31 @@
 
 
 
+#define BUFFER_SIZE 16
+
+
+
 /* Private:
  */
 typedef struct _Private
 {
-  int _dummy;
+  LObject *object;
+  gint stage;
+  gchar buffer[BUFFER_SIZE];
+  guint data_size;
+  guint buffer_offset;
 }
   Private;
 
 #define PRIVATE(p) ((Private *) (L_PACKER(p)->private))
+
+
+
+enum
+  {
+    S_INT_START = 0,
+    S_INT_WRITE_VALUE,
+  };
 
 
 
@@ -199,6 +215,40 @@ gboolean l_packer_put ( LPacker *packer,
 void l_packer_add ( LPacker *packer,
                     LObject *object )
 {
+  ASSERT(L_IS_INT(object));
+  PRIVATE(packer)->object = l_object_ref(object);
+  PRIVATE(packer)->stage = 0;
+}
+
+
+
+static gboolean _send ( LPacker *packer,
+                        GError **error )
+{
+  Private *priv = PRIVATE(packer);
+  gint64 w, size;
+  while (priv->buffer_offset < priv->data_size)
+    {
+      LStreamStatus s;
+      size = priv->data_size - priv->buffer_offset;
+      s = l_stream_write(packer->stream,
+                         priv->buffer + priv->buffer_offset,
+                         size,
+                         &w,
+                         error);
+      switch (s) {
+      case L_STREAM_STATUS_OK:
+        priv->buffer_offset += w;
+        break;
+      case L_STREAM_STATUS_AGAIN:
+        return FALSE;
+      default:
+        CL_ERROR("[TODO] s = %d", s);
+        return 0;
+      }
+    }
+  L_OBJECT_CLEAR(priv->object);
+  return TRUE;
 }
 
 
@@ -208,5 +258,18 @@ void l_packer_add ( LPacker *packer,
 gboolean l_packer_send ( LPacker *packer,
                          GError **error )
 {
+  Private *priv = PRIVATE(packer);
+  switch (priv->stage)
+    {
+    case S_INT_START:
+      ASSERT(BUFFER_SIZE >= sizeof(gint32));
+      *((gint32 *) priv->buffer) = GINT32_TO_BE(L_INT_VALUE(priv->object));
+      priv->data_size = sizeof(gint32);
+      priv->buffer_offset = 0;
+      priv->stage = S_INT_WRITE_VALUE;
+    case S_INT_WRITE_VALUE:
+      if (!_send(packer, error))
+        return FALSE;
+    }
   return TRUE;
 }
