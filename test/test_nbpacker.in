@@ -34,8 +34,13 @@ test /* int */
   LStream *ostream = byte_stream_new(data->tmpfile, "w");
   LPacker *packer = l_packer_new(ostream);
   LObject *obj1 = L_OBJECT(l_int_new(92));
+  GError *err = NULL;
   /* pack */
   l_packer_add(packer, obj1);
   L_OBJECT_CLEAR(obj1);
   /* process */
+  while (!l_packer_send(packer, &err))
+    {
+      PIF_CHECK(!err);
+    }
 }

@@ -200,3 +200,13 @@ void l_packer_add ( LPacker *packer,
                     LObject *object )
 {
 }
+
+
+
+/* l_packer_send:
+ */
+gboolean l_packer_send ( LPacker *packer,
+                         GError **error )
+{
+  return TRUE;
+}

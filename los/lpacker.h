@@ -38,6 +38,8 @@ gboolean l_packer_put ( LPacker *packer,
 /* non-blocking api */
 void l_packer_add ( LPacker *packer,
                     LObject *object );
+gboolean l_packer_send ( LPacker *packer,
+                         GError **error );
 
 
 
