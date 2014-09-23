@@ -34,10 +34,14 @@ static void byte_stream_class_init ( LObjectClass *cls )
 
 /* byte_stream_new:
  */
-LStream *byte_stream_new ( FILE *f )
+LStream *byte_stream_new ( const gchar *fname,
+                           const gchar *mode )
 {
   ByteStream *b = BYTE_STREAM(l_object_new(CLASS_BYTE_STREAM, NULL));
-  b->f = f;
+  if (!(b->f = fopen(fname, mode))) {
+    fprintf(stderr, "fopen error: %s", strerror(errno));
+    abort();
+  }
   b->ready = FALSE;
   return L_STREAM(b);
 }

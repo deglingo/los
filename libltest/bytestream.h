@@ -30,7 +30,8 @@ struct _ByteStreamClass
 
 
 
-LStream *byte_stream_new ( FILE *f );
+LStream *byte_stream_new ( const gchar *fname,
+                           const gchar *mode );
 
 
 

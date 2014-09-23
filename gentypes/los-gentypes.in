@@ -353,7 +353,7 @@ class Parser :
         # [FIXME]
         match = []
         c = ctxt
-        while c :
+        while c is not None :
             tp = self._find_type(c, tplist)
             if tp is not None :
                 match.append(tp)

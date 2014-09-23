@@ -1,5 +1,10 @@
 /* -*- c++ -*- */
 
+namespace L
+{
+  extern class Stream;
+}
+
 namespace LTest
 {
   class Packable {
@@ -7,7 +12,7 @@ namespace LTest
   };
 }
 
-class ByteStream
+class ByteStream : L::Stream
 {
   void class_init ();
 };

@@ -3,5 +3,39 @@
 header
 {
 ##include "los/lpacker.h"
+##include "los/lint.h"
 ##include "libltest/bytestream.h"
+
+##include <unistd.h>
+}
+
+data
+{
+  gchar *tmpfile;
+}
+
+setup
+{
+  gint fd;
+  GError *err = NULL;
+  /* create a tmpfile */
+  if ((fd = g_file_open_tmp(NULL, &data->tmpfile, &err)) < 0)
+    abort(); /* [FIXME] */
+  close(fd);
+}
+
+teardown
+{
+  unlink(data->tmpfile);
+}
+
+test /* int */
+{
+  LStream *ostream = byte_stream_new(data->tmpfile, "w");
+  LPacker *packer = l_packer_new(ostream);
+  LObject *obj1 = L_OBJECT(l_int_new(92));
+  /* pack */
+  l_packer_add(packer, obj1);
+  L_OBJECT_CLEAR(obj1);
+  /* process */
 }

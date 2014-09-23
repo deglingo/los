@@ -191,3 +191,12 @@ gboolean l_packer_put ( LPacker *packer,
     return _l_packer_put_object(packer, object, error);
   }
 }
+
+
+
+/* l_packer_add:
+ */
+void l_packer_add ( LPacker *packer,
+                    LObject *object )
+{
+}
