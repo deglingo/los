@@ -30,6 +30,41 @@ teardown
 
 /* [TODO] test_new */
 
+test /* EAGAIN */
+{
+  int p[2];
+  GError *err = NULL;
+  LStream *s;
+  gchar buf[1024] = { 0, };
+  gint64 w;
+  /* init pipe */
+  if (pipe(p) != 0)
+    abort(); /* [TODO] */
+  fcntl(p[0], F_SETFL, O_NONBLOCK);
+  fcntl(p[1], F_SETFL, O_NONBLOCK);
+  /* read */
+  s = l_file_fdopen(p[0], "r", &err);
+  PIF_CHECK(s);
+  PIF_CHECK_EQ(l_stream_read(s, buf, 1, &w, &err),
+               L_STREAM_STATUS_AGAIN);
+  l_object_unref(s);
+  /* write - this more tricky as we must fill the buffer before
+     getting eagain */
+  s = l_file_fdopen(p[1], "w", &err);
+  PIF_CHECK(s);
+  while (1) {
+    LStreamStatus t = l_stream_write(s, buf, 1024, &w, &err);
+    if (t != L_STREAM_STATUS_OK) {
+      PIF_CHECK_EQ(t, L_STREAM_STATUS_AGAIN);
+      break;
+    }
+  }
+  l_object_unref(s);
+  /* cleanup */
+  close(p[0]);
+  close(p[1]);
+}
+
 #define CHECK_FILE(content) do {                    \
     struct stat st;                                 \
     gint64 cont_len = strlen(content);              \

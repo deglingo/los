@@ -58,10 +58,24 @@ static LStreamStatus _write ( LStream *stream,
                               gint64 *bytes_written,
                               GError **error )
 {
-  if (write(L_FILE(stream)->fd, buffer, size) != size)
-    CL_ERROR("[TODO] write error");
-  *bytes_written = size;
-  return L_STREAM_STATUS_OK;
+  gint64 s;
+  errno = 0;
+  s = write(L_FILE(stream)->fd, buffer, size);
+  if (s > 0)
+    {
+      if (bytes_written)
+        *bytes_written = s;
+      return L_STREAM_STATUS_OK;
+    }
+  else
+    {
+      if (errno == EAGAIN) {
+        return L_STREAM_STATUS_AGAIN;
+      } else {
+        CL_ERROR("[TODO] write error");
+        return -1;
+      }
+    }
 }
 
 
@@ -75,6 +89,7 @@ static LStreamStatus _read ( LStream *stream,
                              GError **error )
 {
   gint64 s;
+  errno = 0;
   if (((s = read(L_FILE(stream)->fd, buffer, size))) > 0)
     {
       *bytes_read = s;
@@ -88,8 +103,12 @@ static LStreamStatus _read ( LStream *stream,
     }
   else
     {
-      CL_ERROR("[TODO] read error: %s", STRERROR);
-      return -1;
+      if (errno == EAGAIN) {
+        return L_STREAM_STATUS_AGAIN;
+      } else {
+        CL_ERROR("[TODO] read error: %s", STRERROR);
+        return -1;
+      }
     }
 }
 
