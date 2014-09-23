@@ -142,7 +142,7 @@ gboolean _l_packer_put_object ( LPacker *packer,
     return FALSE;
   ASSERT(w == sizeof(clsnlen));
   /* write clsname */
-  if (l_stream_write(packer->stream, clsname, clslen, &w, error) != L_STREAM_STATUS_OK)
+  if (l_stream_write(packer->stream, (gchar *) /* [FIXME] */ clsname, clslen, &w, error) != L_STREAM_STATUS_OK)
     return FALSE;
   ASSERT(w == clslen);
   /* write object */
