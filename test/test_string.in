@@ -5,14 +5,10 @@ header {
 ##include <string.h>
 }
 
-data { LString *str; }
-
-setup { data->str = l_string_new("test-string"); }
-
-teardown { L_OBJECT_CLEAR(data->str); }
-
 test { 
-  PIF_CHECK(data->str);
-  PIF_CHECK(data->str->len == 11);
-  PIF_CHECK(!strcmp(data->str->str, "test-string"));
+  LString *s = l_string_new("test-string", -1);
+  PIF_CHECK(s);
+  PIF_CHECK_EQ(s->len, 11);
+  PIF_CHECK_EQ_STR(s->str, "test-string");
+  L_OBJECT_CLEAR(s);
 }

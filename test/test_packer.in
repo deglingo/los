@@ -100,7 +100,7 @@ header
 test { TEST_PACK_OBJECT(l_int_new(91),
                         PIF_CHECK(L_INT_VALUE(obj2) == 91)); }
 
-test { TEST_PACK_OBJECT(l_string_new("string-test"),
+test { TEST_PACK_OBJECT(l_string_new("string-test", -1),
                         PIF_CHECK_EQ_STR(L_STRING(obj2)->str, "string-test")); }
 
 test /* pack_tuple */
@@ -109,7 +109,7 @@ test /* pack_tuple */
   /* create some tuple */
   t1 = l_tuple_new(2);
   l_tuple_give_item(t1, 0, L_OBJECT(l_int_new(2)));
-  l_tuple_give_item(t1, 1, L_OBJECT(l_string_new("tuple-string-test")));
+  l_tuple_give_item(t1, 1, L_OBJECT(l_string_new("tuple-string-test", -1)));
   /* pack/unpack */
   t2 = L_TUPLE(TEST_PACK_OBJECT_(t1));
   L_OBJECT_CLEAR(t1);

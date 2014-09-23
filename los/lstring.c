@@ -1,6 +1,7 @@
 /* lstring.c -
  */
 
+#include "los/private.h"
 #include "los/lstring.h"
 #include "los/lstring.inl"
 
@@ -36,8 +37,10 @@ static void _dispose ( LObject *object )
 
 /* l_string_new:
  */
-LString *l_string_new ( const gchar *str )
+LString *l_string_new ( const gchar *str,
+                        gssize len )
 {
+  ASSERT(len < 0); /* [TODO] */
   LString *lstr = L_STRING(l_object_new(L_CLASS_STRING, NULL));
   lstr->len = strlen(str);
   lstr->str = g_strdup(str);
