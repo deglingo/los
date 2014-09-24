@@ -14,6 +14,7 @@ static GHashTable *_class_names = NULL;
 
 static void _class_init ( LObjectClass *cls );
 static void _dispose ( LObject *object );
+static gchar *_to_string ( LObject *object );
 
 
 
@@ -42,6 +43,7 @@ LObjectClass *l_object_get_class ( void )
 static void _class_init ( LObjectClass *cls )
 {
   cls->dispose = _dispose;
+  cls->to_string = _to_string;
 }
 
 
@@ -212,4 +214,24 @@ LObject *l_object_get_state ( LObject *object )
 {
   ASSERT(L_OBJECT_GET_CLASS(object)->get_state);
   return L_OBJECT_GET_CLASS(object)->get_state(object);
+}
+
+
+
+/* l_object_to_string:
+ */
+gchar *l_object_to_string ( LObject *object )
+{
+  return L_OBJECT_GET_CLASS(object)->to_string(object);
+}
+
+
+
+/* _to_string:
+ */
+static gchar *_to_string ( LObject *object )
+{
+  return g_strdup_printf("<%s %p>",
+                         l_object_class_name(L_OBJECT_GET_CLASS(object)),
+                         object);
 }

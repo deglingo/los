@@ -7,6 +7,7 @@
 #include "los/lint.h" /* ?? */
 #include "los/lstring.h"
 #include "los/ltuple.h"
+#include "los/ltrash.h"
 #include "los/lpacker.inl"
 
 
@@ -159,13 +160,18 @@ gboolean l_packer_put ( LPacker *packer,
                         LObject *object,
                         GError **error )
 {
+  gboolean r;
+  /* l_trash_push(); */
+  /* CL_DEBUG("PUT: %s", (gchar *) L_TRASH_GPOINTER(l_object_to_string(object))); */
   if (L_IS_INT(object)) {
-    return _l_packer_put_int(packer, object, error);
+    r = _l_packer_put_int(packer, object, error);
   } else if (L_IS_STRING(object)) {
-    return _l_packer_put_string(packer, object, error);
+    r = _l_packer_put_string(packer, object, error);
   } else if (L_IS_TUPLE(object)) {
-    return _l_packer_put_tuple(packer, object, error);
+    r = _l_packer_put_tuple(packer, object, error);
   } else {
-    return _l_packer_put_object(packer, object, error);
+    r = _l_packer_put_object(packer, object, error);
   }
+  /* l_trash_pop(); */
+  return r;
 }
