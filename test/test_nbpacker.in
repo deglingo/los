@@ -7,6 +7,7 @@ header
 ##include "los/lint.h"
 ##include "los/lstring.h"
 ##include "los/ltuple.h"
+##include "los/ltrash.h"
 ##include "libltest/bytestream.h"
 
 ##include <unistd.h>
@@ -21,6 +22,7 @@ setup
 {
   gint fd;
   GError *err = NULL;
+  l_trash_push();
   /* create a tmpfile */
   if ((fd = g_file_open_tmp(NULL, &data->tmpfile, &err)) < 0)
     abort(); /* [FIXME] */
@@ -30,286 +32,165 @@ setup
 teardown
 {
   unlink(data->tmpfile);
+  l_trash_pop();
 }
+
+
+#define CHECK_INT(obj, val) do {                \
+    PIF_CHECK(obj);                             \
+    PIF_CHECK(L_IS_INT(obj));                   \
+    PIF_CHECK_EQ(L_INT_VALUE(obj), (val));      \
+  } while (0)
+
+
+#define CHECK_STRING(obj, val) do {                 \
+    PIF_CHECK(obj);                                 \
+    PIF_CHECK(L_IS_STRING(obj));                    \
+    PIF_CHECK_EQ(L_STRING(obj)->len, strlen(val));  \
+    PIF_CHECK_EQ_STR(L_STRING(obj)->str, (val));    \
+  } while (0)
+
+
+#define CHECK_TUPLE(obj, size) do {             \
+    PIF_CHECK(obj);                             \
+    PIF_CHECK(L_IS_TUPLE(obj));                 \
+    PIF_CHECK_EQ(L_TUPLE_SIZE(obj), (size));    \
+  } while (0)
+
+
+#define TEST_PACK(new_stream, add_objs) do {    \
+    GError *err = NULL;                         \
+    LStream *stream = (new_stream);             \
+    LPacker *packer = l_packer_new(stream);     \
+    L_OBJECT_CLEAR(stream);                     \
+    /* add objects */                           \
+    do add_objs while (0);                      \
+    /* process */                               \
+    while (!l_packer_send(packer, &err))        \
+      PIF_CHECK(!err);                          \
+    L_OBJECT_CLEAR(packer);                     \
+  } while (0)
+
+
+#define MAX_OBJS 4
+
+
+#define TEST_UNPACK(new_stream, n_objs, check_objs) do {    \
+    GError *err = NULL;                                     \
+    LStream *stream = (new_stream);                         \
+    LUnpacker *unpacker = l_unpacker_new(stream);           \
+    LObject *objs[MAX_OBJS] = { NULL, };                    \
+    guint o;                                                \
+    /* ASSERT((n_objs) <= MAX_OBJS); */                     \
+    L_OBJECT_CLEAR(stream);                                 \
+    /* unpack */                                            \
+    for (o = 0; o < n_objs; o++) {                          \
+      while (!(objs[o] = l_unpacker_recv(unpacker, &err)))  \
+        PIF_CHECK(!err);                                    \
+    }                                                       \
+    L_OBJECT_CLEAR(unpacker);                               \
+    /* [TODO] check EOF */                                  \
+    do check_objs while (0);                                \
+    /* cleanup */                                           \
+    for (o = 0; o < n_objs; o++) {                          \
+      l_object_unref(objs[o]);                              \
+    }                                                       \
+  } while (0)
+
 
 test /* int_92 */
 {
-  LStream *stream;
-  LPacker *packer;
-  LUnpacker *unpacker;
-  LObject *obj;
-  GError *err = NULL;
-  /* create the packer */
-  stream = byte_stream_new(data->tmpfile, "w");
-  packer = l_packer_new(stream);
-  L_OBJECT_CLEAR(stream);
   /* pack */
-  obj = L_OBJECT(l_int_new(92));
-  l_packer_add(packer, obj);
-  L_OBJECT_CLEAR(obj);
-  /* process */
-  while (!l_packer_send(packer, &err))
-    {
-      PIF_CHECK(!err);
-    }
-  /* cleanup */
-  L_OBJECT_CLEAR(packer);
-  /* create the unpacker */
-  stream = byte_stream_new(data->tmpfile, "r");
-  unpacker = l_unpacker_new(stream);
-  L_OBJECT_CLEAR(stream);
+  TEST_PACK(byte_stream_new(data->tmpfile, "w"),
+            { l_packer_add(packer, L_TRASH_OBJECT(l_int_new(92))); });
   /* unpack */
-  while (!(obj = l_unpacker_recv(unpacker, &err)))
-    {
-      PIF_CHECK(!err);
-    }
-  /* check object */
-  PIF_CHECK(L_IS_INT(obj));
-  PIF_CHECK_EQ(L_INT_VALUE(obj), 92);
-  /* cleanup */
-  L_OBJECT_CLEAR(obj);
-  L_OBJECT_CLEAR(unpacker);
+  TEST_UNPACK(byte_stream_new(data->tmpfile, "r"),
+              1,
+              { CHECK_INT(objs[0], 92); });
 }
 
 test /* int_0x12345678 */
 {
-  LStream *stream;
-  LPacker *packer;
-  LUnpacker *unpacker;
-  LObject *obj;
-  GError *err = NULL;
-  /* create the packer */
-  stream = byte_stream_new(data->tmpfile, "w");
-  packer = l_packer_new(stream);
-  L_OBJECT_CLEAR(stream);
   /* pack */
-  obj = L_OBJECT(l_int_new(0x12345678));
-  l_packer_add(packer, obj);
-  L_OBJECT_CLEAR(obj);
-  /* process */
-  while (!l_packer_send(packer, &err))
-    {
-      PIF_CHECK(!err);
-    }
-  /* cleanup */
-  L_OBJECT_CLEAR(packer);
-  /* create the unpacker */
-  stream = byte_stream_new(data->tmpfile, "r");
-  unpacker = l_unpacker_new(stream);
-  L_OBJECT_CLEAR(stream);
+  TEST_PACK(byte_stream_new(data->tmpfile, "w"),
+            { l_packer_add(packer, L_TRASH_OBJECT(l_int_new(0x12345678))); });
   /* unpack */
-  while (!(obj = l_unpacker_recv(unpacker, &err)))
-    {
-      PIF_CHECK(!err);
-    }
-  /* check object */
-  PIF_CHECK(L_IS_INT(obj));
-  PIF_CHECK_EQ(L_INT_VALUE(obj), 0x12345678);
-  /* cleanup */
-  L_OBJECT_CLEAR(obj);
-  L_OBJECT_CLEAR(unpacker);
+  TEST_UNPACK(byte_stream_new(data->tmpfile, "r"),
+              1,
+              { CHECK_INT(objs[0], 0x12345678); });
 }
 
-test /* sting_1 */
+test /* string_1 */
 {
-  LStream *stream;
-  LPacker *packer;
-  LUnpacker *unpacker;
-  LObject *obj;
-  GError *err = NULL;
-  /* create the packer */
-  stream = byte_stream_new(data->tmpfile, "w");
-  packer = l_packer_new(stream);
-  L_OBJECT_CLEAR(stream);
   /* pack */
-  obj = L_OBJECT(l_string_new("test-string-1", -1));
-  l_packer_add(packer, obj);
-  L_OBJECT_CLEAR(obj);
-  /* process */
-  while (!l_packer_send(packer, &err))
-    {
-      PIF_CHECK(!err);
-    }
-  /* cleanup */
-  L_OBJECT_CLEAR(packer);
-  /* create the unpacker */
-  stream = byte_stream_new(data->tmpfile, "r");
-  unpacker = l_unpacker_new(stream);
-  L_OBJECT_CLEAR(stream);
+  TEST_PACK(byte_stream_new(data->tmpfile, "w"),
+            { l_packer_add(packer, L_TRASH_OBJECT(l_string_new("string-test-1", -1))); });
   /* unpack */
-  while (!(obj = l_unpacker_recv(unpacker, &err)))
-    {
-      PIF_CHECK(!err);
-    }
-  /* check object */
-  PIF_CHECK(L_IS_STRING(obj));
-  PIF_CHECK_EQ_STR(L_STRING(obj)->str, "test-string-1");
-  /* cleanup */
-  L_OBJECT_CLEAR(obj);
-  L_OBJECT_CLEAR(unpacker);
+  TEST_UNPACK(byte_stream_new(data->tmpfile, "r"),
+              1,
+              { CHECK_STRING(objs[0], "string-test-1"); });
 }
 
 test /* sting_2 */
 {
-  LStream *stream;
-  LPacker *packer;
-  LUnpacker *unpacker;
-  LObject *obj;
-  GError *err = NULL;
-  /* create the packer */
-  stream = byte_stream_new(data->tmpfile, "w");
-  packer = l_packer_new(stream);
-  L_OBJECT_CLEAR(stream);
   /* pack */
-  obj = L_OBJECT(l_string_new("test-string-2", -1));
-  l_packer_add(packer, obj);
-  L_OBJECT_CLEAR(obj);
-  /* process */
-  while (!l_packer_send(packer, &err))
-    {
-      PIF_CHECK(!err);
-    }
-  /* cleanup */
-  L_OBJECT_CLEAR(packer);
-  /* create the unpacker */
-  stream = byte_stream_new(data->tmpfile, "r");
-  unpacker = l_unpacker_new(stream);
-  L_OBJECT_CLEAR(stream);
+  TEST_PACK(byte_stream_new(data->tmpfile, "w"),
+            { l_packer_add(packer, L_TRASH_OBJECT(l_string_new("string-test-2", -1))); });
   /* unpack */
-  while (!(obj = l_unpacker_recv(unpacker, &err)))
-    {
-      PIF_CHECK(!err);
-    }
-  /* check object */
-  PIF_CHECK(L_IS_STRING(obj));
-  PIF_CHECK_EQ_STR(L_STRING(obj)->str, "test-string-2");
-  /* cleanup */
-  L_OBJECT_CLEAR(obj);
-  L_OBJECT_CLEAR(unpacker);
+  TEST_UNPACK(byte_stream_new(data->tmpfile, "r"),
+              1,
+              { CHECK_STRING(objs[0], "string-test-2"); });
 }
 
 test /* tuple_empty */
 {
-  LStream *stream;
-  LPacker *packer;
-  LUnpacker *unpacker;
-  LObject *obj;
-  GError *err = NULL;
-  /* create the packer */
-  stream = byte_stream_new(data->tmpfile, "w");
-  packer = l_packer_new(stream);
-  L_OBJECT_CLEAR(stream);
   /* pack */
-  obj = L_OBJECT(l_tuple_new(0));
-  l_packer_add(packer, obj);
-  L_OBJECT_CLEAR(obj);
-  /* process */
-  while (!l_packer_send(packer, &err))
-    {
-      PIF_CHECK(!err);
-    }
-  /* cleanup */
-  L_OBJECT_CLEAR(packer);
-  /* create the unpacker */
-  stream = byte_stream_new(data->tmpfile, "r");
-  unpacker = l_unpacker_new(stream);
-  L_OBJECT_CLEAR(stream);
+  TEST_PACK(byte_stream_new(data->tmpfile, "w"),
+            { l_packer_add(packer, L_TRASH_OBJECT(l_tuple_new(0))); });
   /* unpack */
-  while (!(obj = l_unpacker_recv(unpacker, &err)))
-    {
-      PIF_CHECK(!err);
-    }
-  /* check object */
-  PIF_CHECK(L_IS_TUPLE(obj));
-  PIF_CHECK_EQ(L_TUPLE_SIZE(obj), 0);
-  /* cleanup */
-  L_OBJECT_CLEAR(obj);
-  L_OBJECT_CLEAR(unpacker);
+  TEST_UNPACK(byte_stream_new(data->tmpfile, "r"),
+              1,
+              { CHECK_TUPLE(objs[0], 0); });
 }
 
 test /* tuple_1 */
 {
-  LStream *stream;
-  LPacker *packer;
-  LUnpacker *unpacker;
-  LObject *obj;
-  GError *err = NULL;
-  /* create the packer */
-  stream = byte_stream_new(data->tmpfile, "w");
-  packer = l_packer_new(stream);
-  L_OBJECT_CLEAR(stream);
   /* pack */
-  obj = L_OBJECT(l_tuple_newl_give(1, l_int_new(123), NULL));
-  l_packer_add(packer, obj);
-  L_OBJECT_CLEAR(obj);
-  /* process */
-  while (!l_packer_send(packer, &err))
-    {
-      PIF_CHECK(!err);
-    }
-  /* cleanup */
-  L_OBJECT_CLEAR(packer);
-  /* create the unpacker */
-  stream = byte_stream_new(data->tmpfile, "r");
-  unpacker = l_unpacker_new(stream);
-  L_OBJECT_CLEAR(stream);
+  TEST_PACK
+    (byte_stream_new(data->tmpfile, "w"),
+     {
+       l_packer_add(packer,
+                    L_TRASH_OBJECT(l_tuple_newl_give(1,
+                                                     l_int_new(123),
+                                                     NULL)));
+     });
   /* unpack */
-  while (!(obj = l_unpacker_recv(unpacker, &err)))
-    {
-      PIF_CHECK(!err);
-    }
-  /* check object */
-  PIF_CHECK(L_IS_TUPLE(obj));
-  PIF_CHECK_EQ(L_TUPLE_SIZE(obj), 1);
-  PIF_CHECK(L_IS_INT(L_TUPLE_ITEM(obj, 0)));
-  PIF_CHECK_EQ(L_INT_VALUE(L_TUPLE_ITEM(obj, 0)), 123);
-  /* cleanup */
-  L_OBJECT_CLEAR(obj);
-  L_OBJECT_CLEAR(unpacker);
+  TEST_UNPACK(byte_stream_new(data->tmpfile, "r"),
+              1,
+              {
+                CHECK_TUPLE(objs[0], 1);
+                CHECK_INT(L_TUPLE_ITEM(objs[0], 0), 123);
+              });
 }
 
 test /* tuple_2 */
 {
-  LStream *stream;
-  LPacker *packer;
-  LUnpacker *unpacker;
-  LObject *obj;
-  GError *err = NULL;
-  /* create the packer */
-  stream = byte_stream_new(data->tmpfile, "w");
-  packer = l_packer_new(stream);
-  L_OBJECT_CLEAR(stream);
   /* pack */
-  obj = L_OBJECT(l_tuple_newl_give(2,
-                                   l_int_new(123),
-                                   l_int_new(456),
-                                   NULL));
-  l_packer_add(packer, obj);
-  L_OBJECT_CLEAR(obj);
-  /* process */
-  while (!l_packer_send(packer, &err))
-    {
-      PIF_CHECK(!err);
-    }
-  /* cleanup */
-  L_OBJECT_CLEAR(packer);
-  /* create the unpacker */
-  stream = byte_stream_new(data->tmpfile, "r");
-  unpacker = l_unpacker_new(stream);
-  L_OBJECT_CLEAR(stream);
+  TEST_PACK
+    (byte_stream_new(data->tmpfile, "w"),
+     {
+       l_packer_add(packer,
+                    L_TRASH_OBJECT(l_tuple_newl_give(2,
+                                                     l_int_new(456),
+                                                     l_string_new("pack-tuple-test", -1),
+                                                     NULL)));
+     });
   /* unpack */
-  while (!(obj = l_unpacker_recv(unpacker, &err)))
-    {
-      PIF_CHECK(!err);
-    }
-  /* check object */
-  PIF_CHECK(L_IS_TUPLE(obj));
-  PIF_CHECK_EQ(L_TUPLE_SIZE(obj), 2);
-  PIF_CHECK(L_IS_INT(L_TUPLE_ITEM(obj, 0)));
-  PIF_CHECK_EQ(L_INT_VALUE(L_TUPLE_ITEM(obj, 0)), 123);
-  PIF_CHECK(L_IS_INT(L_TUPLE_ITEM(obj, 1)));
-  PIF_CHECK_EQ(L_INT_VALUE(L_TUPLE_ITEM(obj, 1)), 456);
-  /* cleanup */
-  L_OBJECT_CLEAR(obj);
-  L_OBJECT_CLEAR(unpacker);
+  TEST_UNPACK(byte_stream_new(data->tmpfile, "r"),
+              1,
+              {
+                CHECK_TUPLE(objs[0], 2);
+                CHECK_INT(L_TUPLE_ITEM(objs[0], 0), 456);
+                CHECK_STRING(L_TUPLE_ITEM(objs[0], 1), "pack-tuple-test");
+              });
 }
