@@ -2,7 +2,9 @@
 
 namespace L
 {
-  class Int;
+  class Int {
+    void class_init ();
+  };
   class String {
     void class_init ();
   };
