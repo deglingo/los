@@ -22,3 +22,25 @@
 #    ...
 #    fun:l_object_get_class
 # }
+
+# trash allocation
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:l_trash_alloc
+   ...
+   fun:l_trash_push
+}
+
+# trash nodes allocation
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:l_trash_node_alloc
+   ...
+   fun:l_trash_add
+}

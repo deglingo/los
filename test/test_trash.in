@@ -1,0 +1,23 @@
+/* -*- c -*- */
+
+header
+{
+##include "los/ltrash.h"
+##include "los/lint.h"
+}
+
+test
+{
+  gpointer ptr;
+  LObject *obj;
+  /* init */
+  l_trash_push();
+  /* try a g_malloc'ed pointer */
+  ptr = g_malloc(40);
+  PIF_CHECK_EQ_PTR(L_TRASH_GPOINTER(ptr), ptr);
+  /* try an LObject */
+  obj = L_OBJECT(l_int_new(42));
+  PIF_CHECK_EQ_PTR(L_TRASH_OBJECT(obj), obj);
+  /* cleanup */
+  l_trash_pop();
+}
