@@ -15,6 +15,7 @@ include_HEADERS = los.h
 
 includelos_HEADERS = \
 	lbase.h \
+	ltrash.h \
 	lobject.h \
 	lint.h lint-def.h \
 	lstring.h lstring-def.h \
@@ -27,6 +28,7 @@ includelos_HEADERS = \
 	lunpacker.h lunpacker-def.h
 
 liblos_la_SOURCES = \
+	ltrash.c \
 	lobject.c \
 	lint.c \
 	lstring.c \

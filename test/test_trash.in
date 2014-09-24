@@ -1,0 +1,15 @@
+/* -*- c -*- */
+
+header
+{
+##include "los/ltrash.h"
+}
+
+test
+{
+  gpointer ptr;
+  L_TRASH_INIT(8);
+  ptr = g_malloc(40);
+  PIF_CHECK_EQ_PTR(L_TRASH_GPOINTER(ptr), ptr);
+  L_TRASH_CLEANUP();
+}
