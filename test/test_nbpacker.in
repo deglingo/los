@@ -194,3 +194,29 @@ test /* tuple_2 */
                 CHECK_STRING(L_TUPLE_ITEM(objs[0], 1), "pack-tuple-test");
               });
 }
+
+test /* tuple_nested */
+{
+  /* pack */
+  TEST_PACK
+    (byte_stream_new(data->tmpfile, "w"),
+     {
+       l_packer_add
+         (packer,
+          L_TRASH_OBJECT(l_tuple_newl_give(3,
+                                           l_int_new(1),
+                                           l_tuple_newl_give(1, l_int_new(2), NULL),
+                                           l_int_new(3),
+                                           NULL)));
+     });
+  /* unpack */
+  TEST_UNPACK(byte_stream_new(data->tmpfile, "r"),
+              1,
+              {
+                CHECK_TUPLE(objs[0], 3);
+                CHECK_INT(L_TUPLE_ITEM(objs[0], 0), 1);
+                CHECK_TUPLE(L_TUPLE_ITEM(objs[0], 1), 1);
+                CHECK_INT(L_TUPLE_ITEM(L_TUPLE_ITEM(objs[0], 1), 0), 2);
+                CHECK_INT(L_TUPLE_ITEM(objs[0], 2), 3);
+              });
+}
