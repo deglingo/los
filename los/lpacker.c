@@ -55,6 +55,7 @@ enum
   {
     S_TUPLE_START = 0,
     S_TUPLE_WRITE_TYPE,
+    S_TUPLE_WRITE_SIZE,
   };
 
 
@@ -359,6 +360,12 @@ static gboolean _send_tuple ( LPacker *packer,
       BUFFER_SET(priv, guint8, (guint8) PACK_KEY_TUPLE);
       priv->stage = S_TUPLE_WRITE_TYPE;
     case S_TUPLE_WRITE_TYPE:
+      if (!_send(packer, error))
+        return FALSE;
+      /* size */
+      BUFFER_SET(priv, guint32, GUINT32_TO_BE((guint32) L_TUPLE_SIZE(priv->object)));
+      priv->stage = S_TUPLE_WRITE_SIZE;
+    case S_TUPLE_WRITE_SIZE:
       if (!_send(packer, error))
         return FALSE;
       break;

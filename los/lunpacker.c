@@ -51,6 +51,18 @@ typedef struct _ContextString
 
 
 
+/* ContextTuple:
+ */
+typedef struct _ContextTuple
+{
+  CONTEXT_HEADER;
+  guint size;
+  LTuple *tuple;
+}
+  ContextTuple;
+
+
+
 /* Context:
  */
 typedef union _Context
@@ -59,6 +71,7 @@ typedef union _Context
   ContextAny c_any;
   ContextInt c_int;
   ContextString c_string;
+  ContextTuple c_tuple;
 }
   Context;
 
@@ -77,6 +90,14 @@ enum
     S_STRING_START = 0,
     S_STRING_READ_LEN,
     S_STRING_READ_VALUE,
+  };
+
+
+
+enum
+  {
+    S_TUPLE_START = 0,
+    S_TUPLE_READ_SIZE,
   };
 
 
@@ -389,7 +410,28 @@ static LObject *_recv_tuple ( LUnpacker *unpacker,
                               Context *ctxt,
                               GError **error )
 {
-  return L_OBJECT(l_tuple_new(0));
+  Private *priv = PRIVATE(unpacker);
+  switch (ctxt->c_string.stage)
+    {
+    case S_TUPLE_START:
+      BUFFER_SET(priv, sizeof(guint32));
+      ctxt->c_string.stage = S_TUPLE_READ_SIZE;
+    case S_TUPLE_READ_SIZE:
+      if (!_recv(unpacker, error))
+        return NULL;
+      ctxt->c_tuple.size = GUINT32_FROM_BE(*((guint32 *)(priv->buffer)));
+      ctxt->c_tuple.tuple = l_tuple_new(ctxt->c_tuple.size);
+      /* [FIXME] */
+      {
+        guint i;
+        for (i = 0; i < ctxt->c_tuple.size; i++)
+          l_tuple_give_item(ctxt->c_tuple.tuple, i, L_OBJECT(l_int_new(123)));
+      }
+      break;
+    default:
+      ASSERT(0);
+    }
+  return L_OBJECT(ctxt->c_tuple.tuple);
 }
 
 
