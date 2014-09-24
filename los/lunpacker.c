@@ -16,7 +16,9 @@
 
 #define CONTEXT_HEADER \
   gint type; \
-  gint stage
+  gint stage; \
+  LObject *object; \
+  gboolean done
 
 
 
@@ -57,7 +59,7 @@ typedef struct _ContextTuple
 {
   CONTEXT_HEADER;
   guint size;
-  LTuple *tuple;
+  guint item;
 }
   ContextTuple;
 
@@ -98,6 +100,7 @@ enum
   {
     S_TUPLE_START = 0,
     S_TUPLE_READ_SIZE,
+    S_TUPLE_READ_ITEM,
   };
 
 
@@ -112,6 +115,7 @@ typedef struct _Private
   guint buffer_size;
   guint data_size;
   guint buffer_offset;
+  GPtrArray *object_stack;
 }
   Private;
 
@@ -138,6 +142,7 @@ static void l_unpacker_init ( LObject *obj )
 {
   L_UNPACKER(obj)->private = g_new0(Private, 1);
   PRIVATE(obj)->current_context = -1;
+  PRIVATE(obj)->object_stack = g_ptr_array_new();
 }
 
 
@@ -159,11 +164,15 @@ LUnpacker *l_unpacker_new ( LStream *stream )
 static void _dispose ( LObject *object )
 {
   L_OBJECT_CLEAR(L_UNPACKER(object)->stream);
-  g_free(PRIVATE(object)->buffer);
-  PRIVATE(object)->buffer = NULL;
-  PRIVATE(object)->buffer_size = 0;
-  g_free(L_UNPACKER(object)->private);
-  L_UNPACKER(object)->private = NULL;
+  if (PRIVATE(object))
+    {
+      g_free(PRIVATE(object)->buffer);
+      PRIVATE(object)->buffer = NULL;
+      PRIVATE(object)->buffer_size = 0;
+      g_ptr_array_unref(PRIVATE(object)->object_stack);
+      g_free(L_UNPACKER(object)->private);
+      L_UNPACKER(object)->private = NULL;
+    }
   /* [FIXME] */
   ((LObjectClass *) parent_class)->dispose(object);
 }
@@ -355,11 +364,71 @@ static gboolean _recv ( LUnpacker *unpacker,
 
 
 
-static LObject *_recv_int ( LUnpacker *unpacker,
-                           Context *ctxt,
-                           GError **error )
+static Context *context_peek ( LUnpacker *unpacker )
+{
+  if (PRIVATE(unpacker)->current_context < 0)
+    return NULL;
+  else
+    return PRIVATE(unpacker)->context_stack + PRIVATE(unpacker)->current_context;
+}
+
+
+
+static Context *context_push ( LUnpacker *unpacker )
+{
+  Context *ctxt;
+  /* fprintf(stderr, "\nPUSH\n"); */
+  if (PRIVATE(unpacker)->current_context < 0)
+    {
+      PRIVATE(unpacker)->current_context = 0;
+    }
+  else
+    {
+      PRIVATE(unpacker)->current_context++;
+      ASSERT(PRIVATE(unpacker)->current_context < CONTEXT_STACK_SIZE);
+    }
+  ctxt = PRIVATE(unpacker)->context_stack + PRIVATE(unpacker)->current_context;
+  ctxt->c_type = -1;
+  ctxt->c_any.object = NULL;
+  ctxt->c_any.done = FALSE;
+  BUFFER_SET(PRIVATE(unpacker), sizeof(guint8));
+  return ctxt;
+}
+
+
+
+static void context_pop ( LUnpacker *unpacker )
+{
+  /* fprintf(stderr, "\nPOP\n"); */
+  ASSERT(PRIVATE(unpacker)->current_context >= 0);
+  PRIVATE(unpacker)->current_context--;
+}
+
+
+
+static void object_push ( LUnpacker *unpacker,
+                          LObject *object )
+{
+  g_ptr_array_add(PRIVATE(unpacker)->object_stack, object);
+}
+
+
+
+static LObject *object_pop ( LUnpacker *unpacker )
+{
+  ASSERT(PRIVATE(unpacker)->object_stack->len > 0);
+  return L_OBJECT(g_ptr_array_remove_index(PRIVATE(unpacker)->object_stack,
+                                           PRIVATE(unpacker)->object_stack->len - 1));
+}
+
+
+
+static gboolean _recv_int ( LUnpacker *unpacker,
+                            Context *ctxt,
+                            GError **error )
 {
   Private *priv = PRIVATE(unpacker);
+  /* fprintf(stderr, "\nRECV_INT(%d)\n", ctxt->c_any.stage); */
   switch (ctxt->c_int.stage)
     {
     case S_INT_START:
@@ -367,17 +436,19 @@ static LObject *_recv_int ( LUnpacker *unpacker,
       ctxt->c_int.stage = S_INT_READ_VALUE;
     case S_INT_READ_VALUE:
       if (!_recv(unpacker, error))
-        return NULL;
+        return FALSE;
       break;
     default:
-      ASSERT(0);
+      CL_ERROR("stage = %d", ctxt->c_int.stage);
     }
-  return L_OBJECT(l_int_new(GINT32_FROM_BE(*((gint32 *)(priv->buffer)))));
+  ctxt->c_any.object = L_OBJECT(l_int_new(GINT32_FROM_BE(*((gint32 *)(priv->buffer)))));
+  ctxt->c_any.done = TRUE;
+  return TRUE;
 }
 
 
 
-static LObject *_recv_string ( LUnpacker *unpacker,
+static gboolean _recv_string ( LUnpacker *unpacker,
                                Context *ctxt,
                                GError **error )
 {
@@ -389,24 +460,26 @@ static LObject *_recv_string ( LUnpacker *unpacker,
       ctxt->c_string.stage = S_STRING_READ_LEN;
     case S_STRING_READ_LEN:
       if (!_recv(unpacker, error))
-        return NULL;
+        return FALSE;
       ctxt->c_string.len = GUINT32_FROM_BE(*((guint32 *)(priv->buffer)));
       /* fprintf(stderr, "\nLEN=%d\n", ctxt->c_string.len); */
       BUFFER_SET(priv, ctxt->c_string.len);
       ctxt->c_string.stage = S_STRING_READ_VALUE;
     case S_STRING_READ_VALUE:
       if (!_recv(unpacker, error))
-        return NULL;
+        return FALSE;
       break;
     default:
       ASSERT(0);
     }
-  return L_OBJECT(l_string_new(priv->buffer, ctxt->c_string.len));
+  ctxt->c_any.object = L_OBJECT(l_string_new(priv->buffer, ctxt->c_string.len));
+  ctxt->c_any.done = TRUE;
+  return TRUE;
 }
 
 
 
-static LObject *_recv_tuple ( LUnpacker *unpacker,
+static gboolean _recv_tuple ( LUnpacker *unpacker,
                               Context *ctxt,
                               GError **error )
 {
@@ -415,23 +488,37 @@ static LObject *_recv_tuple ( LUnpacker *unpacker,
     {
     case S_TUPLE_START:
       BUFFER_SET(priv, sizeof(guint32));
-      ctxt->c_string.stage = S_TUPLE_READ_SIZE;
+      ctxt->c_tuple.stage = S_TUPLE_READ_SIZE;
     case S_TUPLE_READ_SIZE:
       if (!_recv(unpacker, error))
-        return NULL;
+        return FALSE;
       ctxt->c_tuple.size = GUINT32_FROM_BE(*((guint32 *)(priv->buffer)));
-      ctxt->c_tuple.tuple = l_tuple_new(ctxt->c_tuple.size);
-      /* [FIXME] */
-      {
-        guint i;
-        for (i = 0; i < ctxt->c_tuple.size; i++)
-          l_tuple_give_item(ctxt->c_tuple.tuple, i, L_OBJECT(l_int_new(123)));
-      }
+      ctxt->c_tuple.object = L_OBJECT(l_tuple_new(ctxt->c_tuple.size));
+      ctxt->c_tuple.item = 0;
+      ctxt->c_tuple.stage = S_TUPLE_READ_ITEM;
+    case S_TUPLE_READ_ITEM:
+      if (ctxt->c_tuple.item > 0)
+        {
+          l_tuple_give_item(L_TUPLE(ctxt->c_tuple.object),
+                            ctxt->c_tuple.item - 1,
+                            object_pop(unpacker));
+        }
+      if (ctxt->c_tuple.item < ctxt->c_tuple.size)
+        {
+          ctxt->c_tuple.item++;
+          context_push(unpacker);
+          return TRUE;
+        }
+      else
+        {
+          break;
+        }
       break;
     default:
       ASSERT(0);
     }
-  return L_OBJECT(ctxt->c_tuple.tuple);
+  ctxt->c_any.done = TRUE;
+  return TRUE;
 }
 
 
@@ -443,45 +530,49 @@ LObject *l_unpacker_recv ( LUnpacker *unpacker,
 {
   Private *priv = PRIVATE(unpacker);
   Context *ctxt;
-  /* get context */
-  if (priv->current_context < 0)
+  while (1)
     {
-      priv->current_context = 0;
-      ctxt = priv->context_stack + priv->current_context;
-      ctxt->c_type = -1;
-      BUFFER_SET(priv, sizeof(guint8));
+      /* get context */
+      if (!(ctxt = context_peek(unpacker)))
+        {
+          ctxt = context_push(unpacker);
+        }
+      /* get type */
+      if (ctxt->c_type < 0)
+        {
+          if (!_recv(unpacker, error))
+            return NULL;
+          ctxt->c_type = *((guint8 *)(priv->buffer));
+          /* fprintf(stderr, "\nRECV: %d\n", ctxt->c_type); */
+          ctxt->c_any.stage = 0;
+        }
+      /* get object */
+      switch (ctxt->c_type)
+        {
+        case PACK_KEY_INT:
+          if (!_recv_int(unpacker, ctxt, error))
+            return NULL;
+          break;
+        case PACK_KEY_STRING:
+          if (!_recv_string(unpacker, ctxt, error))
+            return NULL;
+          break;
+        case PACK_KEY_TUPLE:
+          if (!_recv_tuple(unpacker, ctxt, error))
+            return NULL;
+          break;
+        default:
+          CL_ERROR("[TODO] type = %d", ctxt->c_type);
+        }
+      if (ctxt->c_any.done)
+        {
+          LObject *obj = ctxt->c_any.object;
+          ASSERT(obj);
+          context_pop(unpacker);
+          if (priv->current_context < 0)
+            return obj;
+          else
+            object_push(unpacker, obj);
+        }
     }
-  else
-    {
-      ctxt = priv->context_stack + priv->current_context;
-    }
-  /* get type */
-  if (ctxt->c_type < 0)
-    {
-      if (!_recv(unpacker, error))
-        return NULL;
-      ctxt->c_type = *((guint8 *)(priv->buffer));
-      ctxt->c_any.stage = 0;
-    }
-  /* get object */
-  switch (ctxt->c_type)
-    {
-    case PACK_KEY_INT:
-      return  _recv_int(unpacker, ctxt, error);
-    case PACK_KEY_STRING:
-      return _recv_string(unpacker, ctxt, error);
-    case PACK_KEY_TUPLE:
-      return _recv_tuple(unpacker, ctxt, error);
-    default:
-      CL_ERROR("[TODO] type = %d", ctxt->c_type);
-    }
-  return NULL;
-
-  /* if (!priv->running) */
-  /*   { */
-  /*     priv->data_size = sizeof(gint32); */
-  /*     priv->buffer_offset = 0; */
-  /*     priv->running = 1; */
-  /*   } */
-  /* return _recv(unpacker, error); */
 }

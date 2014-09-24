@@ -12,6 +12,58 @@
 
 
 #define BUFFER_SIZE 16
+#define CONTEXT_STACK_SIZE 16
+
+
+
+#define CONTEXT_HEADER \
+  gint type; \
+  LObject *object; \
+  gint stage
+
+
+
+/* ContextAny:
+ */
+typedef struct _ContextAny
+{
+  CONTEXT_HEADER;
+}
+  ContextAny;
+
+
+
+/* ContextInt:
+ */
+typedef struct _ContextInt
+{
+  CONTEXT_HEADER;
+}
+  ContextInt;
+
+
+
+/* ContextTuple:
+ */
+typedef struct _ContextTuple
+{
+  CONTEXT_HEADER;
+  guint32 item;
+}
+  ContextTuple;
+
+
+
+/* Context:
+ */
+typedef union _Context
+  {
+    gint c_type;
+    ContextAny c_any;
+    ContextInt c_int;
+    ContextTuple c_tuple;
+  }
+  Context;
 
 
 
@@ -19,12 +71,13 @@
  */
 typedef struct _Private
 {
-  LObject *object;
-  gint stage;
   gchar real_buffer[BUFFER_SIZE];
   gchar *buffer;
   guint data_size;
   guint buffer_offset;
+  GQueue *queue;
+  Context context_stack[CONTEXT_STACK_SIZE];
+  gint current_context;
 }
   Private;
 
@@ -56,6 +109,7 @@ enum
     S_TUPLE_START = 0,
     S_TUPLE_WRITE_TYPE,
     S_TUPLE_WRITE_SIZE,
+    S_TUPLE_WRITE_ITEM,
   };
 
 
@@ -78,6 +132,8 @@ static void l_packer_class_init ( LObjectClass *cls )
 static void l_packer_init ( LObject *obj )
 {
   L_PACKER(obj)->private = g_new0(Private, 1);
+  PRIVATE(obj)->current_context = -1;
+  PRIVATE(obj)->queue = g_queue_new();
 }
 
 
@@ -99,7 +155,12 @@ LPacker *l_packer_new ( LStream *stream )
 static void _dispose ( LObject *object )
 {
   L_OBJECT_CLEAR(L_PACKER(object)->stream);
-  g_free(PRIVATE(object));
+  if (PRIVATE(object))
+    {
+      g_queue_free(PRIVATE(object)->queue);
+      g_free(PRIVATE(object));
+      L_PACKER(object)->private = NULL;
+    }
   /* [FIXME] */
   ((LObjectClass *) parent_class)->dispose(object);
 }
@@ -236,8 +297,7 @@ gboolean l_packer_put ( LPacker *packer,
 void l_packer_add ( LPacker *packer,
                     LObject *object )
 {
-  PRIVATE(packer)->object = l_object_ref(object);
-  PRIVATE(packer)->stage = 0;
+  g_queue_push_head(PRIVATE(packer)->queue, l_object_ref(object));
 }
 
 
@@ -272,6 +332,50 @@ static gboolean _send ( LPacker *packer,
 
 
 
+static Context *context_peek ( LPacker *packer )
+{
+  if (PRIVATE(packer)->current_context >= 0) {
+    ASSERT(PRIVATE(packer)->current_context < CONTEXT_STACK_SIZE);
+    return PRIVATE(packer)->context_stack + PRIVATE(packer)->current_context;
+  } else {
+    return NULL;
+  }
+}
+
+
+
+static Context *context_push ( LPacker *packer,
+                               LObject *object )
+{
+  Context *ctxt;
+  if (PRIVATE(packer)->current_context >= 0) {
+    PRIVATE(packer)->current_context++;
+    ASSERT(PRIVATE(packer)->current_context < CONTEXT_STACK_SIZE);
+  } else {
+    PRIVATE(packer)->current_context = 0;
+  }
+  ctxt = PRIVATE(packer)->context_stack + PRIVATE(packer)->current_context;
+  /* [fixme] LObjectClass.pack_type */
+  if (L_IS_INT(object)) ctxt->c_type = PACK_KEY_INT;
+  else if (L_IS_STRING(object)) ctxt->c_type = PACK_KEY_STRING;
+  else if (L_IS_TUPLE(object)) ctxt->c_type = PACK_KEY_TUPLE;
+  else ASSERT(0);
+  ctxt->c_any.object = object;
+  ctxt->c_any.stage = 0;
+  return ctxt;
+}
+
+
+
+static void context_pop ( LPacker *packer )
+{
+  ASSERT(PRIVATE(packer)->current_context >= 0);
+  L_OBJECT_CLEAR(PRIVATE(packer)->context_stack[PRIVATE(packer)->current_context].c_any.object);
+  PRIVATE(packer)->current_context--;
+}
+
+
+
 #define BUFFER_SET(priv, tp, val) do {          \
     ASSERT(sizeof(tp) <= BUFFER_SIZE);          \
     (priv)->buffer = (priv)->real_buffer;       \
@@ -291,88 +395,103 @@ static gboolean _send ( LPacker *packer,
 
 
 static gboolean _send_int ( LPacker *packer,
+                            Context *ctxt,
                             GError **error )
 {
   Private *priv = PRIVATE(packer);
-  switch (priv->stage)
+  switch (ctxt->c_any.stage)
     {
     case S_INT_START:
       BUFFER_SET(priv, guint8, (guint8) PACK_KEY_INT);
-      priv->stage = S_INT_WRITE_TYPE;
+      ctxt->c_any.stage = S_INT_WRITE_TYPE;
     case S_INT_WRITE_TYPE:
       {
         gint32 val;
-        val = L_INT_VALUE(priv->object);
+        val = L_INT_VALUE(ctxt->c_any.object);
         if (!_send(packer, error))
           return FALSE;
         /* value */
         BUFFER_SET(priv, gint32, GINT32_TO_BE(val));
-        priv->stage = S_INT_WRITE_VALUE;
+        ctxt->c_any.stage = S_INT_WRITE_VALUE;
       }
     case S_INT_WRITE_VALUE:
       if (!_send(packer, error))
         return FALSE;
     }
-  L_OBJECT_CLEAR(priv->object);
+  context_pop(packer);
   return TRUE;
 }
 
 
 
 static gboolean _send_string ( LPacker *packer,
+                               Context *ctxt,
                                GError **error )
 {
   Private *priv = PRIVATE(packer);
-  switch (priv->stage)
+  switch (ctxt->c_any.stage)
     {
     case S_STRING_START:
       BUFFER_SET(priv, guint8, (guint8) PACK_KEY_STRING);
-      priv->stage = S_STRING_WRITE_TYPE;
+      ctxt->c_any.stage = S_STRING_WRITE_TYPE;
     case S_STRING_WRITE_TYPE:
       if (!_send(packer, error))
         return FALSE;
       /* string len */
-      BUFFER_SET(priv, guint32, GUINT_TO_BE((guint32)(L_STRING(priv->object)->len)));
-      priv->stage = S_STRING_WRITE_LEN;
+      BUFFER_SET(priv, guint32, GUINT_TO_BE((guint32)(L_STRING(ctxt->c_any.object)->len)));
+      ctxt->c_any.stage = S_STRING_WRITE_LEN;
     case S_STRING_WRITE_LEN:
       if (!_send(packer, error))
         return FALSE;
       /* string value */
-      BUFFER_DIVERT(priv, L_STRING(priv->object)->str, L_STRING(priv->object)->len);
-      priv->stage = S_STRING_WRITE_VALUE;
+      BUFFER_DIVERT(priv, L_STRING(ctxt->c_any.object)->str, L_STRING(ctxt->c_any.object)->len);
+      ctxt->c_any.stage = S_STRING_WRITE_VALUE;
     case S_STRING_WRITE_VALUE:
       if (!_send(packer, error))
         return FALSE;
     }
-  L_OBJECT_CLEAR(priv->object);
+  context_pop(packer);
   return TRUE;
 }
 
 
 
 static gboolean _send_tuple ( LPacker *packer,
+                              Context *ctxt,
                               GError **error )
 {
   Private *priv = PRIVATE(packer);
-  switch (priv->stage)
+  switch (ctxt->c_any.stage)
     {
     case S_TUPLE_START:
       BUFFER_SET(priv, guint8, (guint8) PACK_KEY_TUPLE);
-      priv->stage = S_TUPLE_WRITE_TYPE;
+      ctxt->c_any.stage = S_TUPLE_WRITE_TYPE;
     case S_TUPLE_WRITE_TYPE:
       if (!_send(packer, error))
         return FALSE;
       /* size */
-      BUFFER_SET(priv, guint32, GUINT32_TO_BE((guint32) L_TUPLE_SIZE(priv->object)));
-      priv->stage = S_TUPLE_WRITE_SIZE;
+      BUFFER_SET(priv, guint32, GUINT32_TO_BE((guint32) L_TUPLE_SIZE(ctxt->c_any.object)));
+      ctxt->c_any.stage = S_TUPLE_WRITE_SIZE;
     case S_TUPLE_WRITE_SIZE:
       if (!_send(packer, error))
         return FALSE;
-      break;
+      /* items */
+      ctxt->c_tuple.item = 0;
+      ctxt->c_tuple.stage = S_TUPLE_WRITE_ITEM;
+    case S_TUPLE_WRITE_ITEM:
+      if (L_TUPLE_SIZE(ctxt->c_tuple.object) > ctxt->c_tuple.item)
+        {
+          context_push(packer, l_object_ref(L_TUPLE_ITEM(ctxt->c_tuple.object, ctxt->c_tuple.item++)));
+          return TRUE;
+        }
+      else
+        {
+          break;
+        }
     default:
       ASSERT(0);
     }
-  L_OBJECT_CLEAR(priv->object);
+  context_pop(packer);
   return TRUE;
 }
 
@@ -383,14 +502,37 @@ static gboolean _send_tuple ( LPacker *packer,
 gboolean l_packer_send ( LPacker *packer,
                          GError **error )
 {
-  if (L_IS_INT(PRIVATE(packer)->object)) {
-    return _send_int(packer, error);
-  } else if (L_IS_STRING(PRIVATE(packer)->object)) {
-    return _send_string(packer, error);
-  } else if (L_IS_TUPLE(PRIVATE(packer)->object)) {
-    return _send_tuple(packer, error);
-  } else {
-    ASSERT(0);
-    return FALSE;
-  }
+  Private *priv = PRIVATE(packer);
+  Context *ctxt;
+  while (1)
+    {
+      /* if there is no current context, get the next object and push
+         a new context */
+      if (!(ctxt = context_peek(packer)))
+        {
+          LObject *obj = g_queue_pop_tail(priv->queue);
+          /* no more objects in the queue: all done */
+          if (!obj)
+            return TRUE;
+          /* init a new context */
+          ctxt = context_push(packer, obj);
+        }
+      /* then process it */
+      switch (ctxt->c_type) {
+      case PACK_KEY_INT:
+        if (!_send_int(packer, ctxt, error))
+          return FALSE;
+        break;
+      case PACK_KEY_STRING:
+        if (!_send_string(packer, ctxt, error))
+          return FALSE;
+        break;
+      case PACK_KEY_TUPLE:
+        if (!_send_tuple(packer, ctxt, error))
+          return FALSE;
+        break;
+      default:
+        ASSERT(0);
+      }
+    }
 }
