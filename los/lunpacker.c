@@ -484,7 +484,7 @@ static gboolean _recv_tuple ( LUnpacker *unpacker,
                               GError **error )
 {
   Private *priv = PRIVATE(unpacker);
-  switch (ctxt->c_string.stage)
+  switch (ctxt->c_any.stage)
     {
     case S_TUPLE_START:
       BUFFER_SET(priv, sizeof(guint32));
