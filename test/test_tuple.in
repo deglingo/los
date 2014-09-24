@@ -47,3 +47,11 @@ test /* newl_give */
   /* clean */
   L_OBJECT_CLEAR(t);
 }
+
+test /* empty */
+{
+  LTuple *t = l_tuple_new(0);
+  PIF_CHECK(t);
+  PIF_CHECK_EQ(L_TUPLE_SIZE(t), 0);
+  L_OBJECT_CLEAR(t);
+}

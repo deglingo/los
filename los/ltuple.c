@@ -25,8 +25,8 @@ static void l_tuple_class_init ( LObjectClass *cls )
 LTuple *l_tuple_new ( guint size )
 {
   LTuple *t = L_TUPLE(l_object_new(L_CLASS_TUPLE, NULL));
-  t->_size = size;
-  t->_items = g_new0(LObject *, size);
+  if ((t->_size = size))
+    t->_items = g_new0(LObject *, size);
   return t;
 }
 
