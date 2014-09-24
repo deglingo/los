@@ -41,6 +41,8 @@ typedef struct _LTrash
 
 #define L_TRASH_GPOINTER(ptr) (l_trash_add(_l_trash, (ptr), g_free))
 
+#define L_TRASH_OBJECT(obj) (l_trash_add(_l_trash, (obj), l_object_unref))
+
 
 
 LTrash *l_trash_init ( LTrash *trash,
