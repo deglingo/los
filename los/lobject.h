@@ -66,6 +66,8 @@ struct _LObjectClass
   gchar *name;
   LObjectClass *l_parent_class;
 
+  gchar * (* to_string) ( LObject *object );
+
   /* destructor and finalization */
   void (* dispose) ( LObject *object );
   void (* finalize) ( LObject *object );
@@ -103,6 +105,7 @@ gpointer l_object_ref ( gpointer obj );
 void l_object_unref ( gpointer obj );
 void l_object_dispose ( LObject *object );
 LObject *l_object_get_state ( LObject *object );
+gchar *l_object_to_string ( LObject *object );
 
 
 
