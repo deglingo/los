@@ -51,6 +51,14 @@ enum
 
 
 
+enum
+  {
+    S_TUPLE_START = 0,
+    S_TUPLE_WRITE_TYPE,
+  };
+
+
+
 static void _dispose ( LObject *object );
 
 
@@ -341,6 +349,28 @@ static gboolean _send_string ( LPacker *packer,
 
 
 
+static gboolean _send_tuple ( LPacker *packer,
+                              GError **error )
+{
+  Private *priv = PRIVATE(packer);
+  switch (priv->stage)
+    {
+    case S_TUPLE_START:
+      BUFFER_SET(priv, guint8, (guint8) PACK_KEY_TUPLE);
+      priv->stage = S_TUPLE_WRITE_TYPE;
+    case S_TUPLE_WRITE_TYPE:
+      if (!_send(packer, error))
+        return FALSE;
+      break;
+    default:
+      ASSERT(0);
+    }
+  L_OBJECT_CLEAR(priv->object);
+  return TRUE;
+}
+
+
+
 /* l_packer_send:
  */
 gboolean l_packer_send ( LPacker *packer,
@@ -350,6 +380,8 @@ gboolean l_packer_send ( LPacker *packer,
     return _send_int(packer, error);
   } else if (L_IS_STRING(PRIVATE(packer)->object)) {
     return _send_string(packer, error);
+  } else if (L_IS_TUPLE(PRIVATE(packer)->object)) {
+    return _send_tuple(packer, error);
   } else {
     ASSERT(0);
     return FALSE;

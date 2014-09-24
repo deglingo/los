@@ -385,6 +385,15 @@ static LObject *_recv_string ( LUnpacker *unpacker,
 
 
 
+static LObject *_recv_tuple ( LUnpacker *unpacker,
+                              Context *ctxt,
+                              GError **error )
+{
+  return L_OBJECT(l_tuple_new(0));
+}
+
+
+
 /* l_unpacker_recv:
  */
 LObject *l_unpacker_recv ( LUnpacker *unpacker,
@@ -419,6 +428,8 @@ LObject *l_unpacker_recv ( LUnpacker *unpacker,
       return  _recv_int(unpacker, ctxt, error);
     case PACK_KEY_STRING:
       return _recv_string(unpacker, ctxt, error);
+    case PACK_KEY_TUPLE:
+      return _recv_tuple(unpacker, ctxt, error);
     default:
       CL_ERROR("[TODO] type = %d", ctxt->c_type);
     }
