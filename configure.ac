@@ -3,6 +3,10 @@ AM_INIT_AUTOMAKE
 
 AC_SUBST([pkgconfigdir], ['${libdir}/pkgconfig'])
 AC_SUBST([includelosdir], ['${includedir}/los'])
+# [FIXME] this one is defined in Makefile but does not appear in
+# los.pc !?
+AC_SUBST([pkglibdir], ['${libdir}/${PACKAGE}'])
+AC_SUBST([vgsuppdir], ['${pkglibdir}/valgrind'])
 
 : ${CFLAGS:=-g -O0 -Wall}
 

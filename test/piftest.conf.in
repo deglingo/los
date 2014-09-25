@@ -24,5 +24,5 @@ extra_sources =
   lostestfake.c
 
 valgrind_supp_files =
-  @srcdir@/glib.supp
-  @srcdir@/los.supp
+  @top_srcdir@/glib.supp
+  @top_srcdir@/los.supp
