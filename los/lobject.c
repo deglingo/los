@@ -170,6 +170,15 @@ LObject *l_object_new_from_state ( LObjectClass *cls,
 gpointer l_object_ref ( gpointer obj )
 {
   g_atomic_int_inc(&((LObject *)obj)->ref_count);
+#ifdef L_DEBUG
+  if (L_OBJECT(obj)->trace_ref) {
+    /* [fixme] not mt-safe */
+    CL_DEBUG("REF OBJECT: %s -> %d",
+             l_object_to_string(obj),
+             L_OBJECT(obj)->ref_count);
+    G_BREAKPOINT();
+  }
+#endif
   return obj;
 }
 
@@ -181,12 +190,33 @@ void l_object_unref ( gpointer obj )
 {
   if (g_atomic_int_dec_and_test(&((LObject *)obj)->ref_count))
     {
+#ifdef L_DEBUG
+      if (L_OBJECT(obj)->trace_ref) {
+        /* [fixme] not mt-safe */
+        CL_DEBUG("DESTROY OBJECT: %s -> %d",
+                 l_object_to_string(obj),
+                 L_OBJECT(obj)->ref_count);
+        G_BREAKPOINT();
+      }
+#endif
       l_object_dispose(obj);
       if (L_OBJECT_GET_CLASS(obj)->finalize)
         L_OBJECT_GET_CLASS(obj)->finalize(obj);
       /* [FIXME] use object allocator */
       g_free(obj);
     }
+#ifdef L_DEBUG
+  else
+    {
+      if (L_OBJECT(obj)->trace_ref) {
+        /* [fixme] not mt-safe */
+        CL_DEBUG("UNREF OBJECT: %s -> %d",
+                 l_object_to_string(obj),
+                 L_OBJECT(obj)->ref_count);
+        G_BREAKPOINT();
+      }
+    }
+#endif
 }
 
 
@@ -235,3 +265,15 @@ static gchar *_to_string ( LObject *object )
                          l_object_class_name(L_OBJECT_GET_CLASS(object)),
                          object);
 }
+
+
+
+/* l_object_set_trace_ref:
+ */
+#ifdef L_DEBUG
+void l_object_set_trace_ref ( LObject *object,
+                              gboolean enable )
+{
+  object->trace_ref = (enable ? 1 : 0);
+}
+#endif

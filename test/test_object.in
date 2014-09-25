@@ -15,6 +15,7 @@ test { PIF_CHECK(data->obj); }
 test { PIF_CHECK(data->obj->l_class == L_CLASS_OBJECT); }
 
 test /* ref_count */ {
+  /* l_object_set_trace_ref(data->obj, TRUE); */
   PIF_CHECK(data->obj->ref_count == 1);
   l_object_ref(data->obj);
   PIF_CHECK(data->obj->ref_count == 2);
