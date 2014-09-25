@@ -44,3 +44,13 @@
    ...
    fun:l_trash_add
 }
+
+# strange mem-leak from g_slice_new, probably some debug-only stuff
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:smc_notify_alloc
+   fun:g_slice_alloc
+}

@@ -9,6 +9,7 @@ header
 ##include "los/ltuple.h"
 ##include "los/ltrash.h"
 ##include "libltest/bytestream.h"
+##include "libltest/packable.h"
 
 ##include <unistd.h>
 }
@@ -16,6 +17,7 @@ header
 data
 {
   gchar *tmpfile;
+  gboolean trace_ref_packer;
 }
 
 setup
@@ -62,6 +64,9 @@ teardown
     GError *err = NULL;                         \
     LStream *stream = (new_stream);             \
     LPacker *packer = l_packer_new(stream);     \
+    if (data->trace_ref_packer)                 \
+      l_object_set_trace_ref                    \
+        (L_OBJECT(packer), TRUE);               \
     L_OBJECT_CLEAR(stream);                     \
     /* add objects */                           \
     do add_objs while (0);                      \
@@ -176,6 +181,7 @@ test /* tuple_1 */
 test /* tuple_2 */
 {
   /* pack */
+  /* data->trace_ref_packer = TRUE; */
   TEST_PACK
     (byte_stream_new(data->tmpfile, "w"),
      {
@@ -219,4 +225,20 @@ test /* tuple_nested */
                 CHECK_INT(L_TUPLE_ITEM(L_TUPLE_ITEM(objs[0], 1), 0), 2);
                 CHECK_INT(L_TUPLE_ITEM(objs[0], 2), 3);
               });
+}
+
+test /* packable */
+{
+  TEST_PACK
+    (byte_stream_new(data->tmpfile, "w"),
+     { l_packer_add(packer, L_TRASH_OBJECT(packable_new(27, "packable-string"))); });
+
+  TEST_UNPACK
+    (byte_stream_new(data->tmpfile, "r"),
+     1,
+     {
+       PIF_CHECK(IS_PACKABLE(objs[0]));
+       PIF_CHECK_EQ(PACKABLE(objs[0])->a, 27);
+       PIF_CHECK_EQ_STR(PACKABLE(objs[0])->b, "packable-string");
+     });
 }

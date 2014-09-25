@@ -5,12 +5,9 @@ namespace L
   extern class Stream;
 }
 
-namespace LTest
-{
-  class Packable {
-    void class_init ();
-  };
-}
+class Packable {
+  void class_init ();
+};
 
 class ByteStream : L::Stream
 {

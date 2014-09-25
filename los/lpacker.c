@@ -55,6 +55,18 @@ typedef struct _ContextTuple
 
 
 
+/* ContextObject:
+ */
+typedef struct _ContextObject
+{
+  CONTEXT_HEADER;
+  guint32 clslen;
+  const gchar *clsname;
+}
+  ContextObject;
+
+
+
 /* Context:
  */
 typedef union _Context
@@ -63,6 +75,7 @@ typedef union _Context
     ContextAny c_any;
     ContextInt c_int;
     ContextTuple c_tuple;
+    ContextObject c_object;
   }
   Context;
 
@@ -73,7 +86,7 @@ typedef union _Context
 typedef struct _Private
 {
   gchar real_buffer[BUFFER_SIZE];
-  gchar *buffer;
+  const gchar *buffer;
   guint data_size;
   guint buffer_offset;
   GQueue *queue;
@@ -111,6 +124,18 @@ enum
     S_TUPLE_WRITE_TYPE,
     S_TUPLE_WRITE_SIZE,
     S_TUPLE_WRITE_ITEM,
+  };
+
+
+
+enum
+  {
+    S_OBJECT_START = 0,
+    S_OBJECT_WRITE_TYPE,
+    S_OBJECT_WRITE_CLSLEN,
+    S_OBJECT_WRITE_CLSNAME,
+    S_OBJECT_WRITE_STATE,
+    S_OBJECT_END,
   };
 
 
@@ -354,6 +379,7 @@ static Context *context_push ( LPacker *packer,
                                LObject *object )
 {
   Context *ctxt;
+  /* CL_DEBUG("CTXTPUSH: %s", l_object_to_string(object)); */
   if (PRIVATE(packer)->current_context >= 0) {
     PRIVATE(packer)->current_context++;
     ASSERT(PRIVATE(packer)->current_context < CONTEXT_STACK_SIZE);
@@ -365,7 +391,7 @@ static Context *context_push ( LPacker *packer,
   if (L_IS_INT(object)) ctxt->c_type = PACK_KEY_INT;
   else if (L_IS_STRING(object)) ctxt->c_type = PACK_KEY_STRING;
   else if (L_IS_TUPLE(object)) ctxt->c_type = PACK_KEY_TUPLE;
-  else ASSERT(0);
+  else ctxt->c_type = PACK_KEY_OBJECT;
   ctxt->c_any.object = object;
   ctxt->c_any.stage = 0;
   return ctxt;
@@ -375,6 +401,7 @@ static Context *context_push ( LPacker *packer,
 
 static void context_pop ( LPacker *packer )
 {
+  /* CL_DEBUG("CTXTPOP"); */
   ASSERT(PRIVATE(packer)->current_context >= 0);
   L_OBJECT_CLEAR(PRIVATE(packer)->context_stack[PRIVATE(packer)->current_context].c_any.object);
   PRIVATE(packer)->current_context--;
@@ -408,6 +435,7 @@ static gboolean _send_int ( LPacker *packer,
   switch (ctxt->c_any.stage)
     {
     case S_INT_START:
+      /* CL_DEBUG("pack_int_start"); */
       BUFFER_SET(priv, guint8, (guint8) PACK_KEY_INT);
       ctxt->c_any.stage = S_INT_WRITE_TYPE;
     case S_INT_WRITE_TYPE:
@@ -424,6 +452,7 @@ static gboolean _send_int ( LPacker *packer,
       if (!_send(packer, error))
         return FALSE;
     }
+  /* CL_DEBUG("pack_int_ok"); */
   context_pop(packer);
   return TRUE;
 }
@@ -470,6 +499,7 @@ static gboolean _send_tuple ( LPacker *packer,
   switch (ctxt->c_any.stage)
     {
     case S_TUPLE_START:
+      /* CL_DEBUG("pack_tuple_start"); */
       BUFFER_SET(priv, guint8, (guint8) PACK_KEY_TUPLE);
       ctxt->c_any.stage = S_TUPLE_WRITE_TYPE;
     case S_TUPLE_WRITE_TYPE:
@@ -494,6 +524,56 @@ static gboolean _send_tuple ( LPacker *packer,
         {
           break;
         }
+    default:
+      ASSERT(0);
+    }
+  /* CL_DEBUG("pack_tuple_ok"); */
+  context_pop(packer);
+  return TRUE;
+}
+
+
+
+static gboolean _send_object ( LPacker *packer,
+                               Context *ctxt,
+                               GError **error )
+{
+  Private *priv = PRIVATE(packer);
+  switch (ctxt->c_any.stage)
+    {
+    case S_OBJECT_START:
+      BUFFER_SET(priv, guint8, (guint8) PACK_KEY_OBJECT);
+      ctxt->c_any.stage = S_OBJECT_WRITE_TYPE;
+    case S_OBJECT_WRITE_TYPE:
+      if (!_send(packer, error))
+        return FALSE;
+      /* clslen */
+      ctxt->c_object.clsname = l_object_class_name(L_OBJECT_GET_CLASS(ctxt->c_any.object));
+      ctxt->c_object.clslen = strlen(ctxt->c_object.clsname);
+      /* CL_DEBUG("clsname: '%s' (%d)", ctxt->c_object.clsname, ctxt->c_object.clslen); */
+      BUFFER_SET(priv, guint32, GUINT32_TO_BE(ctxt->c_object.clslen));
+      ctxt->c_any.stage = S_OBJECT_WRITE_CLSLEN;
+    case S_OBJECT_WRITE_CLSLEN:
+      if (!_send(packer, error))
+        return FALSE;
+      /* clsname */
+      BUFFER_DIVERT(priv, ctxt->c_object.clsname, ctxt->c_object.clslen);
+      ctxt->c_any.stage = S_OBJECT_WRITE_CLSNAME;
+    case S_OBJECT_WRITE_CLSNAME:
+      if (!_send(packer, error))
+        return FALSE;
+      /* state */
+      {
+        LObject *state = l_object_get_state(ctxt->c_any.object);
+        ASSERT(state);
+        /* CL_DEBUG("state: %s", l_object_to_string(state)); */
+        ctxt->c_any.stage = S_OBJECT_END;
+        /* this ref will be dropped by context_pop() */
+        context_push(packer, state);
+        return TRUE;
+      }
+    case S_OBJECT_END:
+      break;
     default:
       ASSERT(0);
     }
@@ -535,6 +615,10 @@ gboolean l_packer_send ( LPacker *packer,
         break;
       case PACK_KEY_TUPLE:
         if (!_send_tuple(packer, ctxt, error))
+          return FALSE;
+        break;
+      case PACK_KEY_OBJECT:
+        if (!_send_object(packer, ctxt, error))
           return FALSE;
         break;
       default:
