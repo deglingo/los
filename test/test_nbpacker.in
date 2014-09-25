@@ -242,3 +242,23 @@ test /* packable */
        PIF_CHECK_EQ_STR(PACKABLE(objs[0])->b, "packable-string");
      });
 }
+
+test /* multiple */
+{
+  TEST_PACK
+    (byte_stream_new(data->tmpfile, "w"),
+     {
+       l_packer_add(packer, L_TRASH_OBJECT(l_int_new(0)));
+       l_packer_add(packer, L_TRASH_OBJECT(l_int_new(1)));
+       l_packer_add(packer, L_TRASH_OBJECT(l_int_new(2)));
+     });
+
+  TEST_UNPACK
+    (byte_stream_new(data->tmpfile, "r"),
+     3,
+    {
+      CHECK_INT(objs[0], 0);
+      CHECK_INT(objs[1], 1);
+      CHECK_INT(objs[2], 2);
+    });
+}
