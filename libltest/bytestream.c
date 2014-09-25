@@ -78,15 +78,18 @@ LStreamStatus _read ( LStream *stream,
   if (bs->ready)
     {
       ssize_t s = read(fileno(bs->f), buffer, 1);
-      if (s != 1) {
+      if (s == 1) {
+        *bytes_read = 1;
+        bs->ready = FALSE;
+        /* fprintf(stderr, "%%"); */
+        /* fflush(stderr); */
+        return L_STREAM_STATUS_OK;
+      } else if (s == 0) {
+        return L_STREAM_STATUS_EOF;
+      } else {
         fprintf(stderr, "fread error: %s (%d)\n", strerror(errno), s);
         abort();
       }
-      *bytes_read = 1;
-      bs->ready = FALSE;
-      /* fprintf(stderr, "%%"); */
-      /* fflush(stderr); */
-      return L_STREAM_STATUS_OK;
     }
   else
     {

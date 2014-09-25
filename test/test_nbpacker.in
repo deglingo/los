@@ -93,6 +93,16 @@ teardown
       while (!(objs[o] = l_unpacker_recv(unpacker, &err)))  \
         PIF_CHECK(!err);                                    \
     }                                                       \
+    /* make sure we've reached EOF [fixme] endless loop */  \
+    while (1) {                                             \
+      PIF_CHECK(!l_unpacker_recv(unpacker, &err));          \
+      if (err) {                                            \
+        PIF_CHECK(err->domain == L_PACK_ERROR);             \
+        PIF_CHECK(err->code == L_PACK_ERROR_EOF);           \
+        g_clear_error(&err);                                \
+        break;                                              \
+      }                                                     \
+    }                                                       \
     L_OBJECT_CLEAR(unpacker);                               \
     /* [TODO] check EOF */                                  \
     do check_objs while (0);                                \

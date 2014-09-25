@@ -227,6 +227,9 @@ static gboolean _recv ( LUnpacker *unpacker,
       return FALSE;
   case L_STREAM_STATUS_AGAIN:
     return FALSE;
+  case L_STREAM_STATUS_EOF:
+    g_set_error(error, L_PACK_ERROR, L_PACK_ERROR_EOF, "EOF reached");
+    return FALSE;
   default:
     CL_ERROR("[TODO] s = %d", s);
     return FALSE;
