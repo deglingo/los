@@ -7,6 +7,8 @@
 
 #include <los/lbase.h>
 
+#include <los/ltrash.h>
+
 #include <los/lobject.h>
 
 #include <los/lint.h>
