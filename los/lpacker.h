@@ -32,10 +32,6 @@ struct _LPackerClass
 
 
 LPacker *l_packer_new ( LStream *stream );
-gboolean l_packer_put ( LPacker *packer,
-                        LObject *object,
-                        GError **error );
-/* non-blocking api */
 void l_packer_add ( LPacker *packer,
                     LObject *object );
 gboolean l_packer_send ( LPacker *packer,

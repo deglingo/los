@@ -13,7 +13,6 @@ modules =
   test_tuple
   test_memstream
   test_file
-  test_packer
   test_trash
   test_nbpacker
 
