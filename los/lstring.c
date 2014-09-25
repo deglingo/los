@@ -10,6 +10,7 @@
 
 
 static void _dispose ( LObject *object );
+static gchar *_to_string ( LObject *object );
 
 
 
@@ -18,6 +19,7 @@ static void _dispose ( LObject *object );
 static void l_string_class_init ( LObjectClass *cls )
 {
   cls->dispose = _dispose;
+  cls->to_string = _to_string;
 }
 
 
@@ -31,6 +33,18 @@ static void _dispose ( LObject *object )
   L_STRING(object)->len = 0;
   /* [fixme] */
   ((LObjectClass *) parent_class)->dispose(object);
+}
+
+
+
+/* _to_string:
+ */
+static gchar *_to_string ( LObject *object )
+{
+  /* [FIXME] handle embedded nul bytes */
+  return g_strdup_printf("<%s \"%s\">",
+                         l_object_class_name(L_OBJECT_GET_CLASS(object)),
+                         L_STRING(object)->str);
 }
 
 
