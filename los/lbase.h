@@ -10,6 +10,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/* [FIXME] should be a CFLAG */
+#define L_DEBUG
+
 
 
 #endif

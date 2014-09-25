@@ -52,6 +52,11 @@ struct _LObject
   LObjectClass *l_class;
 
   guint ref_count;
+
+  /* debug */
+#ifdef L_DEBUG
+  guint trace_ref : 1;
+#endif
 };
 
 
@@ -106,6 +111,14 @@ void l_object_unref ( gpointer obj );
 void l_object_dispose ( LObject *object );
 LObject *l_object_get_state ( LObject *object );
 gchar *l_object_to_string ( LObject *object );
+
+/* debug */
+#ifdef L_DEBUG
+void l_object_set_trace_ref ( LObject *object,
+                              gboolean enable );
+#else
+#define l_object_set_trace_ref(obj, enable)
+#endif
 
 
 
