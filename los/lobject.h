@@ -101,9 +101,11 @@ LObject *l_object_new_from_state ( LObjectClass *cls,
                                    LObject *state );
 /* ref counting */
 #define L_OBJECT_CLEAR(ptr) do {                \
-    gpointer __l_object_clear_tmp = (ptr);      \
-    (ptr) = NULL;                               \
-    l_object_unref(__l_object_clear_tmp);       \
+    if (ptr) {                                  \
+      gpointer __l_object_clear_tmp = (ptr);    \
+      (ptr) = NULL;                             \
+      l_object_unref(__l_object_clear_tmp);     \
+    }                                           \
   } while (0)
 
 gpointer l_object_ref ( gpointer obj );
