@@ -51,8 +51,17 @@ static gchar *_to_string ( LObject *object )
 
 /* l_string_new:
  */
-LString *l_string_new ( const gchar *str,
-                        gssize len )
+LString *l_string_new ( const gchar *str )
+{
+  return l_string_new_len(str, -1);
+}
+
+
+
+/* l_string_new_len:
+ */
+LString *l_string_new_len ( const gchar *str,
+                            gssize len )
 {
   LString *lstr = L_STRING(l_object_new(L_CLASS_STRING, NULL));
   if (len < 0)

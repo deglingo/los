@@ -5,24 +5,27 @@ header {
 ##include <string.h>
 }
 
-test { 
-  LString *s = l_string_new("test-string", -1);
-  PIF_CHECK(s);
-  PIF_CHECK_EQ(s->len, 11);
-  PIF_CHECK_EQ_STR(s->str, "test-string");
-  L_OBJECT_CLEAR(s);
-}
-
-test {
-  LString *s = l_string_new("test-string", 8);
+test new
+{ 
+  LString *s = l_string_new("abcdefgh");
   PIF_CHECK(s);
   PIF_CHECK_EQ(s->len, 8);
-  PIF_CHECK_EQ_STR(s->str, "test-str");
+  PIF_CHECK_EQ_STR(s->str, "abcdefgh");
   L_OBJECT_CLEAR(s);
 }
 
-test {
-  LString *s = l_string_new("a\x00b", 3);
+test new_len
+{
+  LString *s = l_string_new_len("abcdefgh", 4);
+  PIF_CHECK(s);
+  PIF_CHECK_EQ(s->len, 4);
+  PIF_CHECK_EQ_STR(s->str, "abcd");
+  L_OBJECT_CLEAR(s);
+}
+
+test new_with_nul_byte
+{
+  LString *s = l_string_new_len("a\x00b", 3);
   PIF_CHECK(s);
   PIF_CHECK_EQ(s->len, 3);
   PIF_CHECK(!strncmp(s->str, "a\x00b", 3));

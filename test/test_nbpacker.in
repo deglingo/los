@@ -139,7 +139,7 @@ test /* string_1 */
 {
   /* pack */
   TEST_PACK(byte_stream_new(data->tmpfile, "w"),
-            { l_packer_add(packer, L_TRASH_OBJECT(l_string_new("string-test-1", -1))); });
+            { l_packer_add(packer, L_TRASH_OBJECT(l_string_new("string-test-1"))); });
   /* unpack */
   TEST_UNPACK(byte_stream_new(data->tmpfile, "r"),
               1,
@@ -150,7 +150,7 @@ test /* sting_2 */
 {
   /* pack */
   TEST_PACK(byte_stream_new(data->tmpfile, "w"),
-            { l_packer_add(packer, L_TRASH_OBJECT(l_string_new("string-test-2", -1))); });
+            { l_packer_add(packer, L_TRASH_OBJECT(l_string_new("string-test-2"))); });
   /* unpack */
   TEST_UNPACK(byte_stream_new(data->tmpfile, "r"),
               1,
@@ -198,7 +198,7 @@ test /* tuple_2 */
        l_packer_add(packer,
                     L_TRASH_OBJECT(l_tuple_newl_give(2,
                                                      l_int_new(456),
-                                                     l_string_new("pack-tuple-test", -1),
+                                                     l_string_new("pack-tuple-test"),
                                                      NULL)));
      });
   /* unpack */

@@ -30,8 +30,9 @@ struct _LStringClass
 
 
 
-LString *l_string_new ( const gchar *str,
-                        gssize len );
+LString *l_string_new ( const gchar *str );
+LString *l_string_new_len ( const gchar *str,
+                            gssize len );
 
 
 

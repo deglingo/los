@@ -58,7 +58,7 @@ LObject *_get_state ( LObject *object )
   Packable *p = PACKABLE(object);
   LTuple *t = l_tuple_newl_give(2,
                                 l_int_new(p->a),
-                                l_string_new(p->b, -1),
+                                l_string_new(p->b),
                                 NULL);
   return L_OBJECT(t);
 }

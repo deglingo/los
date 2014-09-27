@@ -362,7 +362,7 @@ static gboolean _recv_string ( LUnpacker *unpacker,
     default:
       ASSERT(0);
     }
-  ctxt->c_any.object = L_OBJECT(l_string_new(priv->buffer, ctxt->c_string.len));
+  ctxt->c_any.object = L_OBJECT(l_string_new_len(priv->buffer, ctxt->c_string.len));
   ctxt->c_any.done = TRUE;
   return TRUE;
 }
