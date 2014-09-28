@@ -8,6 +8,7 @@
 
 
 static void _dispose ( LObject *object );
+static gchar *_to_string ( LObject *object );
 
 
 
@@ -16,6 +17,7 @@ static void _dispose ( LObject *object );
 static void l_tuple_class_init ( LObjectClass *cls )
 {
   cls->dispose = _dispose;
+  cls->to_string = _to_string;
 }
 
 
@@ -80,6 +82,28 @@ static void _dispose ( LObject *object )
     }
   /* [FIXME] */
   ((LObjectClass *) parent_class)->dispose(object);
+}
+
+
+
+/* _to_string:
+ */
+static gchar *_to_string ( LObject *object )
+{
+  GString *s = g_string_new("(");
+  gboolean sep = FALSE;
+  guint i;
+  for (i = 0; i < L_TUPLE_SIZE(object); i++)
+    {
+      gchar *si;
+      if (sep) g_string_append(s, ", ");
+      sep = TRUE;
+      si = l_object_to_string(L_TUPLE_ITEM(object, i));
+      g_string_append(s, si);
+      g_free(si);
+    }
+  g_string_append(s, ")");
+  return g_string_free(s, FALSE);
 }
 
 
