@@ -42,9 +42,7 @@ static void _dispose ( LObject *object )
 static gchar *_to_string ( LObject *object )
 {
   /* [FIXME] handle embedded nul bytes */
-  return g_strdup_printf("<%s \"%s\">",
-                         l_object_class_name(L_OBJECT_GET_CLASS(object)),
-                         L_STRING(object)->str);
+  return g_strdup_printf("\"%s\"", L_STRING(object)->str);
 }
 
 
