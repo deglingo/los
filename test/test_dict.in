@@ -1,0 +1,24 @@
+/* -*- c -*- */
+
+header
+{
+##include "los/ltrash.h"
+##include "los/ldict.h"
+}
+
+setup
+{
+  l_trash_push();
+}
+
+teardown
+{
+  l_trash_pop();
+}
+
+test
+{
+  LDict *dict = L_TRASH_OBJECT
+    (l_dict_new());
+  PIF_CHECK(dict);
+}

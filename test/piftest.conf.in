@@ -11,6 +11,7 @@ modules =
   test_int
   test_string
   test_tuple
+  test_dict
   test_memstream
   test_file
   test_trash
