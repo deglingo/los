@@ -17,6 +17,7 @@ includelos_HEADERS = \
 	lbase.h \
 	ltrash.h \
 	lobject.h \
+	lnone.h lnone-def.h \
 	lint.h lint-def.h \
 	lstring.h lstring-def.h \
 	llist.h llist-def.h \
@@ -32,6 +33,7 @@ includelos_HEADERS = \
 liblos_la_SOURCES = \
 	ltrash.c \
 	lobject.c \
+	lnone.c \
 	lint.c \
 	lstring.c \
 	llist.c \
@@ -45,6 +47,7 @@ liblos_la_SOURCES = \
 	lunpacker.c
 
 BUILT_SOURCES = \
+	lnone-def.h lnone.inl \
 	lint-def.h lint.inl \
 	lstring-def.h lstring.inl \
 	llist-def.h llist.inl \
@@ -56,6 +59,7 @@ BUILT_SOURCES = \
 	lpacker-def.h lpacker.inl \
 	lunpacker-def.h lunpacker.inl
 
+lnone-def.h lnone.inl \
 lint-def.h lint.inl \
 lstring-def.h lstring.inl \
 llist-def.h llist.inl \

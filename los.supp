@@ -45,6 +45,15 @@
    fun:l_trash_add
 }
 
+# LNone singleton instantiation
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:l_none_ref
+}
+
 # strange mem-leak from g_slice_new, probably some debug-only stuff
 {
    <insert_a_suppression_name_here>

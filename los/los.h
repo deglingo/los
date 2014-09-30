@@ -11,6 +11,8 @@
 
 #include <los/lobject.h>
 
+#include <los/lnone.h>
+
 #include <los/lint.h>
 
 #include <los/lstring.h>

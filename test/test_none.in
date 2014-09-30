@@ -1,0 +1,22 @@
+/* -*- c -*- */
+
+header
+{
+##include "los/lnone.h"
+##include "los/ltrash.h"
+}
+
+setup
+{
+  l_trash_push();
+}
+
+teardown
+{
+  l_trash_pop();
+}
+
+test
+{
+  PIF_CHECK(L_TRASH_OBJECT(l_none_ref()));
+}

@@ -2,6 +2,7 @@
 
 namespace L
 {
+  class None;
   class Int {
     void class_init ();
   };
