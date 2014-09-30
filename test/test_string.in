@@ -2,7 +2,18 @@
 
 header {
 ##include "los/lstring.h"
+##include "los/ltrash.h"
 ##include <string.h>
+}
+
+setup
+{
+  l_trash_push();
+}
+
+teardown
+{
+  l_trash_pop();
 }
 
 test new
@@ -30,4 +41,10 @@ test new_with_nul_byte
   PIF_CHECK_EQ(s->len, 3);
   PIF_CHECK(!strncmp(s->str, "a\x00b", 3));
   L_OBJECT_CLEAR(s);
+}
+
+test hash
+{
+  LString *s = L_TRASH_OBJECT(l_string_new("abcd"));
+  l_object_hash(L_OBJECT(s));
 }

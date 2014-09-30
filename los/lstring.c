@@ -11,6 +11,7 @@
 
 static void _dispose ( LObject *object );
 static gchar *_to_string ( LObject *object );
+static guint _hash ( LObject *object );
 
 
 
@@ -20,6 +21,7 @@ static void l_string_class_init ( LObjectClass *cls )
 {
   cls->dispose = _dispose;
   cls->to_string = _to_string;
+  cls->hash = _hash;
 }
 
 
@@ -43,6 +45,21 @@ static gchar *_to_string ( LObject *object )
 {
   /* [FIXME] handle embedded nul bytes */
   return g_strdup_printf("\"%s\"", L_STRING(object)->str);
+}
+
+
+
+/* _hash:
+ */
+static guint _hash ( LObject *object )
+{
+  /* copied from GLib */
+  const gchar *p, *end;
+  guint32 h = 5381;
+  end = L_STRING(object)->str + L_STRING(object)->len;
+  for (p = L_STRING(object)->str; p != end; p++)
+    h = (h << 5) + h + *p;
+  return h;
 }
 
 
