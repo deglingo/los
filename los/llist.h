@@ -28,6 +28,8 @@ struct _LListClass
 
 
 LList *l_list_new ( void );
+void l_list_append ( LList *list,
+                     LObject *item );
 
 
 

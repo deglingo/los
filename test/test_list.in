@@ -4,6 +4,7 @@ header
 {
 ##include "los/ltrash.h"
 ##include "los/llist.h"
+##include "los/lint.h"
 }
 
 setup
@@ -20,4 +21,12 @@ test
 {
   LList *l = L_TRASH_OBJECT(l_list_new());
   PIF_CHECK(l);
+}
+
+test append
+{
+  LList *l = L_TRASH_OBJECT(l_list_new());
+  guint i;
+  for (i = 0; i < 10; i++)
+    l_list_append(l, L_TRASH_OBJECT(l_int_new(i)));
 }
