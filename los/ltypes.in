@@ -8,6 +8,7 @@ namespace L
   class String {
     void class_init ();
   };
+  class List;
   class Tuple {
     void class_init ();
   };

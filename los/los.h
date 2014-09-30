@@ -15,6 +15,8 @@
 
 #include <los/lstring.h>
 
+#include <los/llist.h>
+
 #include <los/ltuple.h>
 
 #include <los/ldict.h>

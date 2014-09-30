@@ -1,0 +1,23 @@
+/* -*- c -*- */
+
+header
+{
+##include "los/ltrash.h"
+##include "los/llist.h"
+}
+
+setup
+{
+  l_trash_push();
+}
+
+teardown
+{
+  l_trash_pop();
+}
+
+test
+{
+  LList *l = L_TRASH_OBJECT(l_list_new());
+  PIF_CHECK(l);
+}

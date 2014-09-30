@@ -19,6 +19,7 @@ includelos_HEADERS = \
 	lobject.h \
 	lint.h lint-def.h \
 	lstring.h lstring-def.h \
+	llist.h llist-def.h \
 	ltuple.h ltuple-def.h \
 	ldict.h ldict-def.h \
 	lstream.h lstream-def.h \
@@ -33,6 +34,7 @@ liblos_la_SOURCES = \
 	lobject.c \
 	lint.c \
 	lstring.c \
+	llist.c \
 	ltuple.c \
 	ldict.c \
 	lstream.c \
@@ -45,6 +47,7 @@ liblos_la_SOURCES = \
 BUILT_SOURCES = \
 	lint-def.h lint.inl \
 	lstring-def.h lstring.inl \
+	llist-def.h llist.inl \
 	ltuple-def.h ltuple.inl \
 	ldict-def.h ldict.inl \
 	lstream-def.h lstream.inl \
@@ -55,6 +58,7 @@ BUILT_SOURCES = \
 
 lint-def.h lint.inl \
 lstring-def.h lstring.inl \
+llist-def.h llist.inl \
 ltuple-def.h ltuple.inl \
 ldict-def.h ldict.inl \
 lstream-def.h lstream.inl \
