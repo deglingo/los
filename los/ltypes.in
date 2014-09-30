@@ -8,7 +8,9 @@ namespace L
   class String {
     void class_init ();
   };
-  class List;
+  class List {
+    void class_init ();
+  };
   class Tuple {
     void class_init ();
   };

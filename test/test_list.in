@@ -29,4 +29,10 @@ test append
   guint i;
   for (i = 0; i < 10; i++)
     l_list_append(l, L_TRASH_OBJECT(l_int_new(i)));
+  for (i = 0; i < 10; i++) {
+    LObject *item = l_list_get_item(l, i);
+    PIF_CHECK(item);
+    PIF_CHECK(L_IS_INT(item));
+    PIF_CHECK_EQ(L_INT_VALUE(item), i);
+  }
 }
