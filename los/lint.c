@@ -7,6 +7,7 @@
 
 
 static gchar *_to_string ( LObject *object );
+static guint _hash ( LObject *object );
 
 
 
@@ -14,7 +15,8 @@ static gchar *_to_string ( LObject *object );
  */
 static void l_int_class_init ( LObjectClass *cls )
 {
-  ((LObjectClass *) cls)->to_string = _to_string;
+  cls->to_string = _to_string;
+  cls->hash = _hash;
 }
 
 
@@ -37,4 +39,13 @@ static gchar *_to_string ( LObject *object )
   return g_strdup_printf("<%s %d>",
                          l_object_class_name(L_OBJECT_GET_CLASS(object)),
                          L_INT_VALUE(object));
+}
+
+
+
+/* _hash:
+ */
+static guint _hash ( LObject *object )
+{
+  return (guint) (L_INT(object)->value);
 }

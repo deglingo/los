@@ -268,6 +268,16 @@ static gchar *_to_string ( LObject *object )
 
 
 
+/* l_object_hash:
+ */
+guint l_object_hash ( LObject *object )
+{
+  ASSERT(L_OBJECT_GET_CLASS(object)->hash);
+  return L_OBJECT_GET_CLASS(object)->hash(object);
+}
+
+
+
 /* l_object_set_trace_ref:
  */
 #ifdef L_DEBUG

@@ -81,6 +81,9 @@ struct _LObjectClass
   LObject * (* get_state) ( LObject *object );
   LObject * (* from_state) ( LObjectClass *cls,
                              LObject *state );
+
+  /* hashing */
+  guint (* hash) ( LObject *object );
 };
 
 
@@ -113,6 +116,7 @@ void l_object_unref ( gpointer obj );
 void l_object_dispose ( LObject *object );
 LObject *l_object_get_state ( LObject *object );
 gchar *l_object_to_string ( LObject *object );
+guint l_object_hash ( LObject *object );
 
 /* debug */
 #ifdef L_DEBUG

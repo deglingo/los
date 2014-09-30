@@ -10,7 +10,14 @@ setup { data->val = l_int_new(24); }
 
 teardown { L_OBJECT_CLEAR(data->val); }
 
-test { 
+test new
+{ 
   PIF_CHECK(data->val);
   PIF_CHECK(L_INT_VALUE(data->val) == 24);
+}
+
+test hash
+{
+  /* LInt is hashable */
+  l_object_hash(L_OBJECT(data->val));
 }
