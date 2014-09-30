@@ -2,13 +2,22 @@
 
 header {
 ##include "los/lint.h"
+##include "los/ltrash.h"
 }
 
 data { LInt *val; }
 
-setup { data->val = l_int_new(24); }
+setup
+{
+  l_trash_push();
+  data->val = l_int_new(24);
+}
 
-teardown { L_OBJECT_CLEAR(data->val); }
+teardown
+{
+  L_OBJECT_CLEAR(data->val);
+  l_trash_pop();
+}
 
 test new
 { 
@@ -20,4 +29,13 @@ test hash
 {
   /* LInt is hashable */
   l_object_hash(L_OBJECT(data->val));
+}
+
+test eq
+{
+  LInt *i1 = L_TRASH_OBJECT(l_int_new(42));
+  LInt *i2 = L_TRASH_OBJECT(l_int_new(42));
+  LInt *i3 = L_TRASH_OBJECT(l_int_new(43));
+  PIF_CHECK(l_object_eq(L_OBJECT(i1), L_OBJECT(i2)));
+  PIF_CHECK(!l_object_eq(L_OBJECT(i1), L_OBJECT(i3)));
 }

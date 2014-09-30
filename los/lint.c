@@ -8,6 +8,8 @@
 
 static gchar *_to_string ( LObject *object );
 static guint _hash ( LObject *object );
+static gboolean _eq ( LObject *a,
+                      LObject *b );
 
 
 
@@ -17,6 +19,7 @@ static void l_int_class_init ( LObjectClass *cls )
 {
   cls->to_string = _to_string;
   cls->hash = _hash;
+  cls->eq = _eq;
 }
 
 
@@ -48,4 +51,14 @@ static gchar *_to_string ( LObject *object )
 static guint _hash ( LObject *object )
 {
   return (guint) (L_INT(object)->value);
+}
+
+
+
+/* _eq:
+ */
+static gboolean _eq ( LObject *a,
+                      LObject *b )
+{
+  return L_IS_INT(b) && (L_INT_VALUE(a) == L_INT_VALUE(b));
 }

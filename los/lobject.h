@@ -84,6 +84,10 @@ struct _LObjectClass
 
   /* hashing */
   guint (* hash) ( LObject *object );
+
+  /* comparison operators */
+  gboolean (* eq) ( LObject *a,
+                    LObject *b );
 };
 
 
@@ -117,6 +121,8 @@ void l_object_dispose ( LObject *object );
 LObject *l_object_get_state ( LObject *object );
 gchar *l_object_to_string ( LObject *object );
 guint l_object_hash ( LObject *object );
+gboolean l_object_eq ( LObject *a,
+                       LObject *b );
 
 /* debug */
 #ifdef L_DEBUG

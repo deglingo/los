@@ -278,6 +278,17 @@ guint l_object_hash ( LObject *object )
 
 
 
+/* l_object_eq:
+ */
+gboolean l_object_eq ( LObject *a,
+                       LObject *b )
+{
+  ASSERT(L_OBJECT_GET_CLASS(a)->eq);
+  return L_OBJECT_GET_CLASS(a)->eq(a, b);
+}
+
+
+
 /* l_object_set_trace_ref:
  */
 #ifdef L_DEBUG
