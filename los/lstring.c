@@ -12,6 +12,8 @@
 static void _dispose ( LObject *object );
 static gchar *_to_string ( LObject *object );
 static guint _hash ( LObject *object );
+static gboolean _eq ( LObject *a,
+                      LObject *b );
 
 
 
@@ -22,6 +24,7 @@ static void l_string_class_init ( LObjectClass *cls )
   cls->dispose = _dispose;
   cls->to_string = _to_string;
   cls->hash = _hash;
+  cls->eq = _eq;
 }
 
 
@@ -60,6 +63,18 @@ static guint _hash ( LObject *object )
   for (p = L_STRING(object)->str; p != end; p++)
     h = (h << 5) + h + *p;
   return h;
+}
+
+
+
+/* _eq:
+ */
+static gboolean _eq ( LObject *a,
+                      LObject *b )
+{
+  return L_IS_STRING(b) && 
+    (L_STRING(a)->len == L_STRING(b)->len) &&
+    (!strncmp(L_STRING(a)->str, L_STRING(b)->str, L_STRING(a)->len));
 }
 
 

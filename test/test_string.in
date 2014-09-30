@@ -48,3 +48,15 @@ test hash
   LString *s = L_TRASH_OBJECT(l_string_new("abcd"));
   l_object_hash(L_OBJECT(s));
 }
+
+test eq
+{
+  LString *s1 = L_TRASH_OBJECT
+    (l_string_new_len("a\x00b", 3));
+  LString *s2 = L_TRASH_OBJECT
+    (l_string_new_len("a\x00b", 3));
+  LString *s3 = L_TRASH_OBJECT
+    (l_string_new_len("a\x00c", 3));
+  PIF_CHECK(l_object_eq(L_OBJECT(s1), L_OBJECT(s2)));
+  PIF_CHECK(!l_object_eq(L_OBJECT(s1), L_OBJECT(s3)));
+}
