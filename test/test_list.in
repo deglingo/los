@@ -21,14 +21,17 @@ test
 {
   LList *l = L_TRASH_OBJECT(l_list_new());
   PIF_CHECK(l);
+  PIF_CHECK_EQ(L_LIST_SIZE(l), 0);
 }
 
 test append
 {
   LList *l = L_TRASH_OBJECT(l_list_new());
   guint i;
-  for (i = 0; i < 10; i++)
+  for (i = 0; i < 10; i++) {
     l_list_append(l, L_TRASH_OBJECT(l_int_new(i)));
+    PIF_CHECK_EQ(L_LIST_SIZE(l), i+1);
+  }
   for (i = 0; i < 10; i++) {
     LObject *item = l_list_get_item(l, i);
     PIF_CHECK(item);

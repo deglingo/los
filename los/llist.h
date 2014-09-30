@@ -31,6 +31,8 @@ struct _LListClass
 
 
 
+#define L_LIST_SIZE(l) (L_LIST(l)->_size)
+
 LList *l_list_new ( void );
 void l_list_append ( LList *list,
                      LObject *item );
