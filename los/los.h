@@ -17,6 +17,8 @@
 
 #include <los/ltuple.h>
 
+#include <los/ldict.h>
+
 #include <los/lstream.h>
 
 #include <los/lmemstream.h>
