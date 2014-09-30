@@ -7,6 +7,8 @@
 #include "los/lobject.h"
 #include "los/ltuple-def.h"
 
+struct _LList;
+
 
 
 /* LTuple:
@@ -39,6 +41,7 @@ LTuple *l_tuple_newl_give ( guint size,
 G_GNUC_NULL_TERMINATED;
 LTuple *l_tuple_newv_give ( guint size,
                             va_list args );
+LTuple *l_tuple_new_from_list ( struct _LList *list );
 void l_tuple_give_item ( LTuple *tuple,
                          guint index,
                          LObject *item );

@@ -3,6 +3,7 @@
 
 #include "los/private.h"
 #include "los/ltuple.h"
+#include "los/llist.h"
 #include "los/ltuple.inl"
 
 
@@ -62,6 +63,20 @@ LTuple *l_tuple_newv_give ( guint size,
     ASSERT(item);
     t->_items[i] = item;
   }
+  return t;
+}
+
+
+
+/* l_tuple_new_from_list:
+ */
+LTuple *l_tuple_new_from_list ( LList *list )
+{
+  LTuple *t = l_tuple_new(L_LIST_SIZE(list));
+  gsize i;
+  for (i = 0; i < L_TUPLE_SIZE(t); i++)
+    /* [FIXME] use L_LIST_ITEM() */
+    l_tuple_give_item(t, i, l_object_ref(l_list_get_item(list, i)));
   return t;
 }
 

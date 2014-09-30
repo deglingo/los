@@ -1,8 +1,20 @@
 /* -*- c -*- */
 
 header {
+##include "los/ltrash.h"
 ##include "los/ltuple.h"
 ##include "los/lint.h"
+##include "los/llist.h"
+}
+
+setup
+{
+  l_trash_push();
+}
+
+teardown
+{
+  l_trash_pop();
 }
 
 test /* new_give_item */
@@ -54,4 +66,22 @@ test /* empty */
   PIF_CHECK(t);
   PIF_CHECK_EQ(L_TUPLE_SIZE(t), 0);
   L_OBJECT_CLEAR(t);
+}
+
+test new_from_list
+{
+  LList *l = L_TRASH_OBJECT(l_list_new());
+  LTuple *t;
+  gsize i;
+  for (i = 0; i < 10; i++)
+    l_list_append(l, L_TRASH_OBJECT(l_int_new(i)));
+  t = L_TRASH_OBJECT(l_tuple_new_from_list(l));
+  PIF_CHECK(t);
+  PIF_CHECK_EQ(L_TUPLE_SIZE(t), 10);
+  for (i = 0; i < 10; i++) {
+    LObject *item = L_TUPLE_ITEM(t, i);
+    PIF_CHECK(item);
+    PIF_CHECK(L_IS_INT(item));
+    PIF_CHECK_EQ(L_INT_VALUE(item), i);
+  }
 }
