@@ -28,6 +28,9 @@ struct _LDictClass
 
 
 LDict *l_dict_new ( void );
+void l_dict_insert ( LDict *dict,
+                     LObject *key,
+                     LObject *value );
 
 
 

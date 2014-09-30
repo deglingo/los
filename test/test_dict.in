@@ -4,6 +4,8 @@ header
 {
 ##include "los/ltrash.h"
 ##include "los/ldict.h"
+##include "los/lint.h"
+##include "los/lstring.h"
 }
 
 setup
@@ -18,7 +20,18 @@ teardown
 
 test
 {
+  guint i;
   LDict *dict = L_TRASH_OBJECT
     (l_dict_new());
   PIF_CHECK(dict);
+  /* insert some elements */
+  for (i = 0; i < 10; i++)
+    {
+      gchar s[2];
+      s[0] = 'A' + i;
+      s[1] = 0;
+      l_dict_insert(dict,
+                    L_TRASH_OBJECT(l_int_new(i)),
+                    L_TRASH_OBJECT(l_string_new(s)));
+    }
 }
