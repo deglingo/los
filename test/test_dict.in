@@ -34,4 +34,14 @@ test
                     L_TRASH_OBJECT(l_int_new(i)),
                     L_TRASH_OBJECT(l_string_new(s)));
     }
+  /* check */
+  for (i = 0; i < 10; i++)
+    {
+      LObject *key = L_TRASH_OBJECT(l_int_new(i));
+      LObject *value = l_dict_lookup(dict, key);
+      PIF_CHECK(value);
+      PIF_CHECK(L_IS_STRING(value));
+      PIF_CHECK_EQ(L_STRING(value)->len, 1);
+      PIF_CHECK_EQ(L_STRING(value)->str[0], (i + 'A'));
+    }
 }

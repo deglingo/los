@@ -14,6 +14,8 @@
 struct _LDict
 {
   L_DICT_INSTANCE_HEADER;
+
+  GHashTable *ht;
 };
 
 
@@ -31,6 +33,8 @@ LDict *l_dict_new ( void );
 void l_dict_insert ( LDict *dict,
                      LObject *key,
                      LObject *value );
+LObject *l_dict_lookup ( LDict *dict,
+                         LObject *key );
 
 
 

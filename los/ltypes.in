@@ -12,7 +12,9 @@ namespace L
   class Tuple {
     void class_init ();
   };
-  class Dict;
+  class Dict {
+    void class_init ();
+  };
   class Stream;
   class MemStream : Stream {
     void class_init ();
