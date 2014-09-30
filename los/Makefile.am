@@ -14,6 +14,7 @@ liblos_la_CFLAGS = -DCL_LOG_DOMAIN=\"los\" -I$(top_srcdir) -I$(top_builddir) @GL
 include_HEADERS = los.h
 
 includelos_HEADERS = \
+	lostest.h \
 	lbase.h \
 	ltrash.h \
 	lobject.h \
