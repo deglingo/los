@@ -45,7 +45,8 @@ liblos_la_SOURCES = \
 	lfile.c \
 	lpackerbase.c \
 	lpacker.c \
-	lunpacker.c
+	lunpacker.c \
+	lsignal.c
 
 BUILT_SOURCES = \
 	lnone-def.h lnone.inl \

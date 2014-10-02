@@ -9,6 +9,10 @@ class Packable {
   void class_init ();
 };
 
+class Sigobj {
+  void class_init ();
+};
+
 class ByteStream : L::Stream
 {
   void class_init ();
