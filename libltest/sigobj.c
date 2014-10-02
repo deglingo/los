@@ -35,3 +35,12 @@ Sigobj *sigobj_new ( void )
 {
   return SIGOBJ(l_object_new(CLASS_SIGOBJ, NULL));
 }
+
+
+
+/* sigobj_signal1:
+ */
+void sigobj_signal1 ( Sigobj *obj )
+{
+  l_signal_emit(L_OBJECT(obj), signals[SIG_SIGNAL1]);
+}

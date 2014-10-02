@@ -28,6 +28,7 @@ header
                             gpointer data_ )
   {
     struct sig_data *data = data_;
+    data->count++;
   }
 }
 
@@ -37,4 +38,6 @@ test
   Sigobj *obj = L_TRASH_OBJECT(sigobj_new());
   sdata.count = 0;
   l_signal_connect(L_OBJECT(obj), "signal1", _on_signal1, &sdata, NULL);
+  sigobj_signal1(obj);
+  PIF_CHECK_EQ(sdata.count, 1);
 }
