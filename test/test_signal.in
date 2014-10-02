@@ -3,6 +3,7 @@
 header
 {
 ##include "los/ltrash.h"
+##include "los/lsignal.h"
 ##include "libltest/sigobj.h"
 }
 
@@ -16,7 +17,24 @@ teardown
   l_trash_pop();
 }
 
+header
+{
+  struct sig_data
+  {
+    gint count;
+  };
+
+  static void _on_signal1 ( LObject *object,
+                            gpointer data_ )
+  {
+    struct sig_data *data = data_;
+  }
+}
+
 test
 {
-  L_TRASH_OBJECT(sigobj_new());
+  struct sig_data sdata;
+  Sigobj *obj = L_TRASH_OBJECT(sigobj_new());
+  sdata.count = 0;
+  l_signal_connect(L_OBJECT(obj), "signal1", _on_signal1, &sdata, NULL);
 }
