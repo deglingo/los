@@ -252,7 +252,10 @@ LObject *l_object_get_state ( LObject *object )
  */
 gchar *l_object_to_string ( LObject *object )
 {
-  return L_OBJECT_GET_CLASS(object)->to_string(object);
+  if (object)
+    return L_OBJECT_GET_CLASS(object)->to_string(object);
+  else
+    return g_strdup("<NULL>");
 }
 
 
