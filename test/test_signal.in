@@ -19,25 +19,51 @@ teardown
 
 header
 {
+#define SIG_TRACE_SIZE 4
+
+  struct sig_trace
+  {
+    LObject *obj;
+    gint sig;
+  };
+
   struct sig_data
   {
     gint count;
+    struct sig_trace trace[SIG_TRACE_SIZE];
   };
+
+  static void _sigtrace ( struct sig_data *data,
+                          LObject *obj,
+                          gint sig )
+  {
+    struct sig_trace *trace;
+    PIF_CHECK(data->count < SIG_TRACE_SIZE);
+    trace = &data->trace[data->count++];
+    trace->obj = obj;
+    trace->sig = 1;
+  }
 
   static void _on_signal1 ( LObject *object,
                             gpointer data_ )
   {
-    struct sig_data *data = data_;
-    data->count++;
+    _sigtrace(data_, object, 1);
   }
 }
 
 test
 {
   struct sig_data sdata;
-  Sigobj *obj = L_TRASH_OBJECT(sigobj_new());
+  Sigobj *obj1 = L_TRASH_OBJECT(sigobj_new());
+  Sigobj *obj2 = L_TRASH_OBJECT(sigobj_new());
   sdata.count = 0;
-  l_signal_connect(L_OBJECT(obj), "signal1", _on_signal1, &sdata, NULL);
-  sigobj_signal1(obj);
-  PIF_CHECK_EQ(sdata.count, 1);
+  l_signal_connect(L_OBJECT(obj1), "signal1", _on_signal1, &sdata, NULL);
+  l_signal_connect(L_OBJECT(obj2), "signal1", _on_signal1, &sdata, NULL);
+  sigobj_signal1(obj1);
+  sigobj_signal1(obj2);
+  PIF_CHECK_EQ(sdata.count, 2);
+  PIF_CHECK_EQ_PTR(sdata.trace[0].obj, obj1);
+  PIF_CHECK_EQ(sdata.trace[0].sig, 1);
+  PIF_CHECK_EQ_PTR(sdata.trace[1].obj, obj2);
+  PIF_CHECK_EQ(sdata.trace[1].sig, 1);
 }
