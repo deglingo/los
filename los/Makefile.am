@@ -29,7 +29,8 @@ includelos_HEADERS = \
 	lfile.h lfile-def.h \
 	lpackerbase.h \
 	lpacker.h lpacker-def.h \
-	lunpacker.h lunpacker-def.h
+	lunpacker.h lunpacker-def.h \
+	lsignal.h
 
 liblos_la_SOURCES = \
 	ltrash.c \

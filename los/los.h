@@ -33,5 +33,7 @@
 
 #include <los/lunpacker.h>
 
+#include <los/lsignal.h>
+
 
 #endif
