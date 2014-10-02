@@ -8,6 +8,7 @@ header
 ##include "los/lstring.h"
 ##include "los/ltuple.h"
 ##include "los/ltrash.h"
+##include "los/lnone.h"
 ##include "libltest/bytestream.h"
 ##include "libltest/packable.h"
 
@@ -36,6 +37,12 @@ teardown
   unlink(data->tmpfile);
   l_trash_pop();
 }
+
+
+#define CHECK_NONE(obj) do {                    \
+    PIF_CHECK(obj);                             \
+    PIF_CHECK(L_IS_NONE(obj));                  \
+  } while (0)
 
 
 #define CHECK_INT(obj, val) do {                \
@@ -112,6 +119,16 @@ teardown
     }                                                       \
   } while (0)
 
+test none
+{
+  /* pack */
+  TEST_PACK(byte_stream_new(data->tmpfile, "w"),
+            { l_packer_add(packer, L_TRASH_OBJECT(l_none_ref())); });
+  /* unpack */
+  TEST_UNPACK(byte_stream_new(data->tmpfile, "r"),
+              1,
+              { CHECK_NONE(objs[0]); });
+}
 
 test /* int_92 */
 {

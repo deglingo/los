@@ -7,6 +7,7 @@
 #include "los/lint.h" /* ?? */
 #include "los/lstring.h" /* ?? */
 #include "los/ltuple.h"
+#include "los/lnone.h"
 #include "los/lunpacker.inl"
 
 
@@ -492,6 +493,10 @@ LObject *l_unpacker_recv ( LUnpacker *unpacker,
       /* get object */
       switch (ctxt->c_type)
         {
+        case PACK_KEY_NONE:
+          ctxt->c_any.object = L_OBJECT(l_none_ref());
+          ctxt->c_any.done = TRUE;
+          break;
         case PACK_KEY_INT:
           if (!_recv_int(unpacker, ctxt, error))
             return NULL;

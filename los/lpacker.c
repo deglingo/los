@@ -7,6 +7,7 @@
 #include "los/lint.h" /* ?? */
 #include "los/lstring.h"
 #include "los/ltuple.h"
+#include "los/lnone.h"
 #include "los/ltrash.h"
 #include "los/lpacker.inl"
 
@@ -124,6 +125,14 @@ enum
     S_TUPLE_WRITE_TYPE,
     S_TUPLE_WRITE_SIZE,
     S_TUPLE_WRITE_ITEM,
+  };
+
+
+
+enum
+  {
+    S_NONE_START = 0,
+    S_NONE_WRITE_TYPE,
   };
 
 
@@ -261,6 +270,7 @@ static Context *context_push ( LPacker *packer,
   if (L_IS_INT(object)) ctxt->c_type = PACK_KEY_INT;
   else if (L_IS_STRING(object)) ctxt->c_type = PACK_KEY_STRING;
   else if (L_IS_TUPLE(object)) ctxt->c_type = PACK_KEY_TUPLE;
+  else if (L_IS_NONE(object)) ctxt->c_type = PACK_KEY_NONE;
   else ctxt->c_type = PACK_KEY_OBJECT;
   ctxt->c_any.object = object;
   ctxt->c_any.stage = 0;
@@ -404,6 +414,29 @@ static gboolean _send_tuple ( LPacker *packer,
 
 
 
+static gboolean _send_none ( LPacker *packer,
+                             Context *ctxt,
+                             GError **error )
+{
+  Private *priv = PRIVATE(packer);
+  switch (ctxt->c_any.stage)
+    {
+    case S_NONE_START:
+      BUFFER_SET(priv, guint8, (guint8) PACK_KEY_NONE);
+      ctxt->c_any.stage = S_NONE_WRITE_TYPE;
+    case S_NONE_WRITE_TYPE:
+      if (!_send(packer, error))
+        return FALSE;
+      break;
+    default:
+      ASSERT(0);
+    }
+  context_pop(packer);
+  return TRUE;
+}
+
+
+
 static gboolean _send_object ( LPacker *packer,
                                Context *ctxt,
                                GError **error )
@@ -485,6 +518,10 @@ gboolean l_packer_send ( LPacker *packer,
         break;
       case PACK_KEY_TUPLE:
         if (!_send_tuple(packer, ctxt, error))
+          return FALSE;
+        break;
+      case PACK_KEY_NONE:
+        if (!_send_none(packer, ctxt, error))
           return FALSE;
         break;
       case PACK_KEY_OBJECT:
