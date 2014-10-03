@@ -2,7 +2,7 @@
 
 check_LTLIBRARIES = libltest.la
 
-libltest_la_CFLAGS = -I$(top_srcdir) -I$(top_builddir) @GLIB_CFLAGS@
+libltest_la_CFLAGS = -DCL_LOG_DOMAIN=\"libltest\" -I$(top_srcdir) -I$(top_builddir) @GLIB_CFLAGS@ @CLOG_CFLAGS@
 
 libltest_la_SOURCES = \
 	fake.c \

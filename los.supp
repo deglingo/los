@@ -33,6 +33,17 @@
 #    fun:l_object_get_class
 # }
 
+# [TODO] LObject param pool
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:l_param_spec_pool_lookup
+   ...
+   fun:l_object_get_property
+}
+
 # trash allocation
 {
    <insert_a_suppression_name_here>

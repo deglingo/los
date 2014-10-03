@@ -74,6 +74,10 @@ struct _LObjectClass
 
   gchar * (* to_string) ( LObject *object );
 
+  /* property get/setter */
+  LObject * (*get_property) ( LObject *object,
+                              LParamSpec *pspec );
+
   /* destructor and finalization */
   void (* dispose) ( LObject *object );
   void (* finalize) ( LObject *object );

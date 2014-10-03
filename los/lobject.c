@@ -285,7 +285,15 @@ static void _dispose ( LObject *object )
 LObject *l_object_get_property ( LObject *object,
                                  const gchar *name )
 {
-  return NULL;
+  LParamSpec *pspec;
+  if (!(pspec = l_param_spec_pool_lookup(pspec_pool,
+                                         L_OBJECT_GET_CLASS(object),
+                                         name)))
+    CL_ERROR("param not found: %s.%s",
+             l_object_class_name(L_OBJECT_GET_CLASS(object)),
+             name);
+  ASSERT(pspec->owner_type->get_property);
+  return pspec->owner_type->get_property(object, pspec);
 }
 
 
