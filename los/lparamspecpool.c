@@ -23,6 +23,7 @@ typedef struct _PSpecKey
 struct _LParamSpecPool
 {
   GHashTable *pspecs;
+  GHashTable *pspecs_cache;
 };
 
 
@@ -66,6 +67,9 @@ LParamSpecPool *l_param_spec_pool_new ( void )
   pool->pspecs = g_hash_table_new_full(pspec_key_hash, pspec_key_equal,
                                        (GDestroyNotify) g_free,
                                        (GDestroyNotify) l_param_spec_unref);
+  pool->pspecs_cache = g_hash_table_new_full(pspec_key_hash, pspec_key_equal,
+                                             (GDestroyNotify) g_free,
+                                             (GDestroyNotify) l_param_spec_unref);
   return pool;
 }
 
@@ -76,6 +80,7 @@ LParamSpecPool *l_param_spec_pool_new ( void )
 void l_param_spec_pool_free ( LParamSpecPool *pool )
 {
   g_hash_table_unref(pool->pspecs);
+  g_hash_table_unref(pool->pspecs_cache);
   g_free(pool);
 }
 
@@ -103,6 +108,27 @@ void l_param_spec_pool_register ( LParamSpecPool *pool,
 
 
 
+/* _lookup_full:
+ */
+static LParamSpec *_lookup_full ( LParamSpecPool *pool,
+                                  LObjectClass *owner_type,
+                                  const gchar *name )
+{
+  PSpecKey key;
+  LParamSpec *p;
+  key.owner_type = owner_type;
+  key.name = name;
+  while (key.owner_type)
+    {
+      if ((p = g_hash_table_lookup(pool->pspecs, &key)))
+        return p;
+      key.owner_type = key.owner_type->l_parent_class;
+    }
+  return NULL;
+}
+
+
+
 /* l_param_spec_pool_lookup:
  */
 LParamSpec *l_param_spec_pool_lookup ( LParamSpecPool *pool,
@@ -110,7 +136,16 @@ LParamSpec *l_param_spec_pool_lookup ( LParamSpecPool *pool,
                                        const gchar *name )
 {
   PSpecKey key;
+  LParamSpec *p;
   key.owner_type = owner_type;
   key.name = name;
-  return g_hash_table_lookup(pool->pspecs, &key);
+  if (G_UNLIKELY(!g_hash_table_lookup_extended(pool->pspecs_cache, &key, NULL, (gpointer *) &p)))
+    {
+      PSpecKey *new_key;
+      p = _lookup_full(pool, owner_type, name);
+      new_key = g_new(PSpecKey, 1);
+      *new_key = key;
+      g_hash_table_insert(pool->pspecs_cache, new_key, l_param_spec_ref(p));
+    }
+  return p;
 }

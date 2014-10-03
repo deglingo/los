@@ -24,6 +24,17 @@ header
     }
     return cls;
   }
+
+  static LObjectClass *tp2_get_class ( void )
+  {
+    static LObjectClass *cls = NULL;
+    if (!cls) {
+      LClassInfo info = { 0, };
+      info.class_size = sizeof(LObjectClass);
+      cls = l_object_class_register("Tp2", CLASS_TP1, &info);
+    }
+    return cls;
+  }
 }
 
 #define TRASH_PSPEC(p) (l_trash_add((p), (GDestroyNotify) l_param_spec_unref))
@@ -57,4 +68,5 @@ test register
     (l_param_spec_int("p1", 0));
   l_param_spec_pool_register(data->pool, CLASS_TP1, 1, p1);
   PIF_CHECK_EQ_PTR(l_param_spec_pool_lookup(data->pool, CLASS_TP1, "p1"), p1);
+  PIF_CHECK_EQ_PTR(l_param_spec_pool_lookup(data->pool, CLASS_TP2, "p1"), p1);
 }
