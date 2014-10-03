@@ -69,7 +69,7 @@ LParamSpecPool *l_param_spec_pool_new ( void )
                                        (GDestroyNotify) l_param_spec_unref);
   pool->pspecs_cache = g_hash_table_new_full(pspec_key_hash, pspec_key_equal,
                                              (GDestroyNotify) g_free,
-                                             (GDestroyNotify) l_param_spec_unref);
+                                             NULL);
   return pool;
 }
 
@@ -145,7 +145,7 @@ LParamSpec *l_param_spec_pool_lookup ( LParamSpecPool *pool,
       p = _lookup_full(pool, owner_type, name);
       new_key = g_new(PSpecKey, 1);
       *new_key = key;
-      g_hash_table_insert(pool->pspecs_cache, new_key, l_param_spec_ref(p));
+      g_hash_table_insert(pool->pspecs_cache, new_key, p);
     }
   return p;
 }
