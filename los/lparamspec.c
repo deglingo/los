@@ -2,6 +2,7 @@
  */
 
 #include "los/lparamspec.h"
+#include "los/lint.h"
 
 
 
@@ -14,6 +15,7 @@ LParamSpec *l_param_spec_int ( const gchar *name,
   pspec = g_new0(LParamSpec, 1);
   pspec->_ref_count = 1;
   pspec->name = g_strdup(name);
+  pspec->value_type = L_CLASS_INT; /* [fixme] ref ? */
   return pspec;
 }
 

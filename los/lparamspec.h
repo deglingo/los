@@ -22,6 +22,7 @@ struct _LParamSpec
   guint param_id;
   struct _LObjectClass *owner_type;
   gchar *name;
+  struct _LObjectClass *value_type;
 };
 
 

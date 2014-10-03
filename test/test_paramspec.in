@@ -4,6 +4,7 @@ header
 {
 ##include "los/ltrash.h"
 ##include "los/lparamspec.h"
+##include "los/lint.h"
 }
 
 setup
@@ -28,6 +29,7 @@ unit int
     PIF_CHECK_EQ(p->param_id, 0);
     PIF_CHECK_EQ_PTR(p->owner_type, NULL);
     PIF_CHECK_EQ_STR(p->name, "ptest");
+    PIF_CHECK_EQ_PTR(p->value_type, L_CLASS_INT);
   }
 
   test ref
