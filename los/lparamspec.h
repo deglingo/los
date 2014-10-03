@@ -6,9 +6,21 @@
 
 #include "los/lbase.h"
 
+struct _LObjectClass;
+
 
 
 typedef struct _LParamSpec LParamSpec;
+
+
+
+/* LParamSpec:
+ */
+struct _LParamSpec
+{
+  guint param_id;
+  struct LObjectClass *owner_type;
+};
 
 
 

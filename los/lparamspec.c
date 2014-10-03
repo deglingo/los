@@ -5,15 +5,6 @@
 
 
 
-/* LParamSpec:
- */
-struct _LParamSpec
-{
-  int _dummy;
-};
-
-
-
 /* l_param_spec_int:
  */
 LParamSpec *l_param_spec_int ( const gchar *name,
