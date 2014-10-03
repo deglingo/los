@@ -14,6 +14,7 @@ typedef struct _LParamSpec LParamSpec;
 
 LParamSpec *l_param_spec_int ( const gchar *name,
                                gint defo );
+void l_param_spec_unref ( LParamSpec *pspec );
 
 
 

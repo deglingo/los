@@ -12,3 +12,13 @@ LParamSpec *l_param_spec_int ( const gchar *name,
 {
   return NULL;
 }
+
+
+
+/* l_param_spec_unref:
+ */
+void l_param_spec_unref ( LParamSpec *pspec )
+{
+  /* [FIXME] */
+}
+

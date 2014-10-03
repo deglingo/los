@@ -1,0 +1,29 @@
+/* -*- c -*- */
+
+header
+{
+##include "los/ltrash.h"
+##include "los/lparamspec.h"
+}
+
+setup
+{
+  l_trash_push();
+}
+
+teardown
+{
+  l_trash_pop();
+}
+
+#define TRASH_PSPEC(p) (l_trash_add((p), (GDestroyNotify) l_param_spec_unref))
+
+unit int
+{
+  test new
+  {
+    LParamSpec *p = TRASH_PSPEC
+      (l_param_spec_int("ptest", 0));
+    /* PIF_CHECK(p); */
+  }
+}
