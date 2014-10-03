@@ -14,6 +14,8 @@
 struct _TProp
 {
   T_PROP_INSTANCE_HEADER;
+
+  LObject *p1;
 };
 
 

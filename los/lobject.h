@@ -78,6 +78,10 @@ struct _LObjectClass
   LObject * (*get_property) ( LObject *object,
                               LParamSpec *pspec );
 
+  void (* set_property) ( LObject *object,
+                          LParamSpec *pspec,
+                          LObject *value );
+
   /* destructor and finalization */
   void (* dispose) ( LObject *object );
   void (* finalize) ( LObject *object );
@@ -132,6 +136,9 @@ void l_object_unref ( gpointer obj );
 void l_object_dispose ( LObject *object );
 LObject *l_object_get_property ( LObject *object,
                                  const gchar *name );
+void l_object_set_property ( LObject *object,
+                             const gchar *name,
+                             LObject *value );
 LObject *l_object_get_state ( LObject *object );
 gchar *l_object_to_string ( LObject *object );
 guint l_object_hash ( LObject *object );

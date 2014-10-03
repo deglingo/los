@@ -298,6 +298,25 @@ LObject *l_object_get_property ( LObject *object,
 
 
 
+/* l_object_set_property:
+ */
+void l_object_set_property ( LObject *object,
+                             const gchar *name,
+                             LObject *value )
+{
+  LParamSpec *pspec;
+  if (!(pspec = l_param_spec_pool_lookup(pspec_pool,
+                                         L_OBJECT_GET_CLASS(object),
+                                         name)))
+    CL_ERROR("param not found: %s.%s",
+             l_object_class_name(L_OBJECT_GET_CLASS(object)),
+             name);
+  ASSERT(pspec->owner_type->set_property);
+  pspec->owner_type->set_property(object, pspec, value);
+}
+
+
+
 /* l_object_get_state:
  */
 LObject *l_object_get_state ( LObject *object )

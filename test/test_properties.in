@@ -31,4 +31,8 @@ test instance
   val = L_TRASH_OBJECT
     (l_object_get_property(t, "p1"));
   LOS_CHECK_INT(val, 0);
+  l_object_set_property(t, "p1", L_TRASH_OBJECT(l_int_new(2)));
+  val = L_TRASH_OBJECT
+    (l_object_get_property(t, "p1"));
+  LOS_CHECK_INT(val, 2);
 }
