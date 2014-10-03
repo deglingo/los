@@ -154,7 +154,7 @@ class Id :
 class CIdent :
 
     # [fixme] handle '_' and digits
-    RE_CMLWORD = re.compile(r"[A-Z]+[a-z]*")
+    RE_CMLWORD = re.compile(r"[A-Z0-9]+[a-z0-9]*")
     
     @staticmethod
     def split_cml (ident) :

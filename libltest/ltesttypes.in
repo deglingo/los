@@ -5,6 +5,9 @@ namespace L
   extern class Stream;
 }
 
+class Fake;
+class Fake2 : Fake;
+
 class Packable {
   void class_init ();
 };

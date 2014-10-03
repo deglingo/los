@@ -5,15 +5,21 @@ check_LTLIBRARIES = libltest.la
 libltest_la_CFLAGS = -I$(top_srcdir) -I$(top_builddir) @GLIB_CFLAGS@
 
 libltest_la_SOURCES = \
+	fake.c \
+	fake2.c \
 	packable.c \
 	bytestream.c \
 	sigobj.c
 
 BUILT_SOURCES = \
+	fake-def.h fake.inl \
+	fake2-def.h fake2.inl \
 	packable-def.h packable.inl \
 	bytestream-def.h bytestream.inl \
 	sigobj-def.h sigobj.inl
 
+fake-def.h fake.inl \
+fake2-def.h fake2.inl \
 packable-def.h packable.inl \
 bytestream-def.h bytestream.inl \
 sigobj-def.h sigobj.inl \
