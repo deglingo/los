@@ -2,7 +2,13 @@
 header
 {
 ##include "los/private.h"
+##include "los/lbase.h"
 ##include <glib.h>
+}
+
+global_setup
+{
+  los_init();
 }
 
 test { PIF_CHECK(1); }

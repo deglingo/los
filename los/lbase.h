@@ -15,4 +15,8 @@
 
 
 
+void los_init ( void );
+
+
+
 #endif

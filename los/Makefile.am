@@ -35,6 +35,7 @@ includelos_HEADERS = \
 	lsignal.h
 
 liblos_la_SOURCES = \
+	lbase.c \
 	ltrash.c \
 	lparamspec.c \
 	lparamspecpool.c \
