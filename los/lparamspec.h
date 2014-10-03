@@ -18,6 +18,7 @@ typedef struct _LParamSpec LParamSpec;
  */
 struct _LParamSpec
 {
+  volatile guint _ref_count;
   guint param_id;
   struct LObjectClass *owner_type;
 };
@@ -26,6 +27,7 @@ struct _LParamSpec
 
 LParamSpec *l_param_spec_int ( const gchar *name,
                                gint defo );
+LParamSpec *l_param_spec_ref ( LParamSpec *pspec );
 void l_param_spec_unref ( LParamSpec *pspec );
 
 

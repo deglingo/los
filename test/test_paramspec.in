@@ -28,4 +28,12 @@ unit int
     PIF_CHECK_EQ(p->param_id, 0);
     PIF_CHECK_EQ_PTR(p->owner_type, NULL);
   }
+
+  test ref
+  {
+    LParamSpec *p = TRASH_PSPEC
+      (l_param_spec_int("ptest", 0));
+    PIF_CHECK_EQ_PTR(l_param_spec_ref(p), p);
+    l_param_spec_unref(p);
+  }
 }
