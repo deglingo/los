@@ -13,6 +13,7 @@ LParamSpec *l_param_spec_int ( const gchar *name,
   LParamSpec *pspec;
   pspec = g_new0(LParamSpec, 1);
   pspec->_ref_count = 1;
+  pspec->name = g_strdup(name);
   return pspec;
 }
 
@@ -34,6 +35,7 @@ void l_param_spec_unref ( LParamSpec *pspec )
 {
   if (g_atomic_int_dec_and_test(&pspec->_ref_count))
     {
+      g_free(pspec->name);
       g_free(pspec);
     }
 }

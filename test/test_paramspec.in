@@ -27,6 +27,7 @@ unit int
     PIF_CHECK(p);
     PIF_CHECK_EQ(p->param_id, 0);
     PIF_CHECK_EQ_PTR(p->owner_type, NULL);
+    PIF_CHECK_EQ_STR(p->name, "ptest");
   }
 
   test ref
