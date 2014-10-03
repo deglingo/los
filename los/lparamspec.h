@@ -20,7 +20,7 @@ struct _LParamSpec
 {
   volatile guint _ref_count;
   guint param_id;
-  struct LObjectClass *owner_type;
+  struct _LObjectClass *owner_type;
 };
 
 
