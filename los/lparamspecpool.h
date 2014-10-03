@@ -20,6 +20,9 @@ void l_param_spec_pool_register ( LParamSpecPool *pool,
                                   LObjectClass *owner_type,
                                   guint param_id,
                                   LParamSpec *pspec );
+LParamSpec *l_param_spec_pool_lookup ( LParamSpecPool *pool,
+                                       LObjectClass *owner_type,
+                                       const gchar *name );
 
 
 

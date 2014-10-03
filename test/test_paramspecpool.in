@@ -6,6 +6,26 @@ header
 ##include "los/lparamspecpool.h"
 }
 
+header
+{
+##define CLASS_TP1 (tp1_get_class())
+##define CLASS_TP2 (tp2_get_class())
+}
+
+header
+{
+  static LObjectClass *tp1_get_class ( void )
+  {
+    static LObjectClass *cls = NULL;
+    if (!cls) {
+      LClassInfo info = { 0, };
+      info.class_size = sizeof(LObjectClass);
+      cls = l_object_class_register("Tp1", L_CLASS_OBJECT, &info);
+    }
+    return cls;
+  }
+}
+
 #define TRASH_POOL(p) (l_trash_add((p), (GDestroyNotify) l_param_spec_pool_free))
 
 data
@@ -33,5 +53,6 @@ test new
 test register
 {
   LParamSpec *p1 = l_param_spec_int("p1", 0);
-  l_param_spec_pool_register(data->pool, NULL /* [fixme] */, 1, p1);
+  l_param_spec_pool_register(data->pool, CLASS_TP1, 1, p1);
+  PIF_CHECK_EQ_PTR(l_param_spec_pool_lookup(data->pool, CLASS_TP1, "p1"), p1);
 }

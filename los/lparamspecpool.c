@@ -41,3 +41,14 @@ void l_param_spec_pool_register ( LParamSpecPool *pool,
                                   LParamSpec *pspec )
 {
 }
+
+
+
+/* l_param_spec_pool_lookup:
+ */
+LParamSpec *l_param_spec_pool_lookup ( LParamSpecPool *pool,
+                                       LObjectClass *owner_type,
+                                       const gchar *name )
+{
+  return NULL;
+}
