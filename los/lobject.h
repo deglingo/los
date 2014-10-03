@@ -112,6 +112,8 @@ void l_object_class_install_property ( LObjectClass *cls,
 void l_object_class_install_properties ( LObjectClass *cls,
                                          guint count,
                                          LParamSpec **pspecs );
+LParamSpec *l_object_class_lookup_property ( LObjectClass *cls,
+                                             const gchar *name );
 gboolean l_object_isclass ( LObject *obj );
 gboolean l_object_issubclass ( LObject *cls1,
                                LObject *cls2 );

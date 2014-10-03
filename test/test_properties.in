@@ -21,6 +21,7 @@ test class
 {
   LObjectClass *cls = T_CLASS_PROP;
   PIF_CHECK(cls);
+  PIF_CHECK(l_object_class_lookup_property(cls, "p1"));
 }
 
 test instance

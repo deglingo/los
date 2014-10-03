@@ -43,6 +43,15 @@
    ...
    fun:l_object_get_property
 }
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:l_param_spec_pool_lookup
+   ...
+   fun:l_object_class_lookup_property
+}
 
 # trash allocation
 {

@@ -119,6 +119,17 @@ void l_object_class_install_properties ( LObjectClass *cls,
 
 
 
+/* l_object_class_lookup_property:
+ */
+LParamSpec *l_object_class_lookup_property ( LObjectClass *cls,
+                                             const gchar *name )
+{
+  ASSERT(pspec_pool);
+  return l_param_spec_pool_lookup(pspec_pool, cls, name);
+}
+
+
+
 /* l_object_isclass:
  */
 gboolean l_object_isclass ( LObject *obj )
