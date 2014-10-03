@@ -5,12 +5,23 @@
 
 
 
+/* LParamSpec:
+ */
+struct _LParamSpec
+{
+  int _dummy;
+};
+
+
+
 /* l_param_spec_int:
  */
 LParamSpec *l_param_spec_int ( const gchar *name,
                                gint defo )
 {
-  return NULL;
+  LParamSpec *pspec;
+  pspec = g_new0(LParamSpec, 1);
+  return pspec;
 }
 
 
@@ -20,5 +31,6 @@ LParamSpec *l_param_spec_int ( const gchar *name,
 void l_param_spec_unref ( LParamSpec *pspec )
 {
   /* [FIXME] */
+  g_free(pspec);
 }
 

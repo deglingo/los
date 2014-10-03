@@ -24,6 +24,6 @@ unit int
   {
     LParamSpec *p = TRASH_PSPEC
       (l_param_spec_int("ptest", 0));
-    /* PIF_CHECK(p); */
+    PIF_CHECK(p);
   }
 }
