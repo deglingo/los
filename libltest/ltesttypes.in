@@ -23,5 +23,7 @@ class ByteStream : L::Stream
 
 namespace T
 {
-  class Prop;
+  class Prop {
+    void class_init ();
+  };
 }

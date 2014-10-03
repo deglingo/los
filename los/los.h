@@ -9,6 +9,8 @@
 
 #include <los/ltrash.h>
 
+#include <los/lparamspec.h>
+
 #include <los/lobject.h>
 
 #include <los/lnone.h>
