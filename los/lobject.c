@@ -3,6 +3,7 @@
 
 #include "los/private.h"
 #include "los/lobject.h"
+#include "los/lparamspecpool.h"
 
 /* [REMOVEME] */
 #include <stdlib.h>
@@ -11,10 +12,23 @@
 
 
 static GHashTable *_class_names = NULL;
+static LParamSpecPool *pspec_pool = NULL;
 
 static void _class_init ( LObjectClass *cls );
 static void _dispose ( LObject *object );
 static gchar *_to_string ( LObject *object );
+
+
+
+/* _l_object_init:
+ *
+ * Global initialization (MT safe).
+ */
+void _l_object_init ( void )
+{
+  ASSERT(!pspec_pool);
+  pspec_pool = l_param_spec_pool_new();
+}
 
 
 
@@ -79,10 +93,28 @@ LObjectClass *l_object_class_register ( const gchar *name,
 
 /* l_object_class_install_property:
  */
+void l_object_class_install_property ( LObjectClass *cls,
+                                       guint param_id,
+                                       LParamSpec *pspec )
+{
+  ASSERT(pspec_pool);
+  l_param_spec_pool_register
+    (pspec_pool, cls, param_id, pspec);
+}
+
+
+
+/* l_object_class_install_property:
+ */
 void l_object_class_install_properties ( LObjectClass *cls,
                                          guint count,
                                          LParamSpec **pspecs )
 {
+  guint p;
+  ASSERT(count >= 1);
+  ASSERT(!pspecs[0]);
+  for (p = 1; p < count; p++)
+    l_object_class_install_property(cls, p, pspecs[p]);
 }
 
 

@@ -1,3 +1,13 @@
+# [TODO] global initialization
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:l_param_spec_pool_new
+   fun:_l_object_init
+}
+
 # [TODO] class ref-counting and finalization...
 {
    l_class_register

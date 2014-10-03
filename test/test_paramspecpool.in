@@ -6,9 +6,18 @@ header
 ##include "los/lparamspecpool.h"
 }
 
+#define TRASH_POOL(p) (l_trash_add((p), (GDestroyNotify) l_param_spec_pool_free))
+
+data
+{
+  LParamSpecPool *pool;
+}
+
 setup
 {
   l_trash_push();
+  data->pool = TRASH_POOL
+    (l_param_spec_pool_new());
 }
 
 teardown
@@ -16,10 +25,13 @@ teardown
   l_trash_pop();
 }
 
-#define TRASH_POOL(p) (l_trash_add((p), (GDestroyNotify) l_param_spec_pool_free))
-
 test new
 {
-  LParamSpecPool *pool = TRASH_POOL(l_param_spec_pool_new());
-  PIF_CHECK(pool);
+  PIF_CHECK(data->pool);
+}
+
+test register
+{
+  LParamSpec *p1 = l_param_spec_int("p1", 0);
+  l_param_spec_pool_register(data->pool, NULL /* [fixme] */, 1, p1);
 }

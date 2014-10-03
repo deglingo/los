@@ -3,6 +3,7 @@
 
 #include "los/private.h"
 #include "los/lbase.h"
+#include "los/lobject.h"
 
 
 
@@ -10,6 +11,7 @@
  */
 static gpointer los_init_once ( gpointer dummy )
 {
+  _l_object_init();
   return NULL;
 }
 

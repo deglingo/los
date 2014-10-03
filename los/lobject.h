@@ -93,10 +93,14 @@ struct _LObjectClass
 
 
 
+void _l_object_init ( void );
 LObjectClass *l_object_get_class ( void );
 LObjectClass *l_object_class_register ( const gchar *name,
                                         LObjectClass *parent,
                                         LClassInfo *info );
+void l_object_class_install_property ( LObjectClass *cls,
+                                       guint param_id,
+                                       LParamSpec *pspec );
 void l_object_class_install_properties ( LObjectClass *cls,
                                          guint count,
                                          LParamSpec **pspecs );

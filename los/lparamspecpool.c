@@ -30,3 +30,14 @@ void l_param_spec_pool_free ( LParamSpecPool *pool )
 {
   g_free(pool);
 }
+
+
+
+/* l_param_spec_pool_register:
+ */
+void l_param_spec_pool_register ( LParamSpecPool *pool,
+                                  LObjectClass *owner_type,
+                                  guint param_id,
+                                  LParamSpec *pspec )
+{
+}
