@@ -5,6 +5,7 @@ header
 ##include "los/ltrash.h"
 ##include "los/lparamspec.h"
 ##include "los/lint.h"
+##include "los/lstring.h"
 }
 
 setup
@@ -38,5 +39,19 @@ unit int
       (l_param_spec_int("ptest", 0));
     PIF_CHECK_EQ_PTR(l_param_spec_ref(p), p);
     l_param_spec_unref(p);
+  }
+}
+
+unit string
+{
+  test new
+  {
+    LParamSpec *p = TRASH_PSPEC
+      (l_param_spec_string("ptest", 0));
+    PIF_CHECK(p);
+    PIF_CHECK_EQ(p->param_id, 0);
+    PIF_CHECK_EQ_PTR(p->owner_type, NULL);
+    PIF_CHECK_EQ_STR(p->name, "ptest");
+    PIF_CHECK_EQ_PTR(p->value_type, L_CLASS_STRING);
   }
 }

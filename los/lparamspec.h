@@ -29,6 +29,8 @@ struct _LParamSpec
 
 LParamSpec *l_param_spec_int ( const gchar *name,
                                gint defo );
+LParamSpec *l_param_spec_string ( const gchar *name,
+                                  const gchar *defo );
 LParamSpec *l_param_spec_ref ( LParamSpec *pspec );
 void l_param_spec_unref ( LParamSpec *pspec );
 
