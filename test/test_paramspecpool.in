@@ -1,0 +1,25 @@
+/* -*- c -*- */
+
+header
+{
+##include "los/ltrash.h"
+##include "los/lparamspecpool.h"
+}
+
+setup
+{
+  l_trash_push();
+}
+
+teardown
+{
+  l_trash_pop();
+}
+
+#define TRASH_POOL(p) (l_trash_add((p), (GDestroyNotify) l_param_spec_pool_free))
+
+test new
+{
+  LParamSpecPool *pool = TRASH_POOL(l_param_spec_pool_new());
+  PIF_CHECK(pool);
+}

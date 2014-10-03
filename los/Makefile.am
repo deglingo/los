@@ -18,6 +18,7 @@ includelos_HEADERS = \
 	lbase.h \
 	ltrash.h \
 	lparamspec.h \
+	lparamspecpool.h \
 	lobject.h \
 	lnone.h lnone-def.h \
 	lint.h lint-def.h \
@@ -36,6 +37,7 @@ includelos_HEADERS = \
 liblos_la_SOURCES = \
 	ltrash.c \
 	lparamspec.c \
+	lparamspecpool.c \
 	lobject.c \
 	lnone.c \
 	lint.c \
