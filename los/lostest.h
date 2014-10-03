@@ -4,6 +4,9 @@
 #ifndef _LOSTEST_H_
 #define _LOSTEST_H_
 
+/* [FIXME] ?? */
+#include "los/lint.h"
+
 
 
 #define LOS_CHECK_INT(obj_, val) do {           \

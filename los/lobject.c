@@ -248,6 +248,16 @@ static void _dispose ( LObject *object )
 
 
 
+/* l_object_get_property:
+ */
+LObject *l_object_get_property ( LObject *object,
+                                 const gchar *name )
+{
+  return NULL;
+}
+
+
+
 /* l_object_get_state:
  */
 LObject *l_object_get_state ( LObject *object )

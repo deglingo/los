@@ -122,6 +122,8 @@ LObject *l_object_new_from_state ( LObjectClass *cls,
 gpointer l_object_ref ( gpointer obj );
 void l_object_unref ( gpointer obj );
 void l_object_dispose ( LObject *object );
+LObject *l_object_get_property ( LObject *object,
+                                 const gchar *name );
 LObject *l_object_get_state ( LObject *object );
 gchar *l_object_to_string ( LObject *object );
 guint l_object_hash ( LObject *object );
