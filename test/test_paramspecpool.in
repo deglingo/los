@@ -56,5 +56,5 @@ test register
   LParamSpec *p1 = TRASH_PSPEC
     (l_param_spec_int("p1", 0));
   l_param_spec_pool_register(data->pool, CLASS_TP1, 1, p1);
-  /* PIF_CHECK_EQ_PTR(l_param_spec_pool_lookup(data->pool, CLASS_TP1, "p1"), p1); */
+  PIF_CHECK_EQ_PTR(l_param_spec_pool_lookup(data->pool, CLASS_TP1, "p1"), p1);
 }
