@@ -77,6 +77,16 @@ LObjectClass *l_object_class_register ( const gchar *name,
 
 
 
+/* l_object_class_install_property:
+ */
+void l_object_class_install_properties ( LObjectClass *cls,
+                                         guint count,
+                                         LParamSpec **pspecs )
+{
+}
+
+
+
 /* l_object_isclass:
  */
 gboolean l_object_isclass ( LObject *obj )

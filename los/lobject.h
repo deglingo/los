@@ -5,6 +5,7 @@
 #define _LOBJECT_H_
 
 #include "los/lbase.h"
+#include "los/lparamspec.h"
 
 
 
@@ -96,6 +97,9 @@ LObjectClass *l_object_get_class ( void );
 LObjectClass *l_object_class_register ( const gchar *name,
                                         LObjectClass *parent,
                                         LClassInfo *info );
+void l_object_class_install_properties ( LObjectClass *cls,
+                                         guint count,
+                                         LParamSpec **pspecs );
 gboolean l_object_isclass ( LObject *obj );
 gboolean l_object_issubclass ( LObject *cls1,
                                LObject *cls2 );

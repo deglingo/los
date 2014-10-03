@@ -10,6 +10,7 @@
  */
 enum
   {
+    PROP_0,
     PROP_P1,
     PROP_COUNT,
   };
@@ -23,9 +24,8 @@ static LParamSpec *pspecs[PROP_COUNT] = { NULL, };
  */
 static void t_prop_class_init ( LObjectClass *cls )
 {
-  /* props[PROP_P1] = */
-  /*   l_object_class_install_property */
-  /*   (cls, */
-  /*    "p1", */
-  /*    L_CLASS_INT); */
+  pspecs[PROP_P1] = l_param_spec_int("p1",
+                                     2);
+
+  l_object_class_install_properties(cls, PROP_COUNT, pspecs);
 }
