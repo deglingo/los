@@ -9,6 +9,7 @@ libltest_la_SOURCES = \
 	fake2.c \
 	packable.c \
 	bytestream.c \
+	tprop.c \
 	sigobj.c
 
 BUILT_SOURCES = \
@@ -16,12 +17,14 @@ BUILT_SOURCES = \
 	fake2-def.h fake2.inl \
 	packable-def.h packable.inl \
 	bytestream-def.h bytestream.inl \
+	tprop-def.h tprop.inl \
 	sigobj-def.h sigobj.inl
 
 fake-def.h fake.inl \
 fake2-def.h fake2.inl \
 packable-def.h packable.inl \
 bytestream-def.h bytestream.inl \
+tprop-def.h tprop.inl \
 sigobj-def.h sigobj.inl \
 : ltesttypes.stamp-h
 

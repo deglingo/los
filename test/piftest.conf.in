@@ -18,6 +18,7 @@ modules =
   test_file
   test_trash
   test_nbpacker
+  test_properties
   test_signal
 
 cflags = -DCL_LOG_DOMAIN=\"los-test\" -I@top_srcdir@ -I@top_builddir@ @PIFTEST_CFLAGS@ @GLIB_CFLAGS@ @CLOG_CFLAGS@

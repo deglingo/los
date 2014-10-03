@@ -1,0 +1,23 @@
+/* -*- c -*- */
+
+header
+{
+##include "los/ltrash.h"
+##include "libltest/tprop.h"
+}
+
+setup
+{
+  l_trash_push();
+}
+
+teardown
+{
+  l_trash_pop();
+}
+
+test
+{
+  LObjectClass *cls = T_CLASS_PROP;
+  PIF_CHECK(cls);
+}
