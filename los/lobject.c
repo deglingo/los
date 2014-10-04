@@ -11,7 +11,7 @@
 
 
 
-static GHashTable *_class_names = NULL;
+static GHashTable *class_names = NULL;
 static LParamSpecPool *pspec_pool = NULL;
 
 static void _class_init ( LObjectClass *cls );
@@ -27,6 +27,7 @@ static gchar *_to_string ( LObject *object );
 void _l_object_init ( void )
 {
   ASSERT(!pspec_pool);
+  class_names = g_hash_table_new(g_str_hash, g_str_equal);
   pspec_pool = l_param_spec_pool_new();
 }
 
@@ -39,8 +40,6 @@ LObjectClass *l_object_get_class ( void )
   static LObjectClass *cls=NULL;
   if (!cls) {
     LClassInfo info = { 0, };
-    /* [FIXME] should be in some global init func */
-    _class_names = g_hash_table_new(g_str_hash, g_str_equal);
     /* class init */
     info.class_size = sizeof(LObjectClass);
     info.class_init = _class_init;
@@ -85,7 +84,7 @@ LObjectClass *l_object_class_register ( const gchar *name,
   if (info->class_init)
     info->class_init(cls);
   /* register name */
-  g_hash_table_insert(_class_names, cls->name, cls);
+  g_hash_table_insert(class_names, cls->name, cls);
   return cls;
 }
 
@@ -169,7 +168,7 @@ const gchar *l_object_class_name ( LObjectClass *cls )
  */
 LObjectClass *l_object_class_from_name ( const gchar *name )
 {
-  return g_hash_table_lookup(_class_names, name);
+  return g_hash_table_lookup(class_names, name);
 }
 
 
