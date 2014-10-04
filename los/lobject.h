@@ -149,10 +149,10 @@ gboolean l_object_eq ( LObject *a,
 
 /* debug */
 #ifdef L_DEBUG
-void l_object_set_trace_ref ( LObject *object,
+gpointer l_object_trace_ref ( gpointer object,
                               gboolean enable );
 #else
-#define l_object_set_trace_ref(obj, enable)
+#define l_object_trace_ref(obj, enable) (obj)
 #endif
 
 

@@ -72,7 +72,7 @@ teardown
     LStream *stream = (new_stream);             \
     LPacker *packer = l_packer_new(stream);     \
     if (data->trace_ref_packer)                 \
-      l_object_set_trace_ref                    \
+      l_object_trace_ref                        \
         (L_OBJECT(packer), TRUE);               \
     L_OBJECT_CLEAR(stream);                     \
     /* add objects */                           \

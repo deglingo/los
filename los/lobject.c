@@ -218,20 +218,40 @@ LObject *l_object_new_from_state ( LObjectClass *cls,
 
 
 
+#ifdef L_DEBUG
+#define TRACE_REF(obj, msg) do {                                        \
+    if (L_OBJECT(obj)->trace_ref) {                                     \
+      gchar *str = l_object_to_string(obj);                             \
+      CL_DEBUG("%s: %s -> %d", (msg), str, L_OBJECT(obj)->ref_count);   \
+      g_free(str);                                                      \
+      CL_BACKTRACE();                                                   \
+    }                                                                   \
+  } while (0)
+#else
+#define TRACE_REF(obj, msg)
+#endif
+
+
+
+/* l_object_trace_ref:
+ */
+#ifdef L_DEBUG
+gpointer l_object_trace_ref ( gpointer object,
+                              gboolean enable )
+{
+  L_OBJECT(object)->trace_ref = (enable ? 1 : 0);
+  return object;
+}
+#endif
+
+
+
 /* l_object_ref:
  */
 gpointer l_object_ref ( gpointer obj )
 {
   g_atomic_int_inc(&((LObject *)obj)->ref_count);
-#ifdef L_DEBUG
-  if (L_OBJECT(obj)->trace_ref) {
-    /* [fixme] not mt-safe */
-    CL_DEBUG("REF OBJECT: %s -> %d",
-             l_object_to_string(obj),
-             L_OBJECT(obj)->ref_count);
-    G_BREAKPOINT();
-  }
-#endif
+  TRACE_REF(obj, "REF");
   return obj;
 }
 
@@ -243,33 +263,17 @@ void l_object_unref ( gpointer obj )
 {
   if (g_atomic_int_dec_and_test(&((LObject *)obj)->ref_count))
     {
-#ifdef L_DEBUG
-      if (L_OBJECT(obj)->trace_ref) {
-        /* [fixme] not mt-safe */
-        CL_DEBUG("DESTROY OBJECT: %s -> %d",
-                 l_object_to_string(obj),
-                 L_OBJECT(obj)->ref_count);
-        G_BREAKPOINT();
-      }
-#endif
+      TRACE_REF(obj, "DESTROY");
       l_object_dispose(obj);
       if (L_OBJECT_GET_CLASS(obj)->finalize)
         L_OBJECT_GET_CLASS(obj)->finalize(obj);
       /* [FIXME] use object allocator */
       g_free(obj);
     }
-#ifdef L_DEBUG
   else
     {
-      if (L_OBJECT(obj)->trace_ref) {
-        /* [fixme] not mt-safe */
-        CL_DEBUG("UNREF OBJECT: %s -> %d",
-                 l_object_to_string(obj),
-                 L_OBJECT(obj)->ref_count);
-        G_BREAKPOINT();
-      }
+      TRACE_REF(obj, "UNREF");
     }
-#endif
 }
 
 
@@ -379,15 +383,3 @@ gboolean l_object_eq ( LObject *a,
   ASSERT(L_OBJECT_GET_CLASS(a)->eq);
   return L_OBJECT_GET_CLASS(a)->eq(a, b);
 }
-
-
-
-/* l_object_set_trace_ref:
- */
-#ifdef L_DEBUG
-void l_object_set_trace_ref ( LObject *object,
-                              gboolean enable )
-{
-  object->trace_ref = (enable ? 1 : 0);
-}
-#endif
