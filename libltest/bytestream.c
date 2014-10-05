@@ -17,7 +17,7 @@ LStreamStatus _read ( LStream *stream,
                       gint64 *bytes_read,
                       GError **error );
 LStreamStatus _write ( LStream *stream,
-                       gpointer buffer,
+                       gconstpointer buffer,
                        gint64 size,
                        gint64 *bytes_read,
                        GError **error );
@@ -104,7 +104,7 @@ LStreamStatus _read ( LStream *stream,
 /* _write:
  */
 LStreamStatus _write ( LStream *stream,
-                       gpointer buffer,
+                       gconstpointer buffer,
                        gint64 size,
                        gint64 *bytes_written,
                        GError **error )

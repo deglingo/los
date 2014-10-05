@@ -10,7 +10,7 @@
 /* l_stream_write:
  */
 LStreamStatus l_stream_write ( LStream *stream,
-                               gpointer buffer,
+                               gconstpointer buffer,
                                gint64 size,
                                gint64 *bytes_written,
                                GError **error )

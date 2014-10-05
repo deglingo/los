@@ -9,7 +9,7 @@
 
 
 static LStreamStatus _write ( LStream *stream,
-                              gpointer buffer,
+                              gconstpointer buffer,
                               gint64 size,
                               gint64 *bytes_written,
                               GError **error );
@@ -53,7 +53,7 @@ LStream *l_file_fdopen ( gint fd,
 /* _write:
  */
 static LStreamStatus _write ( LStream *stream,
-                              gpointer buffer,
+                              gconstpointer buffer,
                               gint64 size,
                               gint64 *bytes_written,
                               GError **error )

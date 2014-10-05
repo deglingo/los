@@ -13,7 +13,7 @@
 
 static void _dispose ( LObject *object );
 static LStreamStatus _write ( LStream *stream,
-                              gpointer buffer,
+                              gconstpointer buffer,
                               gint64 size,
                               gint64 *bytes_written,
                               GError **error );
@@ -111,7 +111,7 @@ gpointer l_mem_stream_get_buffer ( LMemStream *stream,
 /* _write:
  */
 static LStreamStatus _write ( LStream *stream,
-                              gpointer buffer,
+                              gconstpointer buffer,
                               gint64 size,
                               gint64 *bytes_written,
                               GError **error )

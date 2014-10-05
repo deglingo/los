@@ -49,7 +49,7 @@ struct _LStreamClass
   L_STREAM_CLASS_HEADER;
 
   LStreamStatus (* write) ( LStream *stream,
-                            gpointer buffer,
+                            gconstpointer buffer,
                             gint64 size,
                             gint64 *bytes_written,
                             GError **error );
@@ -72,7 +72,7 @@ struct _LStreamClass
 
 
 LStreamStatus l_stream_write ( LStream *stream,
-                               gpointer buffer,
+                               gconstpointer buffer,
                                gint64 size,
                                gint64 *bytes_written,
                                GError **error );
