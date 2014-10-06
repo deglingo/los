@@ -155,6 +155,9 @@ gpointer l_object_trace_ref ( gpointer object,
 #define l_object_trace_ref(obj, enable) (obj)
 #endif
 
+#define L_OBJECT_REPR(object) (l_object_repr(L_OBJECT(object)))
+const gchar *l_object_repr ( LObject *object );
+
 
 
 #endif

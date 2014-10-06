@@ -364,6 +364,16 @@ static gchar *_to_string ( LObject *object )
 
 
 
+/* l_object_repr:
+ */
+const gchar *l_object_repr ( LObject *object )
+{
+  /* [TODO] */
+  return l_object_to_string(object);
+}
+
+
+
 /* l_object_hash:
  */
 guint l_object_hash ( LObject *object )
