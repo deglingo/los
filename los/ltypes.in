@@ -2,33 +2,47 @@
 
 namespace L
 {
-  class None;
+  class None
+  {
+  };
+
   class Int {
     void class_init ();
   };
+
   class String {
     void class_init ();
   };
+
   class List {
     void class_init ();
   };
+
   class Tuple {
     void class_init ();
   };
+
   class Dict {
     void class_init ();
   };
-  class Stream;
+
+  class Stream
+  {
+  };
+
   class MemStream : Stream {
     void class_init ();
   };
+
   class File : Stream {
     void class_init ();
   };
+
   class Packer {
     void class_init ();
     void init ();
   };
+
   class Unpacker {
     void class_init ();
     void init ();

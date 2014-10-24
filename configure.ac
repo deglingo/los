@@ -13,6 +13,7 @@ AC_SUBST([vgsuppdir], ['${pkglibdir}/valgrind'])
 AC_PROG_CC
 AM_PROG_CC_C_O
 LT_INIT
+AC_PROG_YACC
 
 # [fixme] check for python3
 AC_PATH_PROG([PYTHON], [python3])
@@ -32,5 +33,4 @@ AC_CONFIG_FILES([ \
   test/Makefile \
 ])
 AC_CONFIG_FILES([los.pc])
-AC_CONFIG_FILES([gentypes/los-gentypes], [chmod +x gentypes/los-gentypes])
 AC_OUTPUT

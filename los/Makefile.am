@@ -1,5 +1,7 @@
 #
 
+LOS_GENTYPES = $(top_builddir)/gentypes/los-gentypes
+
 EXTRA_DIST = \
 	ltypes.in \
 	private.h
@@ -81,5 +83,5 @@ lunpacker-def.h lunpacker.inl \
 : ltypes.stamp-h
 
 ltypes.stamp-h: ltypes.in
-	cpp $< | $(top_builddir)/gentypes/los-gentypes
+	cpp $< | $(LOS_GENTYPES)
 	echo >$@
