@@ -83,5 +83,5 @@ lunpacker-def.h lunpacker.inl \
 : ltypes.stamp-h
 
 ltypes.stamp-h: ltypes.in
-	cpp $< | $(LOS_GENTYPES)
+	cpp $< | $(LOS_GENTYPES) -s $(srcdir) -u 'los/'
 	echo >$@

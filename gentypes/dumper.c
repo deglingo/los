@@ -14,6 +14,8 @@ typedef struct _Context
 {
   Writer *hfile;
   Writer *ifile;
+  Writer *htmpl;
+  Writer *ctmpl;
 
   WNode *s_typedefs;
   WNode *s_defines;
@@ -39,6 +41,8 @@ typedef struct _Context
  */
 struct _Dumper
 {
+  gchar *srcdir;
+  gchar *incsubdir;
   GSList *stack;
   GPtrArray *writers;
 };
@@ -147,9 +151,12 @@ static void dumper_funcs_lookup ( ASTType type,
 
 /* dumper_new:
  */
-Dumper *dumper_new ( void )
+Dumper *dumper_new ( const gchar *srcdir,
+                     const gchar *incsubdir )
 {
   Dumper *dumper = g_new0(Dumper, 1);
+  dumper->srcdir = g_strdup(srcdir);
+  dumper->incsubdir = g_strdup(incsubdir);
   dumper->writers = g_ptr_array_new();
   return dumper;
 }
@@ -413,6 +420,70 @@ static void _write_class_inl ( Context *ctxt,
 
 
 
+/* _write_template_header:
+ */
+static void _write_template_header ( Dumper *dumper,
+                                     CIdent *id,
+                                     CIdent *base_id )
+{
+  Context *ctxt = dumper->stack->data; /* check! */
+  GString *hguard = g_string_new("");
+  g_string_printf(hguard, "_%s_H_", id->fname);
+  g_string_ascii_up(hguard);
+  wsection_add(ctxt->htmpl->root,
+               wtext_newf("#error FIX THIS FILE AND REMOVE ME\n"),
+               wtext_newf("/* %s.h -\n", id->fname),
+               wtext_newf(" */\n"),
+               wtext_newf("\n"),
+               wtext_newf("#ifndef %s\n", hguard->str),
+               wtext_newf("#define %s\n", hguard->str),
+               wtext_newf("\n"),
+               wtext_newf("#include \"%s%s.h\"\n", dumper->incsubdir, base_id->fname),
+               wtext_newf("#include \"%s%s-def.h\"\n", dumper->incsubdir, id->fname),
+               wtext_newf("\n"),
+               wtext_newf("G_BEGIN_DECLS\n"),
+               wtext_newf("\n\n\n"),
+               wtext_newf("/* %s:\n", id->full.cml),
+               wtext_newf(" */\n"),
+               wtext_newf("struct _%s\n", id->full.cml),
+               wtext_newf("{\n"),
+               wtext_newf("  %s_INSTANCE_HEADER;\n", id->full.cst),
+               wtext_newf("};\n"),
+               wtext_newf("\n\n\n"),
+               wtext_newf("/* %sClass:\n", id->full.cml),
+               wtext_newf(" */\n"),
+               wtext_newf("struct _%sClass\n", id->full.cml),
+               wtext_newf("{\n"),
+               wtext_newf("  %s_CLASS_HEADER;\n", id->full.cst),
+               wtext_newf("};\n"),
+               wtext_newf("\n\n\n"),
+               wtext_newf("G_END_DECLS\n"),
+               wtext_newf("\n"),
+               wtext_newf("#endif /* ifndef %s */\n", hguard->str),
+               NULL);
+  g_string_free(hguard, TRUE);
+}
+
+
+
+/* _write_template_body:
+ */
+static void _write_template_body ( Dumper *dumper,
+                                   CIdent *id )
+{
+  Context *ctxt = dumper->stack->data; /* check! */
+  wsection_add(ctxt->ctmpl->root,
+               wtext_newf("#error FIX THIS FILE AND REMOVE ME\n"),
+               wtext_newf("/* %s.c -\n", id->fname),
+               wtext_newf(" */\n"),
+               wtext_newf("\n"),
+               wtext_newf("#include \"%s%s.h\"\n", dumper->incsubdir, id->fname),
+               wtext_newf("#include \"%s%s.inl\"\n", dumper->incsubdir, id->fname),
+               NULL);
+}
+
+
+
 /* enter_class_decl:
  */
 static void enter_class_decl ( Dumper *dumper,
@@ -421,7 +492,7 @@ static void enter_class_decl ( Dumper *dumper,
   CIdent *id;
   CIdent *base_id;
   Context *ctxt = dumper_push(dumper);
-  gchar *hfile, *ifile;
+  gchar *hfile, *ifile, *htmpl, *ctmpl;
   if (AST_DECL_EXTERN(ast))
     return;
   id = AST_DECL_CIDENT(ast);
@@ -430,6 +501,8 @@ static void enter_class_decl ( Dumper *dumper,
   /* CL_TRACE("%s", AST_DECL(ast)->cident->full.cml); */
   APRINTF(&hfile, "%s-def.h", id->fname);
   APRINTF(&ifile, "%s.inl", id->fname);
+  APRINTF(&htmpl, "%s/%s.h", dumper->srcdir, id->fname);
+  APRINTF(&ctmpl, "%s/%s.c", dumper->srcdir, id->fname);
   ctxt->hfile = dumper_writer_new(dumper, hfile);
   ctxt->ifile = dumper_writer_new(dumper, ifile);
 
@@ -451,6 +524,16 @@ static void enter_class_decl ( Dumper *dumper,
 
   _write_class_header(ctxt, id, base_id);
   _write_class_inl(ctxt, id, base_id);
+  if (!g_file_test(htmpl, G_FILE_TEST_EXISTS))
+    {
+      ctxt->htmpl = dumper_writer_new(dumper, htmpl);
+      _write_template_header(dumper, id, base_id);
+    }
+  if (!g_file_test(ctmpl, G_FILE_TEST_EXISTS))
+    {
+      ctxt->ctmpl = dumper_writer_new(dumper, ctmpl);
+      _write_template_body(dumper, id);
+    }
 }
 
 

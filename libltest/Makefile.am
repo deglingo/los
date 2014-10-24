@@ -29,5 +29,5 @@ sigobj-def.h sigobj.inl \
 : ltesttypes.stamp-h
 
 ltesttypes.stamp-h: ltesttypes.in
-	cpp $< | $(top_builddir)/gentypes/los-gentypes
+	cpp $< | $(top_builddir)/gentypes/los-gentypes -s $(srcdir) -u 'libltest/'
 	echo >$@

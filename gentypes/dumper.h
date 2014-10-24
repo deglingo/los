@@ -13,7 +13,8 @@ typedef struct _Dumper Dumper;
 
 
 
-Dumper *dumper_new ( void );
+Dumper *dumper_new ( const gchar *srcdir,
+                     const gchar *incsubdir );
 void dumper_dump ( Dumper *dumper,
                    AST *ast );
 void dumper_write ( Dumper *dumper );
