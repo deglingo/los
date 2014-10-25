@@ -23,3 +23,23 @@ test { PIF_CHECK(1); }
 /* { */
 /*   g_malloc(40); */
 /* } */
+
+header
+{
+  static GPrivate thread_priv = G_PRIVATE_INIT(g_free);
+  static gpointer thread_func ( gpointer data )
+  {
+    g_private_set(&thread_priv, g_strdup("hello!"));
+    return NULL;
+  }
+}
+
+test
+{
+  gint i;
+  for (i = 0; i < 10; i++)
+    {
+      GThread *t = g_thread_new("test-thread", thread_func, NULL);
+      g_thread_join(t);
+    }
+}

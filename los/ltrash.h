@@ -21,6 +21,8 @@ typedef void (* LTrashFunc) ( gpointer item );
 
 
 
+void l_trash_pool_free ( gpointer pool );
+
 void l_trash_push ( void );
 void l_trash_pop ( void );
 gpointer l_trash_add ( gpointer item,

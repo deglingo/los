@@ -38,6 +38,7 @@ includelos_HEADERS = \
 
 liblos_la_SOURCES = \
 	lbase.c \
+	lprivate.c \
 	ltrash.c \
 	lparamspec.c \
 	lparamspecpool.c \

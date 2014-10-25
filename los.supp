@@ -62,28 +62,6 @@
    fun:l_object_class_lookup_property
 }
 
-# trash allocation
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   match-leak-kinds: reachable
-   ...
-   fun:l_trash_alloc
-   ...
-   fun:l_trash_push
-}
-
-# trash nodes allocation
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   match-leak-kinds: reachable
-   ...
-   fun:l_trash_node_alloc
-   ...
-   fun:l_trash_add
-}
-
 # LNone singleton instantiation
 {
    <insert_a_suppression_name_here>
@@ -110,4 +88,32 @@
    match-leak-kinds: reachable
    ...
    fun:l_signal_connect
+}
+
+# LPrivate stuff
+# [FIXME] all this should be cleaned by the GPrivate destructor but it
+# does not seem to be called for the main thread
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:l_private_get
+}
+
+# LTrash studd
+# [FIXME] same problem as LPrivate
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:l_trash_push
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:l_trash_add
 }

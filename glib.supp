@@ -22,3 +22,21 @@
    ...
    fun:g_quark_from_string
 }
+
+# g_private_set()
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:g_private_set
+}
+
+# g_private_get()
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:g_private_get
+}
