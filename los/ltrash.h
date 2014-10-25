@@ -16,6 +16,9 @@ typedef void (* LTrashFunc) ( gpointer item );
 
 #define L_TRASH_OBJECT(obj) (l_trash_add((obj), l_object_unref))
 
+#define L_TRASH_INT(value) (L_TRASH_OBJECT(l_int_new(value)))
+#define L_TRASH_STRING(value) (L_TRASH_OBJECT(l_string_new(value)))
+
 
 
 void l_trash_push ( void );
