@@ -2,6 +2,7 @@
  */
 
 #include "lexer.h"
+#include "parser.h"
 #include "parsergram.h"
 
 #include <string.h>
