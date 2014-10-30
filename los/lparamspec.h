@@ -21,7 +21,8 @@ struct _LParamSpec
   volatile guint _ref_count;
   guint param_id;
   struct _LObjectClass *owner_type;
-  gchar *name;
+  const gchar *name;
+  GQuark qname;
   struct _LObjectClass *value_type;
 };
 

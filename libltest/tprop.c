@@ -95,6 +95,7 @@ static void _set_property ( LObject *object,
     case PROP_P1:
       L_OBJECT_CLEAR(T_PROP(object)->p1);
       T_PROP(object)->p1 = l_object_ref(value);
+      l_object_notify(object, pspec);
       break;
     default:
       ASSERT(0);

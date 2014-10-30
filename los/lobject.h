@@ -141,6 +141,8 @@ LObject *l_object_get_property ( LObject *object,
 void l_object_set_property ( LObject *object,
                              const gchar *name,
                              LObject *value );
+void l_object_notify ( LObject *object,
+                       LParamSpec *pspec );
 LObject *l_object_get_state ( LObject *object );
 gchar *l_object_to_string ( LObject *object );
 guint l_object_hash ( LObject *object );

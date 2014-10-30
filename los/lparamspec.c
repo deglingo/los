@@ -15,7 +15,8 @@ LParamSpec *l_param_spec_int ( const gchar *name,
   LParamSpec *pspec;
   pspec = g_new0(LParamSpec, 1);
   pspec->_ref_count = 1;
-  pspec->name = g_strdup(name);
+  pspec->qname = g_quark_from_string(name);
+  pspec->name = g_quark_to_string(pspec->qname);
   pspec->value_type = L_CLASS_INT; /* [fixme] ref ? */
   return pspec;
 }
@@ -30,7 +31,8 @@ LParamSpec *l_param_spec_string ( const gchar *name,
   LParamSpec *pspec;
   pspec = g_new0(LParamSpec, 1);
   pspec->_ref_count = 1;
-  pspec->name = g_strdup(name);
+  pspec->qname = g_quark_from_string(name);
+  pspec->name = g_quark_to_string(pspec->qname);
   pspec->value_type = L_CLASS_STRING; /* [fixme] ref ? */
   return pspec;
 }
@@ -53,7 +55,7 @@ void l_param_spec_unref ( LParamSpec *pspec )
 {
   if (g_atomic_int_dec_and_test(&pspec->_ref_count))
     {
-      g_free(pspec->name);
+      /* g_free(pspec->name); */
       g_free(pspec);
     }
 }

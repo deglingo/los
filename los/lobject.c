@@ -3,6 +3,7 @@
 
 #include "los/private.h"
 #include "los/lobject.h"
+#include "los/lsignal.h"
 #include "los/lparamspecpool.h"
 
 /* [REMOVEME] */
@@ -17,6 +18,18 @@ static LParamSpecPool *pspec_pool = NULL;
 static void _class_init ( LObjectClass *cls );
 static void _dispose ( LObject *object );
 static gchar *_to_string ( LObject *object );
+
+
+
+/* Signals:
+ */
+enum
+  {
+    SIG_NOTIFY,
+    SIG_COUNT,
+  };
+
+static LSignalID signals[SIG_COUNT] = { 0, };
 
 
 
@@ -57,6 +70,9 @@ static void _class_init ( LObjectClass *cls )
 {
   cls->dispose = _dispose;
   cls->to_string = _to_string;
+
+  signals[SIG_NOTIFY] = l_signal_new(cls,
+                                     "notify");
 }
 
 
@@ -327,6 +343,16 @@ void l_object_set_property ( LObject *object,
              name);
   ASSERT(pspec->owner_type->set_property);
   pspec->owner_type->set_property(object, pspec, value);
+}
+
+
+
+/* l_object_notify:
+ */
+void l_object_notify ( LObject *object,
+                       LParamSpec *pspec )
+{
+  l_signal_emit(object, signals[SIG_NOTIFY], pspec->qname);
 }
 
 

@@ -26,6 +26,7 @@ test class
 
 test instance
 {
+  /* [FIXME] test te notify signal */
   LObject *t = L_TRASH_OBJECT
     (l_object_new(T_CLASS_PROP, NULL));
   LObject *val;
