@@ -25,6 +25,7 @@ header
   {
     LObject *obj;
     gint sig;
+    GQuark detail;
   };
 
   struct sig_data
@@ -33,37 +34,128 @@ header
     struct sig_trace trace[SIG_TRACE_SIZE];
   };
 
+  static void check_data ( struct sig_data *data,
+                           gpointer first_obj,
+                           ... )
+    G_GNUC_NULL_TERMINATED;
+  
+  static void check_data ( struct sig_data *data,
+                           gpointer first_obj,
+                           ... )
+  {
+    va_list args;
+    gpointer obj;
+    guint count;
+    if (!first_obj) {
+      PIF_CHECK_EQ(data->count, 0);
+      return;
+    }
+    va_start(args, first_obj);
+    count = 0;
+    obj = first_obj;
+    while (obj)
+      {
+        gint sig = va_arg(args, gint);
+        GQuark detail = va_arg(args, GQuark);
+        PIF_CHECK_LT(count, data->count);
+        PIF_CHECK_EQ_PTR(data->trace[count].obj, obj);
+        PIF_CHECK_EQ(data->trace[count].sig, sig);
+        PIF_CHECK_EQ(data->trace[count].detail, detail);
+        count++;
+        obj = va_arg(args, gpointer);
+      }
+    PIF_CHECK_EQ(data->count, count);
+    va_end(args);
+  }
+
   static void _sigtrace ( struct sig_data *data,
                           LObject *obj,
-                          gint sig )
+                          gint sig,
+                          GQuark detail )
   {
     struct sig_trace *trace;
     PIF_CHECK(data->count < SIG_TRACE_SIZE);
     trace = &data->trace[data->count++];
     trace->obj = obj;
     trace->sig = 1;
+    trace->detail = detail;
   }
 
   static void _on_signal1 ( LObject *object,
                             gpointer data_ )
   {
-    _sigtrace(data_, object, 1);
+    _sigtrace(data_, object, 1, 0);
+  }
+
+  static void _on_signal1_d1 ( LObject *object,
+                               gpointer data_ )
+  {
+    _sigtrace(data_, object, 1, g_quark_from_string("detail1"));
+  }
+
+  static void _on_signal1_d2 ( LObject *object,
+                               gpointer data_ )
+  {
+    _sigtrace(data_, object, 1, g_quark_from_string("detail2"));
   }
 }
 
 test
 {
-  struct sig_data sdata;
+  struct sig_data sdata = { 0, };
   Sigobj *obj1 = L_TRASH_OBJECT(sigobj_new());
   Sigobj *obj2 = L_TRASH_OBJECT(sigobj_new());
-  sdata.count = 0;
-  l_signal_connect(L_OBJECT(obj1), "signal1", _on_signal1, &sdata, NULL);
-  l_signal_connect(L_OBJECT(obj2), "signal1", _on_signal1, &sdata, NULL);
-  sigobj_signal1(obj1);
-  sigobj_signal1(obj2);
+  l_signal_connect(L_OBJECT(obj1), "signal1", 0, _on_signal1, &sdata, NULL);
+  l_signal_connect(L_OBJECT(obj2), "signal1", 0, _on_signal1, &sdata, NULL);
+  sigobj_signal1(obj1, 0);
+  sigobj_signal1(obj2, 0);
   PIF_CHECK_EQ(sdata.count, 2);
   PIF_CHECK_EQ_PTR(sdata.trace[0].obj, obj1);
   PIF_CHECK_EQ(sdata.trace[0].sig, 1);
   PIF_CHECK_EQ_PTR(sdata.trace[1].obj, obj2);
   PIF_CHECK_EQ(sdata.trace[1].sig, 1);
+}
+
+unit detail
+{
+  data
+    {
+      GQuark detail1;
+      GQuark detail2;
+    }
+
+  setup
+    {
+      data->detail1 = g_quark_from_string("detail1");
+      data->detail2 = g_quark_from_string("detail2");
+    }
+  
+  test detail
+  {
+    struct sig_data sdata = { 0, };
+    Sigobj *obj = L_TRASH_OBJECT(sigobj_new());
+    l_signal_connect(L_OBJECT(obj), "signal1", 0, _on_signal1, &sdata, NULL);                /* A */
+    l_signal_connect(L_OBJECT(obj), "signal1", data->detail1, _on_signal1_d1, &sdata, NULL); /* B */
+    l_signal_connect(L_OBJECT(obj), "signal1", data->detail2, _on_signal1_d2, &sdata, NULL); /* C */
+    /* emit with detail1 must trigger A and B */
+    sdata.count = 0;
+    sigobj_signal1(obj, data->detail1);
+    check_data(&sdata,
+               obj, 1, 0,
+               obj, 1, data->detail1,
+               NULL);
+    /* emit with detail2 must trigger A and C */
+    sdata.count = 0;
+    sigobj_signal1(obj, data->detail2);
+    check_data(&sdata,
+               obj, 1, 0,
+               obj, 1, data->detail2,
+               NULL);
+    /* emit with no detail must trigger A only */
+    sdata.count = 0;
+    sigobj_signal1(obj, 0);
+    check_data(&sdata,
+               obj, 1, 0,
+               NULL);
+  }
 }

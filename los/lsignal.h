@@ -19,11 +19,13 @@ LSignalID l_signal_new ( LObjectClass *cls,
                          const gchar *name );
 void l_signal_connect ( LObject *object,
                         const gchar *name,
+                        GQuark detail,
                         LSignalHandler handler,
                         gpointer data,
                         GDestroyNotify destroy_data );
 void l_signal_emit ( LObject *object,
-                     LSignalID signal );
+                     LSignalID signal,
+                     GQuark detail );
 
 
 

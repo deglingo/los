@@ -34,6 +34,7 @@ typedef struct _HandlerKey
 typedef struct _HandlerNode
 {
   HandlerKey key;
+  GQuark detail;
   LSignalHandler func;
   gpointer data;
   GDestroyNotify destroy_data;
@@ -67,6 +68,7 @@ SignalNode *signal_node_new ( LObjectClass *cls,
  */
 HandlerNode *handler_node_new ( LObject *object,
                                 SignalNode *signal,
+                                GQuark detail,
                                 LSignalHandler func,
                                 gpointer data,
                                 GDestroyNotify destroy_data )
@@ -74,6 +76,7 @@ HandlerNode *handler_node_new ( LObject *object,
   HandlerNode *node = g_new0(HandlerNode, 1);
   node->key.object = object; /* [TODO] weakref */
   node->key.signal = signal;
+  node->detail = detail;
   node->func = func;
   node->data = data;
   node->destroy_data = destroy_data;
@@ -132,6 +135,7 @@ LSignalID l_signal_new ( LObjectClass *cls,
  */
 void l_signal_connect ( LObject *object,
                         const gchar *name,
+                        GQuark detail,
                         LSignalHandler func,
                         gpointer data,
                         GDestroyNotify destroy_data )
@@ -141,7 +145,7 @@ void l_signal_connect ( LObject *object,
   GList *hlist;
   node = g_hash_table_lookup(signal_names, name);
   ASSERT(node);
-  handler = handler_node_new(object, node, func, data, destroy_data);
+  handler = handler_node_new(object, node, detail, func, data, destroy_data);
   if ((hlist = g_hash_table_lookup(signal_handlers, &handler->key)))
     /* NOTE: we only get the return value to avoid a warning, but no
        need to re-insert hlist which should not have changed */
@@ -155,7 +159,8 @@ void l_signal_connect ( LObject *object,
 /* l_signal_emit:
  */
 void l_signal_emit ( LObject *object,
-                     LSignalID signal )
+                     LSignalID signal,
+                     GQuark detail )
 {
   SignalNode *node;
   GList *hlist, *l;
@@ -169,7 +174,8 @@ void l_signal_emit ( LObject *object,
   for (l = hlist; l; l = l->next)
     {
       HandlerNode *handler = l->data;
-      handler->func(object, handler->data);
+      if (handler->detail == 0 || handler->detail == detail)
+        handler->func(object, handler->data);
     }
   l_object_unref(object);
 }

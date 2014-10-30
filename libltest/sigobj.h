@@ -28,7 +28,8 @@ struct _SigobjClass
 
 
 Sigobj *sigobj_new ( void );
-void sigobj_signal1 ( Sigobj *obj );
+void sigobj_signal1 ( Sigobj *obj,
+                      GQuark detail );
 
 
 
