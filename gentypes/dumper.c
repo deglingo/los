@@ -336,6 +336,9 @@ static void _write_class_header ( Context *ctxt,
   wsection_writef(ctxt->s_defines,
                   "#define %s_GET_CLASS(obj) (L_OBJECT_GET_CLASS_CAST((obj), %sCLASS_%s, %sClass))\n",
                   id->full.cst, id->pfx.cst, id->sfx.cst, id->full.cml);
+  wsection_writef(ctxt->s_defines,
+                  "#define %s_NEW(v...) (%s(l_object_new(%sCLASS_%s, v)))\n",
+                  id->full.cst, id->full.cst, id->pfx.cst, id->sfx.cst);
   /* instance header macro */
   wsection_add(ctxt->s_defines,
                wtext_newf("#define %s_INSTANCE_HEADER \\\n", id->full.cst),
