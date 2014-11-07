@@ -38,3 +38,12 @@ test instance
     (l_object_get_property(t, "p1"));
   LOS_CHECK_INT(val, 2);
 }
+
+test new
+{
+  LObject *t = L_TRASH_OBJECT
+    (l_object_new(T_CLASS_PROP,
+                  "p1", L_TRASH_INT(3),
+                  NULL));
+  LOS_CHECK_INT(T_PROP(t)->p1, 3);
+}
