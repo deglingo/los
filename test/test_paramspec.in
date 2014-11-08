@@ -55,3 +55,17 @@ unit string
     PIF_CHECK_EQ_PTR(p->value_type, L_CLASS_STRING);
   }
 }
+
+unit object
+{
+  test new
+  {
+    LParamSpec *p = TRASH_PSPEC
+      (l_param_spec_object("ptest", L_CLASS_STRING));
+    PIF_CHECK(p);
+    PIF_CHECK_EQ(p->param_id, 0);
+    PIF_CHECK_EQ_PTR(p->owner_type, NULL);
+    PIF_CHECK_EQ_STR(p->name, "ptest");
+    PIF_CHECK_EQ_PTR(p->value_type, L_CLASS_STRING);
+  }
+}

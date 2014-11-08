@@ -39,6 +39,22 @@ LParamSpec *l_param_spec_string ( const gchar *name,
 
 
 
+/* l_param_spec_object:
+ */
+LParamSpec *l_param_spec_object ( const gchar *name,
+                                  LObjectClass *value_type )
+{
+  LParamSpec *pspec;
+  pspec = g_new0(LParamSpec, 1);
+  pspec->_ref_count = 1;
+  pspec->qname = g_quark_from_string(name);
+  pspec->name = g_quark_to_string(pspec->qname);
+  pspec->value_type = value_type; /* [fixme] ref ? */
+  return pspec;
+}
+
+
+
 /* l_param_spec_ref:
  */
 LParamSpec *l_param_spec_ref ( LParamSpec *pspec )
