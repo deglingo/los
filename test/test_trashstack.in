@@ -1,0 +1,33 @@
+/* -*- c -*- */
+
+header
+{
+##include "los/ltrashstack.h"
+}
+
+test
+{
+  LTrashStack *stack;
+  gint i, c;
+  gpointer items[10];
+  stack = l_trash_stack_new(32, -1);
+  for (i = 0; i < 10; i++)
+    {
+      items[i] = l_trash_stack_alloc(stack);
+    }
+  for (i = 0; i < 10; i++)
+    {
+      l_trash_stack_free(stack, items[i]);
+    }
+  for (i = 0; i < 10; i++)
+    {
+      items[i] = l_trash_stack_alloc0(stack);
+      for (c = 0; c < 32; c++)
+        PIF_CHECK_EQ(((gchar *) (items[i]))[c], 0);
+    }
+  for (i = 0; i < 10; i++)
+    {
+      l_trash_stack_free(stack, items[i]);
+    }
+  l_trash_stack_destroy(stack);
+}

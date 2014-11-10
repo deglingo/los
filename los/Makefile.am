@@ -19,6 +19,7 @@ includelos_HEADERS = \
 	lostest.h \
 	lbase.h \
 	ltrash.h \
+	ltrashstack.h \
 	lparamspec.h \
 	lparamspecpool.h \
 	lobject.h \
@@ -40,6 +41,7 @@ liblos_la_SOURCES = \
 	lbase.c \
 	lprivate.c \
 	ltrash.c \
+	ltrashstack.c \
 	lparamspec.c \
 	lparamspecpool.c \
 	lobject.c \

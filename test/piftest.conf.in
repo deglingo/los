@@ -17,6 +17,7 @@ modules =
   test_memstream
   test_file
   test_trash
+  test_trashstack
   test_nbpacker
   test_paramspec
   test_paramspecpool
