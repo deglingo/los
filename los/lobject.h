@@ -101,6 +101,19 @@ struct _LObjectClass
 
 
 
+#define L_OBJECT_SET_PROPERTY_ERROR(obj, pspec) do {        \
+    CL_ERROR("ERROR: property not handled: %s.%s",          \
+             l_object_class_name(L_OBJECT_GET_CLASS(obj)),  \
+             (pspec)->name);                                \
+  } while (0)
+
+#define L_OBJECT_GET_PROPERTY_ERROR(obj, pspec) do {        \
+    CL_ERROR("ERROR: property not handled: %s.%s",          \
+             l_object_class_name(L_OBJECT_GET_CLASS(obj)),  \
+             (pspec)->name);                                \
+    return NULL;                                            \
+  } while (0)
+
 void _l_object_init ( void );
 LObjectClass *l_object_get_class ( void );
 LObjectClass *l_object_class_register ( const gchar *name,
