@@ -122,6 +122,9 @@ LObjectClass *l_object_class_from_name ( const gchar *name );
 LObject *l_object_new ( LObjectClass *cls,
                         const char *first_prop,
                         ... );
+LObject *l_object_new_give ( LObjectClass *cls,
+                             ... )
+  G_GNUC_NULL_TERMINATED;
 LObject *l_object_new_from_state ( LObjectClass *cls,
                                    LObject *state );
 /* ref counting */

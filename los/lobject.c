@@ -236,6 +236,38 @@ LObject *l_object_new ( LObjectClass *cls,
 
 
 
+/* l_object_new_give:
+ *
+ * [FIXME] not tested
+ *
+ */
+LObject *l_object_new_give ( LObjectClass *cls,
+                             ... )
+{
+  LObject *obj;
+  va_list args;
+  const gchar *prop_name;
+  /* [FIXME] use object allocator */
+  obj = g_malloc0(cls->l_class_info.instance_size);
+  obj->l_class = l_object_ref(cls);
+  obj->ref_count = 1;
+  /* instance init */
+  _instance_init(obj, cls);
+  /* set properties */
+  va_start(args, cls);
+  while ((prop_name = va_arg(args, const gchar *)))
+    {
+      LObject *prop_value = va_arg(args, LObject *);
+      ASSERT(prop_value);
+      l_object_set_property(obj, prop_name, prop_value);
+      l_object_unref(prop_value);
+    }
+      va_end(args);
+  return obj;
+}
+
+
+
 /* l_object_new_from_state:
  */
 LObject *l_object_new_from_state ( LObjectClass *cls,
