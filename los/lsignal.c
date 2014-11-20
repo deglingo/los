@@ -135,7 +135,6 @@ LSignalID l_signal_new ( LObjectClass *cls,
  */
 void l_signal_connect ( LObject *object,
                         const gchar *name,
-                        GQuark detail,
                         LSignalHandler func,
                         gpointer data,
                         GDestroyNotify destroy_data )
@@ -143,6 +142,21 @@ void l_signal_connect ( LObject *object,
   SignalNode *node;
   HandlerNode *handler;
   GList *hlist;
+  const gchar *colon;
+  GQuark detail;
+  if ((colon = strchr(name, ':')))
+    {
+      gint len = colon - name;
+      gchar *strip_name = g_alloca(len+1);
+      memcpy(strip_name, name, len);
+      strip_name[len] = 0;
+      name = strip_name;
+      detail = g_quark_from_string(colon + 1);
+    }
+  else
+    {
+      detail = 0;
+    }
   node = g_hash_table_lookup(signal_names, name);
   ASSERT(node);
   handler = handler_node_new(object, node, detail, func, data, destroy_data);

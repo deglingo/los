@@ -105,8 +105,8 @@ test
   struct sig_data sdata = { 0, };
   Sigobj *obj1 = L_TRASH_OBJECT(sigobj_new());
   Sigobj *obj2 = L_TRASH_OBJECT(sigobj_new());
-  l_signal_connect(L_OBJECT(obj1), "signal1", 0, _on_signal1, &sdata, NULL);
-  l_signal_connect(L_OBJECT(obj2), "signal1", 0, _on_signal1, &sdata, NULL);
+  l_signal_connect(L_OBJECT(obj1), "signal1", _on_signal1, &sdata, NULL);
+  l_signal_connect(L_OBJECT(obj2), "signal1", _on_signal1, &sdata, NULL);
   sigobj_signal1(obj1, 0);
   sigobj_signal1(obj2, 0);
   PIF_CHECK_EQ(sdata.count, 2);
@@ -134,9 +134,9 @@ unit detail
   {
     struct sig_data sdata = { 0, };
     Sigobj *obj = L_TRASH_OBJECT(sigobj_new());
-    l_signal_connect(L_OBJECT(obj), "signal1", 0, _on_signal1, &sdata, NULL);                /* A */
-    l_signal_connect(L_OBJECT(obj), "signal1", data->detail1, _on_signal1_d1, &sdata, NULL); /* B */
-    l_signal_connect(L_OBJECT(obj), "signal1", data->detail2, _on_signal1_d2, &sdata, NULL); /* C */
+    l_signal_connect(L_OBJECT(obj), "signal1", _on_signal1, &sdata, NULL);                /* A */
+    l_signal_connect(L_OBJECT(obj), "signal1:detail1", _on_signal1_d1, &sdata, NULL); /* B */
+    l_signal_connect(L_OBJECT(obj), "signal1:detail2", _on_signal1_d2, &sdata, NULL); /* C */
     /* emit with detail1 must trigger A and B */
     sdata.count = 0;
     sigobj_signal1(obj, data->detail1);
