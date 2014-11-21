@@ -27,7 +27,13 @@ struct _LNoneClass
 
 
 
-LNone *l_none_ref ( void );
+/* private */
+extern LNone *__l_none_singleton;
+
+#define l_none_get() (__l_none_singleton)
+#define l_none_ref() (l_object_ref(l_none_get()))
+
+void _l_none_init ( void );
 
 
 

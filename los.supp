@@ -68,7 +68,7 @@
    Memcheck:Leak
    match-leak-kinds: reachable
    ...
-   fun:l_none_ref
+   fun:_l_none_init
 }
 
 # strange mem-leak from g_slice_new, probably some debug-only stuff

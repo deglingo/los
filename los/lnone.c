@@ -7,15 +7,13 @@
 
 
 /* [fixme] not mt-safe */
-static LNone *l_none = NULL;
+LNone *__l_none_singleton = NULL;
 
 
 
-/* l_none_ref:
+/* _l_none_init:
  */
-LNone *l_none_ref ( void )
+void _l_none_init ( void )
 {
-  if (!l_none)
-    l_none = L_NONE(l_object_new(L_CLASS_NONE, NULL));
-  return l_object_ref(l_none);
+  __l_none_singleton = L_NONE(l_object_new(L_CLASS_NONE, NULL));
 }
