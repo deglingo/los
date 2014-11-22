@@ -6,6 +6,12 @@
 
 
 
+typedef struct _HandlerNode HandlerNode;
+typedef struct _HandlerKey HandlerKey;
+typedef struct _HandlerList HandlerList;
+
+
+
 /* SignalNode:
  */
 typedef struct _SignalNode
@@ -20,34 +26,47 @@ typedef struct _SignalNode
 
 
 
-/* HandlerKey:
- */
-typedef struct _HandlerKey
-{
-  LObject *object;
-  SignalNode *signal;
-}
-  HandlerKey;
-
-
-
 /* HandlerNode:
  */
-typedef struct _HandlerNode
+struct _HandlerNode
 {
-  HandlerKey key;
   GQuark detail;
   LSignalHandler func;
   gpointer data;
   GDestroyNotify destroy_data;
-}
-  HandlerNode;
+  /* list links */
+  HandlerList *list;
+  HandlerNode *next;
+  HandlerNode *prev;
+};
 
 
 
-static GHashTable *signal_nodes = NULL;
-static GHashTable *signal_handlers = NULL; /* map < (object, sigid), handler > */
-/* static volatile LSignalID sigid_counter = 1; */
+/* HandlerKey:
+ */
+struct _HandlerKey
+{
+  LObject *object;
+  SignalNode *signal;
+};
+
+
+
+/* HandlerList:
+ */
+struct _HandlerList
+{
+  HandlerKey key;
+  HandlerNode *first;
+  HandlerNode *last;
+};
+
+#define HANDLER_KEY(k) ((HandlerKey *)(k))
+
+
+
+static GHashTable *signal_nodes = NULL; /* set < SignalNode > */
+static GHashTable *handler_lists = NULL; /* set < HandlerList > */
 
 
 
@@ -121,23 +140,67 @@ static SignalNode *signal_node_lookup ( LObject *obj,
  */
 static guint handler_key_hash ( gconstpointer key )
 {
-  const gchar *p, *end;
-  guint h = 5381;
-  end = key + sizeof(HandlerKey);
-  for (p = key; p != end; p++)
-    h = (h << 5) + h + *p;
-  return h;
+  return GPOINTER_TO_UINT(HANDLER_KEY(key)->object) ^ GPOINTER_TO_UINT(HANDLER_KEY(key)->signal);
 }
 
 
 
 /* handler_key_equal:
  */
-static gboolean handler_key_equal ( gconstpointer k1_,
-                                    gconstpointer k2_ )
+static gboolean handler_key_equal ( gconstpointer k1,
+                                    gconstpointer k2 )
 {
-  const HandlerKey *k1 = k1_, *k2 = k2_;
-  return k1->object == k2->object && k1->signal == k2->signal;
+  return HANDLER_KEY(k1)->object == HANDLER_KEY(k2)->object &&
+    HANDLER_KEY(k1)->signal == HANDLER_KEY(k2)->signal;
+}
+
+
+
+/* handler_list_new:
+ */
+static HandlerList *handler_list_new ( LObject *object,
+                                       SignalNode *signal )
+{
+  HandlerList *l = g_new0(HandlerList, 1);
+  l->key.object = object;
+  l->key.signal = signal;
+  return l;
+}
+
+
+
+/* handler_list_lookup:
+ */
+static HandlerList *handler_list_lookup ( LObject *object,
+                                          SignalNode *signal )
+{
+  HandlerKey key;
+  key.object = object;
+  key.signal = signal;
+  return g_hash_table_lookup(handler_lists, &key);
+}
+
+
+
+/* handler_list_append:
+ */
+static void handler_list_append ( HandlerList *l,
+                                  HandlerNode *n )
+{
+  ASSERT(!n->list);
+  n->list = l;
+  if (l->first)
+    {
+      ASSERT(l->last);
+      l->last->next = n;
+    }
+  else
+    {
+      ASSERT(!l->last);
+      l->first = n;
+    }
+  n->prev = l->last;
+  l->last = n;
 }
 
 
@@ -148,23 +211,19 @@ void _l_signal_init ( void )
                                        signal_node_equal,
                                        NULL,
                                        (GDestroyNotify) signal_node_free);
-  signal_handlers = g_hash_table_new(handler_key_hash, handler_key_equal);
+  handler_lists = g_hash_table_new(handler_key_hash, handler_key_equal);
 }
 
 
 
 /* handler_node_new:
  */
-HandlerNode *handler_node_new ( LObject *object,
-                                SignalNode *signal,
-                                GQuark detail,
+HandlerNode *handler_node_new ( GQuark detail,
                                 LSignalHandler func,
                                 gpointer data,
                                 GDestroyNotify destroy_data )
 {
   HandlerNode *node = g_new0(HandlerNode, 1);
-  node->key.object = object; /* [TODO] weakref */
-  node->key.signal = signal;
   node->detail = detail;
   node->func = func;
   node->data = data;
@@ -199,7 +258,7 @@ void l_signal_connect ( LObject *object,
 {
   SignalNode *node;
   HandlerNode *handler;
-  GList *hlist;
+  HandlerList *hlist;
   const gchar *colon;
   GQuark detail;
   if ((colon = strchr(name, ':')))
@@ -217,13 +276,13 @@ void l_signal_connect ( LObject *object,
     }
   node = signal_node_lookup(object, name);
   ASSERT(node);
-  handler = handler_node_new(object, node, detail, func, data, destroy_data);
-  if ((hlist = g_hash_table_lookup(signal_handlers, &handler->key)))
-    /* NOTE: we only get the return value to avoid a warning, but no
-       need to re-insert hlist which should not have changed */
-    hlist = g_list_append(hlist, handler);
-  else
-    g_hash_table_insert(signal_handlers, &handler->key, g_list_append(NULL, handler));
+  handler = handler_node_new(detail, func, data, destroy_data);
+  if (!(hlist = handler_list_lookup(object, node)))
+    {
+      hlist = handler_list_new(object, node);
+      g_hash_table_insert(handler_lists, hlist, hlist);
+    }
+  handler_list_append(hlist, handler);
 }
 
 
@@ -235,19 +294,18 @@ void l_signal_emit ( LObject *object,
                      GQuark detail )
 {
   SignalNode *node;
-  GList *hlist, *l;
-  HandlerKey key;
+  HandlerList *hlist;
   node = (SignalNode *) signal;
   ASSERT(node);
-  key.object = object;
-  key.signal = node;
-  hlist = g_hash_table_lookup(signal_handlers, &key);
-  l_object_ref(object);
-  for (l = hlist; l; l = l->next)
+  if ((hlist = handler_list_lookup(object, signal)))
     {
-      HandlerNode *handler = l->data;
-      if (handler->detail == 0 || handler->detail == detail)
-        handler->func(object, handler->data);
+      HandlerNode *handler;
+      l_object_ref(object);
+      for (handler = hlist->first; handler; handler = handler->next)
+        {
+          if (handler->detail == 0 || handler->detail == detail)
+            handler->func(object, handler->data);
+        }
+      l_object_unref(object);
     }
-  l_object_unref(object);
 }
