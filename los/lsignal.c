@@ -30,6 +30,7 @@ typedef struct _SignalNode
  */
 struct _HandlerNode
 {
+  LSignalHandlerID id;
   GQuark detail;
   LSignalHandler func;
   gpointer data;
@@ -65,6 +66,7 @@ struct _HandlerList
 
 
 
+static volatile LSignalHandlerID handler_id_counter = 1;
 static GHashTable *signal_nodes = NULL; /* set < SignalNode > */
 static GHashTable *handler_lists = NULL; /* set < HandlerList > */
 
@@ -224,6 +226,7 @@ HandlerNode *handler_node_new ( GQuark detail,
                                 GDestroyNotify destroy_data )
 {
   HandlerNode *node = g_new0(HandlerNode, 1);
+  node->id = g_atomic_int_add(&handler_id_counter, 1);
   node->detail = detail;
   node->func = func;
   node->data = data;
@@ -250,11 +253,11 @@ LSignalID l_signal_new ( LObjectClass *cls,
 
 /* l_signal_connect:
  */
-void l_signal_connect ( LObject *object,
-                        const gchar *name,
-                        LSignalHandler func,
-                        gpointer data,
-                        GDestroyNotify destroy_data )
+LSignalHandlerID l_signal_connect ( LObject *object,
+                                    const gchar *name,
+                                    LSignalHandler func,
+                                    gpointer data,
+                                    GDestroyNotify destroy_data )
 {
   SignalNode *node;
   HandlerNode *handler;
@@ -283,6 +286,7 @@ void l_signal_connect ( LObject *object,
       g_hash_table_insert(handler_lists, hlist, hlist);
     }
   handler_list_append(hlist, handler);
+  return handler->id;
 }
 
 
