@@ -12,6 +12,15 @@ typedef struct _HandlerList HandlerList;
 
 
 
+/* LSignalHandlerGroup:
+ */
+struct _LSignalHandlerGroup
+{
+  GPtrArray *handlers;
+};
+
+
+
 /* SignalNode:
  */
 typedef struct _SignalNode
@@ -69,6 +78,7 @@ struct _HandlerList
 static volatile LSignalHandlerID handler_id_counter = 1;
 static GHashTable *signal_nodes = NULL; /* set < SignalNode > */
 static GHashTable *handler_lists = NULL; /* set < HandlerList > */
+static GHashTable *handler_nodes = NULL; /* map < LSignalHandlerID, HandlerNode > */
 
 
 
@@ -207,6 +217,27 @@ static void handler_list_append ( HandlerList *l,
 
 
 
+/* handler_list_remove:
+ */
+static void handler_list_remove ( HandlerList *l,
+                                  HandlerNode *n )
+{
+  ASSERT(n->list == l);
+  if (n->prev)
+    n->prev->next = n->next;
+  if (n->next)
+    n->next->prev = n->prev;
+  if (n == l->first)
+    l->first = n->next;
+  if (n == l->last)
+    l->last = n->prev;
+  /* just in case */
+  n->list = NULL;
+  n->prev = n->next = NULL;
+}
+
+
+
 void _l_signal_init ( void )
 {
   signal_nodes = g_hash_table_new_full(signal_node_hash,
@@ -214,6 +245,7 @@ void _l_signal_init ( void )
                                        NULL,
                                        (GDestroyNotify) signal_node_free);
   handler_lists = g_hash_table_new(handler_key_hash, handler_key_equal);
+  handler_nodes = g_hash_table_new(NULL, NULL);
 }
 
 
@@ -232,6 +264,24 @@ HandlerNode *handler_node_new ( GQuark detail,
   node->data = data;
   node->destroy_data = destroy_data;
   return node;
+}
+
+
+
+/* handler_node_free:
+ */
+static void handler_node_free ( HandlerNode *node )
+{
+  g_free(node);
+}
+
+
+
+/* handler_node_lookup:
+ */
+static HandlerNode *handler_node_lookup ( LSignalHandlerID id )
+{
+  return g_hash_table_lookup(handler_nodes, GUINT_TO_POINTER(id));
 }
 
 
@@ -286,7 +336,25 @@ LSignalHandlerID l_signal_connect ( LObject *object,
       g_hash_table_insert(handler_lists, hlist, hlist);
     }
   handler_list_append(hlist, handler);
+  g_hash_table_insert(handler_nodes,
+                      GUINT_TO_POINTER(handler->id),
+                      handler);
   return handler->id;
+}
+
+
+
+/* l_signal_handler_remove:
+ */
+void l_signal_handler_remove ( LSignalHandlerID handler_id )
+{
+  HandlerNode *handler;
+  handler = handler_node_lookup(handler_id);
+  ASSERT(handler);
+  /* [FIXME] free list if empty ? */
+  handler_list_remove(handler->list, handler);
+  g_hash_table_remove(handler_nodes, GUINT_TO_POINTER(handler_id));
+  handler_node_free(handler);
 }
 
 
@@ -312,4 +380,47 @@ void l_signal_emit ( LObject *object,
         }
       l_object_unref(object);
     }
+}
+
+
+
+/* l_signal_handler_group_new:
+ */
+LSignalHandlerGroup *l_signal_handler_group_new ( void )
+{
+  LSignalHandlerGroup *group;
+  group = g_new0(LSignalHandlerGroup, 1);
+  group->handlers = g_ptr_array_new();
+  return group;
+}
+
+
+
+/* l_signal_handler_group_connect:
+ */
+LSignalHandlerID l_signal_handler_group_connect ( LSignalHandlerGroup *group,
+                                                  LObject *object,
+                                                  const gchar *name,
+                                                  LSignalHandler func,
+                                                  gpointer data,
+                                                  GDestroyNotify destroy_data )
+{
+  LSignalHandlerID id;
+  id = l_signal_connect(object, name, func, data, destroy_data);
+  g_ptr_array_add(group->handlers, GUINT_TO_POINTER(id));
+  return id;
+}
+
+
+
+/* l_signal_handler_group_remove_all:
+ */
+void l_signal_handler_group_remove_all ( LSignalHandlerGroup *group )
+{
+  guint i;
+  for (i = 0; i < group->handlers->len; i++)
+    {
+      l_signal_handler_remove(GPOINTER_TO_UINT(group->handlers->pdata[i]));
+    }
+  g_ptr_array_set_size(group->handlers, 0);
 }
