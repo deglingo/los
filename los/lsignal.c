@@ -16,6 +16,8 @@ typedef struct _SignalNode
 }
   SignalNode;
 
+#define SIGNAL_NODE(n) ((SignalNode *)(n))
+
 
 
 /* HandlerKey:
@@ -43,10 +45,75 @@ typedef struct _HandlerNode
 
 
 
-/* static GHashTable *signal_nodes = NULL; /\* map < sigid, node > *\/ */
-static GHashTable *signal_names = NULL; /* map < name, node > */
+static GHashTable *signal_nodes = NULL;
 static GHashTable *signal_handlers = NULL; /* map < (object, sigid), handler > */
 /* static volatile LSignalID sigid_counter = 1; */
+
+
+
+/* signal_node_new:
+ */
+static SignalNode *signal_node_new ( LObjectClass *cls,
+                                     const gchar *name )
+{
+  SignalNode *node = g_new0(SignalNode, 1);
+  node->cls = cls; /* [FIXME] weakref ? */
+  node->name = g_strdup(name);
+  return node;
+}
+
+
+
+/* signal_node_free:
+ */
+static void signal_node_free ( SignalNode *node )
+{
+  g_free(node->name);
+  g_free(node);
+}
+
+
+
+/* signal_node_hash:
+ */
+static guint signal_node_hash ( gconstpointer node )
+{
+  const gchar *p;
+  guint32 h = 5381;
+  for (p = SIGNAL_NODE(node)->name; *p; p++)
+    h = (h << 5) + h + *p;
+  return h ^ GPOINTER_TO_UINT(SIGNAL_NODE(node)->cls);
+}
+
+
+
+/* signal_node_equal:
+ */
+static gboolean signal_node_equal ( gconstpointer n1,
+                                    gconstpointer n2 )
+{
+  return SIGNAL_NODE(n1)->cls == SIGNAL_NODE(n2)->cls &&
+    !strcmp(SIGNAL_NODE(n1)->name, SIGNAL_NODE(n2)->name);
+}
+
+
+
+/* signal_node_lookup:
+ */
+static SignalNode *signal_node_lookup ( LObject *obj,
+                                        const gchar *name )
+{
+  SignalNode key, *node;
+  /* [FIXME] cache the result ? */
+  /* [FIXME] not sure that discarding const is safe */
+  key.name = (gchar *) name;
+  for (key.cls = L_OBJECT_GET_CLASS(obj); key.cls; key.cls = key.cls->l_parent_class)
+    {
+      if ((node = g_hash_table_lookup(signal_nodes, &key)))
+        return node;
+    }
+  return NULL;
+}
 
 
 
@@ -77,23 +144,11 @@ static gboolean handler_key_equal ( gconstpointer k1_,
 
 void _l_signal_init ( void )
 {
-  /* signal_nodes = g_hash_table_new(NULL, NULL); */
-  signal_names = g_hash_table_new(g_str_hash, g_str_equal);
+  signal_nodes = g_hash_table_new_full(signal_node_hash,
+                                       signal_node_equal,
+                                       NULL,
+                                       (GDestroyNotify) signal_node_free);
   signal_handlers = g_hash_table_new(handler_key_hash, handler_key_equal);
-}
-
-
-
-/* signal_node_new:
- */
-SignalNode *signal_node_new ( LObjectClass *cls,
-                              const gchar *name )
-{
-  SignalNode *node = g_new0(SignalNode, 1);
-  /* node->sigid = g_atomic_int_add(&sigid_counter, 1); */
-  node->cls = l_object_ref(cls);
-  node->name = g_strdup(name);
-  return node;
 }
 
 
@@ -128,7 +183,7 @@ LSignalID l_signal_new ( LObjectClass *cls,
   /* create the node */
   node = signal_node_new(cls, name);
   /* g_hash_table_insert(signal_nodes, GUINT_TO_POINTER(node->sigid), node); */
-  g_hash_table_insert(signal_names, node->name, node);
+  g_hash_table_insert(signal_nodes, node, node);
   return (LSignalID) node;
 }
 
@@ -160,7 +215,7 @@ void l_signal_connect ( LObject *object,
     {
       detail = 0;
     }
-  node = g_hash_table_lookup(signal_names, name);
+  node = signal_node_lookup(object, name);
   ASSERT(node);
   handler = handler_node_new(object, node, detail, func, data, destroy_data);
   if ((hlist = g_hash_table_lookup(signal_handlers, &handler->key)))
