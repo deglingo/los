@@ -81,6 +81,15 @@
    fun:g_slice_alloc
 }
 
+# signal globals
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_l_signal_init
+}
+
 # [TODO] signals and handlers
 {
    <insert_a_suppression_name_here>

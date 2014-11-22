@@ -5,6 +5,7 @@
 #include "los/lbase.h"
 #include "los/lobject.h"
 #include "los/lnone.h"
+#include "los/lsignal.h"
 
 
 
@@ -12,6 +13,7 @@
  */
 static gpointer los_init_once ( gpointer dummy )
 {
+  _l_signal_init();
   _l_object_init();
   _l_none_init();
   return NULL;

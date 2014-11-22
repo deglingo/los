@@ -15,6 +15,8 @@ typedef void (* LSignalHandler) ( LObject *object,
 
 
 
+void _l_signal_init ( void );
+
 LSignalID l_signal_new ( LObjectClass *cls,
                          const gchar *name );
 void l_signal_connect ( LObject *object,

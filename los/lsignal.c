@@ -50,6 +50,40 @@ static GHashTable *signal_handlers = NULL; /* map < (object, sigid), handler > *
 
 
 
+/* handler_key_hash:
+ */
+static guint handler_key_hash ( gconstpointer key )
+{
+  const gchar *p, *end;
+  guint h = 5381;
+  end = key + sizeof(HandlerKey);
+  for (p = key; p != end; p++)
+    h = (h << 5) + h + *p;
+  return h;
+}
+
+
+
+/* handler_key_equal:
+ */
+static gboolean handler_key_equal ( gconstpointer k1_,
+                                    gconstpointer k2_ )
+{
+  const HandlerKey *k1 = k1_, *k2 = k2_;
+  return k1->object == k2->object && k1->signal == k2->signal;
+}
+
+
+
+void _l_signal_init ( void )
+{
+  /* signal_nodes = g_hash_table_new(NULL, NULL); */
+  signal_names = g_hash_table_new(g_str_hash, g_str_equal);
+  signal_handlers = g_hash_table_new(handler_key_hash, handler_key_equal);
+}
+
+
+
 /* signal_node_new:
  */
 SignalNode *signal_node_new ( LObjectClass *cls,
@@ -85,43 +119,12 @@ HandlerNode *handler_node_new ( LObject *object,
 
 
 
-/* handler_key_hash:
- */
-static guint handler_key_hash ( gconstpointer key )
-{
-  const gchar *p, *end;
-  guint h = 5381;
-  end = key + sizeof(HandlerKey);
-  for (p = key; p != end; p++)
-    h = (h << 5) + h + *p;
-  return h;
-}
-
-
-
-/* handler_key_equal:
- */
-static gboolean handler_key_equal ( gconstpointer k1_,
-                                    gconstpointer k2_ )
-{
-  const HandlerKey *k1 = k1_, *k2 = k2_;
-  return k1->object == k2->object && k1->signal == k2->signal;
-}
-
-
-
 /* l_signal_new:
  */
 LSignalID l_signal_new ( LObjectClass *cls,
                          const gchar *name )
 {
   SignalNode *node;
-  /* [FIXME] global init */
-  if (!signal_names) {
-    /* signal_nodes = g_hash_table_new(NULL, NULL); */
-    signal_names = g_hash_table_new(g_str_hash, g_str_equal);
-    signal_handlers = g_hash_table_new(handler_key_hash, handler_key_equal);
-  }
   /* create the node */
   node = signal_node_new(cls, name);
   /* g_hash_table_insert(signal_nodes, GUINT_TO_POINTER(node->sigid), node); */
