@@ -9,6 +9,16 @@
 typedef struct _HandlerNode HandlerNode;
 typedef struct _HandlerKey HandlerKey;
 typedef struct _HandlerList HandlerList;
+typedef struct _List List;
+
+
+
+/* List:
+ */
+struct _List
+{
+  GSList *list;
+};
 
 
 
@@ -79,6 +89,7 @@ static volatile LSignalHandlerID handler_id_counter = 1;
 static GHashTable *signal_nodes = NULL; /* set < SignalNode > */
 static GHashTable *handler_lists = NULL; /* set < HandlerList > */
 static GHashTable *handler_nodes = NULL; /* map < LSignalHandlerID, HandlerNode > */
+static GHashTable *instances_map = NULL; /* map < LObject *, GQueue *handler_lists > */
 
 
 
@@ -246,6 +257,7 @@ void _l_signal_init ( void )
                                        (GDestroyNotify) signal_node_free);
   handler_lists = g_hash_table_new(handler_key_hash, handler_key_equal);
   handler_nodes = g_hash_table_new(NULL, NULL);
+  instances_map = g_hash_table_new(NULL, NULL);
 }
 
 
@@ -301,6 +313,37 @@ LSignalID l_signal_new ( LObjectClass *cls,
 
 
 
+/* _l_signal_object_dispose:
+ */
+void _l_signal_object_dispose ( LObject *object )
+{
+  List *hqueue;
+  GSList *l;
+  if (!(hqueue = g_hash_table_lookup(instances_map, object)))
+    return;
+  for (l = hqueue->list; l; l = l->next)
+    {
+      HandlerList *hlist = l->data;
+      HandlerNode *handler = hlist->first;
+      while (handler)
+        {
+          HandlerNode *next = handler->next;
+          if (handler->destroy_data)
+            handler->destroy_data(handler->data);
+          g_hash_table_remove(handler_nodes, GUINT_TO_POINTER(handler->id));
+          g_free(handler);
+          handler = next;
+        }
+      g_hash_table_remove(handler_lists, &hlist->key);
+      g_free(hlist);
+    }
+  g_hash_table_remove(instances_map, object);
+  g_slist_free(hqueue->list);
+  g_free(hqueue);
+}
+
+
+
 /* l_signal_connect:
  */
 LSignalHandlerID l_signal_connect ( LObject *object,
@@ -332,8 +375,15 @@ LSignalHandlerID l_signal_connect ( LObject *object,
   handler = handler_node_new(detail, func, data, destroy_data);
   if (!(hlist = handler_list_lookup(object, node)))
     {
+      List *hqueue;
       hlist = handler_list_new(object, node);
       g_hash_table_insert(handler_lists, hlist, hlist);
+      if (!(hqueue = g_hash_table_lookup(instances_map, object)))
+        {
+          hqueue = g_new0(List, 1);
+          g_hash_table_insert(instances_map, object, hqueue);
+        }
+      hqueue->list = g_slist_prepend(hqueue->list, hlist);
     }
   handler_list_append(hlist, handler);
   g_hash_table_insert(handler_nodes,
@@ -351,6 +401,8 @@ void l_signal_handler_remove ( LSignalHandlerID handler_id )
   HandlerNode *handler;
   handler = handler_node_lookup(handler_id);
   ASSERT(handler);
+  if (handler->destroy_data)
+    handler->destroy_data(handler->data);
   /* [FIXME] free list if empty ? */
   handler_list_remove(handler->list, handler);
   g_hash_table_remove(handler_nodes, GUINT_TO_POINTER(handler_id));

@@ -285,7 +285,7 @@ LObject *l_object_new_from_state ( LObjectClass *cls,
       gchar *str = l_object_to_string(obj);                             \
       CL_DEBUG("%s: %s -> %d", (msg), str, L_OBJECT(obj)->ref_count);   \
       g_free(str);                                                      \
-      /* CL_BACKTRACE(); */                                             \
+      CL_BACKTRACE();                                                   \
     }                                                                   \
   } while (0)
 #else
@@ -354,6 +354,10 @@ void l_object_dispose ( LObject *object )
  */
 static void _dispose ( LObject *object )
 {
+  ASSERT(object);
+  /* [FIXME] this lookup for every destroyed object is painfull (also,
+     maybe it should be in finalize ?) */
+  _l_signal_object_dispose(object);
 }
 
 
