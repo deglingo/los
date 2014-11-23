@@ -52,7 +52,7 @@ struct _LObject
 {
   LObjectClass *l_class;
 
-  guint ref_count;
+  volatile guint ref_count;
 
   /* debug */
 #ifdef L_DEBUG

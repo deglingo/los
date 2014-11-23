@@ -285,7 +285,7 @@ LObject *l_object_new_from_state ( LObjectClass *cls,
       gchar *str = l_object_to_string(obj);                             \
       CL_DEBUG("%s: %s -> %d", (msg), str, L_OBJECT(obj)->ref_count);   \
       g_free(str);                                                      \
-      CL_BACKTRACE();                                                   \
+      /* CL_BACKTRACE(); */                                             \
     }                                                                   \
   } while (0)
 #else
@@ -322,7 +322,9 @@ gpointer l_object_ref ( gpointer obj )
  */
 void l_object_unref ( gpointer obj )
 {
-  if (g_atomic_int_dec_and_test(&((LObject *)obj)->ref_count))
+  gint val = g_atomic_int_add(&((LObject *)obj)->ref_count, -1);
+  ASSERT(val != 0);
+  if (val == 1)
     {
       TRACE_REF(obj, "DESTROY");
       l_object_dispose(obj);
