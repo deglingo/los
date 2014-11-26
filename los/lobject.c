@@ -410,7 +410,7 @@ void l_object_set_property ( LObject *object,
 void l_object_notify ( LObject *object,
                        LParamSpec *pspec )
 {
-  l_signal_emit(object, signals[SIG_NOTIFY], pspec->qname);
+  l_signal_emit(object, signals[SIG_NOTIFY], pspec->qname, NULL);
 }
 
 

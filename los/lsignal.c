@@ -419,9 +419,10 @@ void l_signal_handler_remove ( LSignalHandlerID handler_id )
 
 /* l_signal_emit:
  */
-void l_signal_emit ( LObject *object,
-                     LSignalID signal,
-                     GQuark detail )
+LObject *l_signal_emit ( LObject *object,
+                         LSignalID signal,
+                         GQuark detail,
+                         ... )
 {
   SignalNode *node;
   HandlerList *hlist;
@@ -438,6 +439,7 @@ void l_signal_emit ( LObject *object,
         }
       l_object_unref(object);
     }
+  return NULL;
 }
 
 

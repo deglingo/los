@@ -48,9 +48,11 @@ LSignalHandlerID l_signal_connect ( LObject *object,
                                     gpointer data,
                                     GDestroyNotify destroy_data );
 void l_signal_handler_remove ( LSignalHandlerID handler );
-void l_signal_emit ( LObject *object,
-                     LSignalID signal,
-                     GQuark detail );
+LObject *l_signal_emit ( LObject *object,
+                         LSignalID signal,
+                         GQuark detail,
+                         ... )
+  G_GNUC_NULL_TERMINATED;
 
 LSignalHandlerGroup *l_signal_handler_group_new ( void );
 LSignalHandlerID l_signal_handler_group_connect ( LSignalHandlerGroup *group,

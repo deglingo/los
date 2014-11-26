@@ -49,5 +49,5 @@ Sigobj *sigobj_new ( void )
 void sigobj_signal1 ( Sigobj *obj,
                       GQuark detail )
 {
-  l_signal_emit(L_OBJECT(obj), signals[SIG_SIGNAL1], detail);
+  l_signal_emit(L_OBJECT(obj), signals[SIG_SIGNAL1], detail, NULL);
 }
