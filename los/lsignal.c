@@ -11,6 +11,34 @@ typedef struct _HandlerKey HandlerKey;
 typedef struct _HandlerList HandlerList;
 typedef struct _List List;
 
+typedef void (* Marshaller) ( LObject *instance,
+                              LSignalHandler handler,
+                              gpointer data,
+                              LObject **params );
+
+#define MAX_PARAMS 1
+
+static void MARSHALLER_VOID_0 ( LObject *instance,
+                                LSignalHandler handler,
+                                gpointer data,
+                                LObject **params )
+{
+  ((void (*)(void *, void *)) (handler))
+    (instance,
+     data);
+}
+
+static void MARSHALLER_VOID_1 ( LObject *instance,
+                                LSignalHandler handler,
+                                gpointer data,
+                                LObject **params )
+{
+  ((void (*)(void *, void *, void *)) (handler))
+    (instance,
+     params[0],
+     data);
+}
+
 
 
 /* List:
@@ -38,6 +66,9 @@ typedef struct _SignalNode
   /* LSignalID sigid; */
   LObjectClass *cls;
   gchar *name;
+  guint n_params;
+  LObject **param_types;
+  Marshaller marshaller;
 }
   SignalNode;
 
@@ -310,8 +341,27 @@ LSignalID l_signal_new ( LObjectClass *cls,
                          ... )
 {
   SignalNode *node;
+  va_list args;
+  guint n;
+  LObject *param_type;
   /* create the node */
   node = signal_node_new(cls, name);
+  /* count and check param types */
+  va_start(args, return_type);
+  for (node->n_params = 0; (param_type = va_arg(args, LObject *)); node->n_params++)
+    ASSERT(l_object_isclass(param_type));
+  va_end(args);
+  node->param_types = g_new0(LObject *, node->n_params);
+  va_start(args, return_type);
+  for (n = 0; n < node->n_params; n++)
+    node->param_types[n] = l_object_ref(va_arg(args, LObject *));
+  va_end(args);
+  switch (node->n_params)
+    {
+    case 0: node->marshaller = MARSHALLER_VOID_0; break;
+    case 1: node->marshaller = MARSHALLER_VOID_1; break;
+    default: CL_ERROR("[TODO] %d params", node->n_params);
+    }
   /* g_hash_table_insert(signal_nodes, GUINT_TO_POINTER(node->sigid), node); */
   g_hash_table_insert(signal_nodes, node, node);
   return (LSignalID) node;
@@ -426,8 +476,25 @@ LObject *l_signal_emit ( LObject *object,
 {
   SignalNode *node;
   HandlerList *hlist;
+  va_list args;
+  LObject *params[MAX_PARAMS];
+  guint n;
   node = (SignalNode *) signal;
   ASSERT(node);
+  /* check and ref the params */
+  /* if (node->n_params) */
+  /*   params = g_alloca(sizeof(LObject *) * node->n_params); */
+  va_start(args, detail);
+  for (n = 0; n < node->n_params; n++)
+    {
+      params[n] = va_arg(args, LObject *);
+      ASSERT(params[n]);
+      ASSERT(l_object_issubclass((LObject *)(L_OBJECT_GET_CLASS(params[n])), node->param_types[n]));
+      l_object_ref(params[n]);
+    }
+  ASSERT(!va_arg(args, LObject *));
+  va_end(args);
+  /* call handlers */
   if ((hlist = handler_list_lookup(object, signal)))
     {
       HandlerNode *handler;
@@ -435,10 +502,15 @@ LObject *l_signal_emit ( LObject *object,
       for (handler = hlist->first; handler; handler = handler->next)
         {
           if (handler->detail == 0 || handler->detail == detail)
-            handler->func(object, handler->data);
+            {
+              node->marshaller(object, handler->func, handler->data, params);
+            }
         }
       l_object_unref(object);
     }
+  /* unref params */
+  for (n = 0; n < node->n_params; n++)
+    l_object_unref(params[n]);
   return NULL;
 }
 
