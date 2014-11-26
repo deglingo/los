@@ -72,7 +72,13 @@ static void _class_init ( LObjectClass *cls )
   cls->to_string = _to_string;
 
   signals[SIG_NOTIFY] = l_signal_new(cls,
-                                     "notify");
+                                     "notify",
+                                     0,
+                                     0,
+                                     NULL,
+                                     NULL,
+                                     NULL,
+                                     NULL);
 }
 
 

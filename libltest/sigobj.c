@@ -24,7 +24,13 @@ static LSignalID signals[SIG_COUNT] = { 0, };
 static void sigobj_class_init ( LObjectClass *cls )
 {
   signals[SIG_SIGNAL1] = l_signal_new(cls,
-                                      "signal1");
+                                      "signal1",
+                                      0,
+                                      0,
+                                      NULL,
+                                      NULL,
+                                      NULL,
+                                      NULL);
 }
 
 

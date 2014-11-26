@@ -15,13 +15,33 @@ typedef struct _LSignalHandlerGroup LSignalHandlerGroup;
 typedef void (* LSignalHandler) ( LObject *object,
                                   gpointer data );
 
+/* [FIXME] */
+typedef LObject (* LSignalAccumulator) ( void );
+
+
+
+/* LSignalFlags:
+ */
+typedef enum _LSignalFlags
+  {
+    L_SIGNAL_FLAG_DUMMY = 0,
+  }
+  LSignalFlags;
+
 
 
 void _l_signal_init ( void );
 void _l_signal_object_dispose ( LObject *object );
 
 LSignalID l_signal_new ( LObjectClass *cls,
-                         const gchar *name );
+                         const gchar *name,
+                         LSignalFlags flags,
+                         guint class_offset,
+                         LSignalAccumulator accu,
+                         gpointer accu_data,
+                         LObjectClass *return_type,
+                         ... )
+  G_GNUC_NULL_TERMINATED;
 LSignalHandlerID l_signal_connect ( LObject *object,
                                     const gchar *name,
                                     LSignalHandler handler,

@@ -301,7 +301,13 @@ static HandlerNode *handler_node_lookup ( LSignalHandlerID id )
 /* l_signal_new:
  */
 LSignalID l_signal_new ( LObjectClass *cls,
-                         const gchar *name )
+                         const gchar *name,
+                         LSignalFlags flags,
+                         guint class_offset,
+                         LSignalAccumulator accu,
+                         gpointer accu_data,
+                         LObjectClass *return_type,
+                         ... )
 {
   SignalNode *node;
   /* create the node */
