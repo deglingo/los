@@ -528,6 +528,16 @@ LSignalHandlerGroup *l_signal_handler_group_new ( void )
 
 
 
+/* l_signal_handler_group_add:
+ */
+void l_signal_handler_group_add ( LSignalHandlerGroup *group,
+                                  LSignalHandlerID handler )
+{
+  g_ptr_array_add(group->handlers, GUINT_TO_POINTER(handler));
+}
+
+
+
 /* l_signal_handler_group_connect:
  */
 LSignalHandlerID l_signal_handler_group_connect ( LSignalHandlerGroup *group,
@@ -539,7 +549,7 @@ LSignalHandlerID l_signal_handler_group_connect ( LSignalHandlerGroup *group,
 {
   LSignalHandlerID id;
   id = l_signal_connect(object, name, func, data, destroy_data);
-  g_ptr_array_add(group->handlers, GUINT_TO_POINTER(id));
+  l_signal_handler_group_add(group, id);
   return id;
 }
 

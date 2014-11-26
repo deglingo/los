@@ -55,6 +55,8 @@ LObject *l_signal_emit ( LObject *object,
   G_GNUC_NULL_TERMINATED;
 
 LSignalHandlerGroup *l_signal_handler_group_new ( void );
+void l_signal_handler_group_add ( LSignalHandlerGroup *group,
+                                  LSignalHandlerID handler );
 LSignalHandlerID l_signal_handler_group_connect ( LSignalHandlerGroup *group,
                                                   LObject *object,
                                                   const gchar *name,
