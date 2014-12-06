@@ -6,7 +6,7 @@ header {
 
 data { LObject *obj; }
 
-setup { data->obj = l_object_new(L_CLASS_OBJECT, 0); }
+setup { data->obj = l_object_new(L_CLASS_OBJECT, NULL); }
 
 teardown { L_OBJECT_CLEAR(data->obj); }
 

@@ -10,12 +10,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* [FIXME] */
+#define MAX_PARAMS 64
+
 
 
 static GHashTable *class_names = NULL;
 static LParamSpecPool *pspec_pool = NULL;
 
 static void _class_init ( LObjectClass *cls );
+static LObject *_constructor ( LObjectClass *cls,
+                               LObjectConstructParam *params,
+                               gint n_params );
 static void _dispose ( LObject *object );
 static gchar *_to_string ( LObject *object );
 
@@ -68,6 +74,7 @@ LObjectClass *l_object_get_class ( void )
  */
 static void _class_init ( LObjectClass *cls )
 {
+  cls->constructor = _constructor;
   cls->dispose = _dispose;
   cls->to_string = _to_string;
 
@@ -210,33 +217,51 @@ static void _instance_init ( LObject *obj,
 
 
 
+/* _l_object_new:
+ */
+static LObject *_l_object_new ( LObjectClass *cls,
+                                gboolean give,
+                                va_list args )
+{
+  LObject *obj;
+  LObjectConstructParam params[MAX_PARAMS];
+  LObjectConstructParam *param;
+  gint n_params = 0;
+  const gchar *prop_name;
+  /* fill params */
+  for (prop_name = va_arg(args, const gchar *), param = params;
+       prop_name;
+       prop_name = va_arg(args, const gchar *), param++, n_params++)
+    {
+      ASSERT(n_params < MAX_PARAMS);
+      param->value = va_arg(args, LObject *);
+      param->pspec = l_param_spec_pool_lookup(pspec_pool,
+                                              cls,
+                                              prop_name);
+      ASSERT(param->pspec);
+    }
+  obj = cls->constructor(cls, params, n_params);
+  if (give)
+    {
+      gint n;
+      for (n = 0; n < n_params; n++)
+        l_object_unref(params[n].value);
+    }
+  return obj;
+}
+
+
+
 /* l_object_new:
  */
 LObject *l_object_new ( LObjectClass *cls,
-                        const char *first_prop,
                         ... )
 {
   LObject *obj;
   va_list args;
-  const gchar *prop_name;
-  /* [FIXME] use object allocator */
-  obj = g_malloc0(cls->l_class_info.instance_size);
-  obj->l_class = l_object_ref(cls);
-  obj->ref_count = 1;
-  /* instance init */
-  _instance_init(obj, cls);
-  /* set properties */
-  if (first_prop)
-    {
-      va_start(args, first_prop);
-      for (prop_name = first_prop; prop_name; prop_name = va_arg(args, const gchar *))
-        {
-          LObject *prop_value = va_arg(args, LObject *);
-          ASSERT(prop_value);
-          l_object_set_property(obj, prop_name, prop_value);
-        }
-      va_end(args);
-    }
+  va_start(args, cls);
+  obj = _l_object_new(cls, FALSE, args);
+  va_end(args);
   return obj;
 }
 
@@ -252,7 +277,23 @@ LObject *l_object_new_give ( LObjectClass *cls,
 {
   LObject *obj;
   va_list args;
-  const gchar *prop_name;
+  va_start(args, cls);
+  obj = _l_object_new(cls, TRUE, args);
+  va_end(args);
+  return obj;
+}
+
+
+
+/* constructor:
+ */
+static LObject *_constructor ( LObjectClass *cls,
+                               LObjectConstructParam *params,
+                               gint n_params )
+{
+  gint n;
+  LObjectConstructParam *p;
+  LObject *obj;
   /* [FIXME] use object allocator */
   obj = g_malloc0(cls->l_class_info.instance_size);
   obj->l_class = l_object_ref(cls);
@@ -260,15 +301,10 @@ LObject *l_object_new_give ( LObjectClass *cls,
   /* instance init */
   _instance_init(obj, cls);
   /* set properties */
-  va_start(args, cls);
-  while ((prop_name = va_arg(args, const gchar *)))
+  for (n = 0, p = params; n < n_params; n++, p++)
     {
-      LObject *prop_value = va_arg(args, LObject *);
-      ASSERT(prop_value);
-      l_object_set_property(obj, prop_name, prop_value);
-      l_object_unref(prop_value);
+      p->pspec->owner_type->set_property(obj, p->pspec, p->value);
     }
-      va_end(args);
   return obj;
 }
 

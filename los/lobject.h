@@ -46,6 +46,17 @@ struct _LClassInfo
 
 
 
+/* LObjectConstructParam:
+ */
+typedef struct _LObjectConstructParam
+{
+  LParamSpec *pspec;
+  LObject *value;
+}
+  LObjectConstructParam;
+
+
+
 /* LObject:
  */
 struct _LObject
@@ -71,6 +82,10 @@ struct _LObjectClass
   LClassInfo l_class_info;
   gchar *name;
   LObjectClass *l_parent_class;
+
+  LObject * (* constructor) ( LObjectClass *cls,
+                              LObjectConstructParam *params,
+                              gint n_params );
 
   gchar * (* to_string) ( LObject *object );
 
@@ -133,8 +148,8 @@ gboolean l_object_issubclass ( LObject *cls1,
 const gchar *l_object_class_name ( LObjectClass *cls );
 LObjectClass *l_object_class_from_name ( const gchar *name );
 LObject *l_object_new ( LObjectClass *cls,
-                        const char *first_prop,
-                        ... );
+                        ... )
+  G_GNUC_NULL_TERMINATED;
 LObject *l_object_new_give ( LObjectClass *cls,
                              ... )
   G_GNUC_NULL_TERMINATED;
